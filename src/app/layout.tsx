@@ -15,6 +15,9 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+//toast imports
+import { Toaster } from "@/components/ui/toaster";
+import ModalProvider from "./providers/modal-provider";
 
 // Fonts
 const geistSans = Geist({
@@ -43,14 +46,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <head />
-        <body className={`${geistSans.variable} ${geistMono.variable} ${barlow.variable} antialiased`}>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} ${barlow.variable} antialiased`}
+        >
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <ModalProvider>{children}</ModalProvider>
+            <Toaster />
           </ThemeProvider>
         </body>
       </html>
