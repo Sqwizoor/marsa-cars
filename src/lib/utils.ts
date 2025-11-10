@@ -233,6 +233,7 @@ export const getTimeUntil = (
 };
 
 export const downloadBlobAsFile = (blob: Blob, filename: string) => {
+  if (typeof window === "undefined") return;
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = filename;
@@ -241,6 +242,7 @@ export const downloadBlobAsFile = (blob: Blob, filename: string) => {
 };
 
 export const printPDF = (blob: Blob) => {
+  if (typeof window === "undefined") return;
   const pdfUrl = URL.createObjectURL(blob);
   const printWindow = window.open(pdfUrl, "_blank");
   if (printWindow) {
@@ -253,6 +255,7 @@ export const printPDF = (blob: Blob) => {
 
 // Handle product history in localStorage
 export const updateProductHistory = (variantId: string) => {
+  if (typeof window === "undefined") return;
   // Fetch existing product history from localStorage
   let productHistory: string[] = [];
   const historyString = localStorage.getItem("productHistory");
