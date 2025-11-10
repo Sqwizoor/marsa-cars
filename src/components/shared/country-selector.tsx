@@ -2,6 +2,7 @@ import COUNTRIES from "@/data/countries.json";
 import { SelectMenuOption } from "@/lib/types";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { MutableRefObject, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 export interface CountrySelectorProps {
   id: string;
@@ -25,10 +26,11 @@ export default function CountrySelector({
   useEffect(() => {
     const mutableRef = ref as MutableRefObject<HTMLDivElement | null>;
 
-    const handleClickOutside = (event: any) => {
+    const handleClickOutside = (event: Event) => {
+      const target = event.target as Node;
       if (
         mutableRef.current &&
-        !mutableRef.current.contains(event.target) &&
+        !mutableRef.current.contains(target) &&
         open
       ) {
         onToggle();
@@ -40,7 +42,7 @@ export default function CountrySelector({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [ref]);
+  }, [ref, open, onToggle]);
 
   const [query, setQuery] = useState("");
 
@@ -59,10 +61,12 @@ export default function CountrySelector({
           disabled={disabled}
         >
           <span className="truncate flex items-center">
-            <img
+            <Image
               alt={`${selectedValue.name}`}
               src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${selectedValue.code}.svg`}
-              className={"inline mr-2 h-4 rounded-sm"}
+              width={32}
+              height={24}
+              className={"inline mr-2 h-4 w-6 rounded-sm object-cover"}
             />
             {selectedValue.name}
           </span>
@@ -119,57 +123,55 @@ export default function CountrySelector({
                   "max-h-64 scrollbar scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-600 scrollbar-thumb-rounded scrollbar-thin overflow-y-scroll"
                 }
               >
-                {COUNTRIES.filter((country) =>
-                  country.name.toLowerCase().startsWith(query.toLowerCase())
+                {COUNTRIES.filter((c) =>
+                  c.name.toLowerCase().startsWith(query.toLowerCase())
                 ).length === 0 ? (
                   <li className="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-9">
                     No countries found
                   </li>
                 ) : (
-                  COUNTRIES.filter((country) =>
-                    country.name.toLowerCase().startsWith(query.toLowerCase())
-                  ).map((value, index) => {
-                    return (
-                      <li
-                        key={`${id}-${index}`}
-                        className="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-9 flex items-center hover:bg-gray-50 transition"
-                        id="listbox-option-0"
-                        role="option"
-                        onClick={() => {
-                          onChange(value.name);
-                          setQuery("");
-                          onToggle();
-                        }}
-                      >
-                        <img
-                          alt={`${value.name}`}
-                          src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${value.code}.svg`}
-                          className={"inline mr-2 h-4 rounded-sm"}
-                        />
-
-                        <span className="font-normal truncate">
-                          {value.name}
+                  COUNTRIES.filter((c) =>
+                    c.name.toLowerCase().startsWith(query.toLowerCase())
+                  ).map((value, index) => (
+                    <li
+                      key={`${id}-${index}`}
+                      className="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-9 flex items-center hover:bg-gray-50 transition"
+                      id={`listbox-option-${index}`}
+                      role="option"
+                      aria-selected={value.name === selectedValue.name}
+                      onClick={() => {
+                        onChange(value.name);
+                        setQuery("");
+                        onToggle();
+                      }}
+                    >
+                      <Image
+                        alt={`${value.name}`}
+                        src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${value.code}.svg`}
+                        width={32}
+                        height={24}
+                        className={"inline mr-2 h-4 w-6 rounded-sm object-cover"}
+                      />
+                      <span className="font-normal truncate">{value.name}</span>
+                      {value.name === selectedValue.name && (
+                        <span className="text-blue-600 absolute inset-y-0 right-0 flex items-center pr-8">
+                          <svg
+                            className="h-5 w-5"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            aria-hidden="true"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
                         </span>
-                        {value.name === selectedValue.name ? (
-                          <span className="text-blue-600 absolute inset-y-0 right-0 flex items-center pr-8">
-                            <svg
-                              className="h-5 w-5"
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              aria-hidden="true"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </span>
-                        ) : null}
-                      </li>
-                    );
-                  })
+                      )}
+                    </li>
+                  ))
                 )}
               </div>
             </motion.ul>

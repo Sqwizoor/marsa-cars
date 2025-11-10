@@ -1,8 +1,10 @@
 import { db } from "@/lib/db";  // Adjust the import path if needed
 
+export const dynamic = 'force-dynamic';
+
 async function deleteStoreByUrl(storeUrl: string) {
   try {
-    const deletedStore = await db.store.delete({
+    await db.store.delete({
       where: {
         url: storeUrl,  // Using 'url' as a unique identifier
       },
@@ -13,5 +15,14 @@ async function deleteStoreByUrl(storeUrl: string) {
   }
 }
 
-// Call the function to delete the store by its URL
-deleteStoreByUrl("all-stores");
+export default async function FixDbPage() {
+  // Call the function to delete the store by its URL
+  await deleteStoreByUrl("all-stores");
+  
+  return (
+    <div className="p-8">
+      <h1 className="text-2xl font-bold">Database Fix</h1>
+      <p className="mt-4">Store deletion completed. Check console for results.</p>
+    </div>
+  );
+}

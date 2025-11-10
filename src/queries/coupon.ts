@@ -316,8 +316,9 @@ export const applyCoupon = async (
       )} applied to items from ${coupon.store.name}.`,
       cart: updatedCart,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Error applying coupon:", error);
-    throw error;
+    throw new Error(errorMessage);
   }
 };

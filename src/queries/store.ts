@@ -3,7 +3,6 @@
 // DB
 import { db } from "@/lib/db";
 import {
-  CountryWithShippingRatesType,
   StoreDefaultShippingType,
   StoreStatus,
   StoreType,

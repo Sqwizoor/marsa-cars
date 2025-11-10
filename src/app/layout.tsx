@@ -7,14 +7,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 //Clerk Imports
-
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 //toast imports
 import { Toaster } from "@/components/ui/toaster";
 import ModalProvider from "./providers/modal-provider";

@@ -1,23 +1,17 @@
-import PaymentStatusTag from "@/components/shared/payment-status";
 import {
   AdminStoreType,
-  OrderStatus,
-  PaymentStatus,
-  ProductStatus,
   StoreStatus,
 } from "@/lib/types";
-import { cn, getShippingDatesRange } from "@/lib/utils";
-import { FC, useState } from "react";
-import OrderStatusSelect from "../forms/order-status-select";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 import Image from "next/image";
-import ProductStatusSelect from "../forms/product-status-select";
 import StoreStatusSelect from "../forms/store-status-select";
 
 interface Props {
   store: AdminStoreType;
 }
 
-const StoreSummary: FC<Props> = ({ store }) => {
+const StoreSummary = ({ store }: Props) => {
   const [showFullDesc, setShowFullDesc] = useState<boolean>(false);
   return (
     <div className="py-2 relative">

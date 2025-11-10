@@ -30,8 +30,10 @@ export async function GET(req: Request) {
         },
       },
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const results = response.hits.hits.map((hit: any) => hit._source);
     return NextResponse.json(results);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.log(error);
     return NextResponse.json({ message: error.message }, { status: 500 });

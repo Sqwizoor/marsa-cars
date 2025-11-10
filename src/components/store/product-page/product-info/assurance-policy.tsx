@@ -40,8 +40,8 @@ export default function ProductAssurancePolicy() {
         <div className="flex-1 px-1">
           <span className="text-main-primary leading-5">Buyer protection</span>
           <span className="text-main-secondary leading-5">
-            &nbsp;&nbsp;Get your money back if your order isn't delivered by
-            estimated date or if you're not satisfied with your order
+            &nbsp;&nbsp;Get your money back if your order isn&apos;t delivered by
+            estimated date or if you&apos;re not satisfied with your order
           </span>
         </div>
       </Link>

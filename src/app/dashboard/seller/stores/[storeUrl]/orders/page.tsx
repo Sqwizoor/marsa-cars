@@ -1,18 +1,16 @@
 // Queries
 import DataTable from "@/components/ui/data-table";
 import { columns } from "./columns";
-import { Plus } from "lucide-react";
-import { getStoreCoupons } from "@/queries/coupon";
-import CouponDetails from "@/components/dashboard/forms/coupon-details";
 import { getStoreOrders } from "@/queries/store";
 
 export default async function SellerOrdersPage({
   params,
 }: {
-  params: { storeUrl: string };
+  params: Promise<{ storeUrl: string }>;
 }) {
+  const { storeUrl } = await params;
   // Get all store coupons
-  const orders = await getStoreOrders(params.storeUrl);
+  const orders = await getStoreOrders(storeUrl);
   return (
     <div>
       <DataTable

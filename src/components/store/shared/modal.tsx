@@ -11,9 +11,9 @@ interface ModalProps {
 }
 
 const Modal: FC<ModalProps> = ({ children, title, show, setShow }) => {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   const close = () => setShow(false);
-  useOnClickOutside(ref, close);
+  useOnClickOutside(ref as React.RefObject<HTMLElement>, close);
   if (show) {
     return (
       <div className="w-full h-full fixed top-0 left-0 right-0 bottom-0 bg-gray-50/65 z-50">

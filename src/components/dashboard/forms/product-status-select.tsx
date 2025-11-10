@@ -1,9 +1,8 @@
 import ProductStatusTag from "@/components/shared/product-status";
 import { useToast } from "@/hooks/use-toast";
 import { ProductStatus } from "@/lib/types";
-import { updateOrderGroupStatus, updateOrderItemStatus } from "@/queries/order";
-import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { updateOrderItemStatus } from "@/queries/order";
+import { useState } from "react";
 
 interface Props {
   storeId: string;
@@ -11,11 +10,9 @@ interface Props {
   status: ProductStatus;
 }
 
-const ProductStatusSelect: FC<Props> = ({ orderItemId, status, storeId }) => {
+const ProductStatusSelect = ({ orderItemId, status, storeId }: Props) => {
   const [newStatus, setNewStatus] = useState<ProductStatus>(status);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  const router = useRouter();
 
   const { toast } = useToast();
 
@@ -34,11 +31,12 @@ const ProductStatusSelect: FC<Props> = ({ orderItemId, status, storeId }) => {
         setNewStatus(response as ProductStatus);
         setIsOpen(false);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error";
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.toString(),
+        description: message,
       });
     }
   };

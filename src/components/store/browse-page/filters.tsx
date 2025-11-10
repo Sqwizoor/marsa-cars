@@ -13,8 +13,7 @@ export default async function ProductFilters({
   queries: FiltersQueryType;
   storeUrl?: string;
 }) {
-  const { category, subCategory, offer } = queries;
-  const categories = await getAllCategories(storeUrl);
+  const categories = await getAllCategories();
   const offers = await getAllOfferTags(storeUrl);
   return (
     <div className="h-[840px] transition-transform overflow-auto pr-6 pb-2.5 flex-none basis-[196px] sticky top-0 overflow-x-hidden scrollbar">

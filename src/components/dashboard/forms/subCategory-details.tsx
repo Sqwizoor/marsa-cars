@@ -1,12 +1,11 @@
 "use client"
 
-import { type FC, useEffect } from "react"
+import { useEffect } from "react"
 import type { Category, SubCategory } from "@prisma/client"
 import type * as z from "zod"
-import { useForm, Controller } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { SubCategoryFormSchema } from "@/lib/schemas"
-import { AlertDialog } from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -24,7 +23,7 @@ interface SubCategoryDetailsProps {
   categories: Category[]
 }
 
-const SubCategoryDetails: FC<SubCategoryDetailsProps> = ({ data, categories }) => {
+const SubCategoryDetails = ({ data, categories }: SubCategoryDetailsProps) => {
   const { toast } = useToast()
   const router = useRouter()
 
@@ -76,22 +75,22 @@ const SubCategoryDetails: FC<SubCategoryDetailsProps> = ({ data, categories }) =
       } else {
         router.push("/dashboard/admin/subCategories")
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error"
       console.error(error)
       toast({
         variant: "destructive",
         title: "Oops!",
-        description: error.toString(),
+        description: message,
       })
     }
   }
 
   return (
-    <AlertDialog>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>SubCategory Information</CardTitle>
-          <CardDescription>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>SubCategory Information</CardTitle>
+        <CardDescription>
             {data?.id
               ? `Update ${data.name} SubCategory information.`
               : "Let's create a subCategory. You can edit subCategory later from the subCategories table or the subCategory page."}
@@ -195,9 +194,8 @@ const SubCategoryDetails: FC<SubCategoryDetailsProps> = ({ data, categories }) =
           </Form>
         </CardContent>
       </Card>
-    </AlertDialog>
-  )
-}
+    )
+  }
 
 export default SubCategoryDetails
 

@@ -8,21 +8,23 @@ import VariantSwitcher from "./variant-switcher";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/store/ui/button";
 import { Heart } from "lucide-react";
-import ProductPrice from "../../product-page/product-info/product-price";
+import ProductPrice from "@/components/store/product-page/product-info/product-price";
 import { addToWishlist } from "@/queries/user";
 import toast from "react-hot-toast";
 
 export default function ProductCard({ product }: { product: ProductType }) {
   const { name, slug, rating, sales, variantImages, variants, id } = product;
-  const [variant, setVariant] = useState<VariantSimplified>(variants[0]);
+  const [variant, setVariant] = useState<VariantSimplified>(variants[0] as VariantSimplified);
   const { variantSlug, variantName, images, sizes } = variant;
 
-  const handleaddToWishlist = async () => {
+  const handleAddToWishlist = async () => {
     try {
       const res = await addToWishlist(id, variant.variantId);
       if (res) toast.success("Product successfully added to wishlist.");
-    } catch (error: any) {
-      toast.error(error.toString());
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to add to wishlist"
+      );
     }
   };
 
@@ -70,7 +72,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
           {/* Variant switcher */}
           <VariantSwitcher
             images={variantImages}
-            variants={variants}
+            variants={variants as VariantSimplified[]}
             setVariant={setVariant}
             selectedVariant={variant}
           />
@@ -82,7 +84,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
             <Button
               variant="black"
               size="icon"
-              onClick={() => handleaddToWishlist()}
+              onClick={() => handleAddToWishlist()}
             >
               <Heart className="w-5" />
             </Button>

@@ -134,16 +134,11 @@ interface CellActionsProps {
 
 // CellActions component definition
 const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
-  // Hooks
+  // Hooks must be called before any conditional logic
   const { setOpen, setClose } = useModal();
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-
-  // Return null if rowData or rowData.id don't exist
-  if (!rowData || !rowData.id) return null;
-
-  // Get categories
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
@@ -153,6 +148,9 @@ const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
     };
     fetchCategories();
   }, []);
+
+  // Return null if rowData or rowData.id don't exist
+  if (!rowData || !rowData.id) return null;
 
   return (
     <AlertDialog>

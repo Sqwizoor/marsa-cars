@@ -22,7 +22,7 @@ const AddressList: FC<Props> = ({
     if (defaultAddress) {
       setSelectedAddress(defaultAddress);
     }
-  }, [addresses]);
+  }, [addresses, setSelectedAddress]);
 
   const haneldeAddressSelect = (address: ShippingAddress) => {
     setSelectedAddress(address);

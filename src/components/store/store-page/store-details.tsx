@@ -9,7 +9,7 @@ export default function StoreDEetails({
 }: {
   details: StoreDetailsType;
 }) {
-  const { averageRating, cover, description, logo, name, numReviews } = details;
+  const { averageRating, cover, logo, name, numReviews } = details;
   const numOfReviews = new Intl.NumberFormat().format(numReviews);
 
   return (

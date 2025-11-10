@@ -18,16 +18,17 @@ import StarRatings from "react-star-ratings";
 
 interface Props {
   productData: ProductPageDataType;
-  quantity?: number;
   sizeId: string | undefined;
-  handleChange: (property: keyof CartProductType, value: any) => void;
+  handleChange: (
+    property: keyof CartProductType,
+    value: CartProductType[keyof CartProductType]
+  ) => void;
   setVariantImages: Dispatch<SetStateAction<ProductVariantImage[]>>;
   setActiveImage: Dispatch<SetStateAction<ProductVariantImage | null>>;
 }
 
 const ProductInfo: FC<Props> = ({
   productData,
-  quantity,
   sizeId,
   handleChange,
   setVariantImages,
@@ -38,7 +39,6 @@ const ProductInfo: FC<Props> = ({
 
   // Destructure necessary properties from the productData object
   const {
-    productId,
     name,
     sku,
     colors,
@@ -60,7 +60,7 @@ const ProductInfo: FC<Props> = ({
     try {
       await navigator.clipboard.writeText(sku);
       toast.success("Copied successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to copy");
     }
   };

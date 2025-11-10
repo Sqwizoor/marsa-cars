@@ -49,7 +49,7 @@ export const columns: ColumnDef<StoreProductType>[] = [
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ row }) => {
+    cell: () => {
       return <span></span>
     },
   },

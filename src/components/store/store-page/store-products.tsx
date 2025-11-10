@@ -32,7 +32,7 @@ export default function StoreProducts({
       setData(products);
     };
     getFilteredProducts();
-  }, [searchParams]);
+  }, [category, offer, search, size, sort, store, subCategory]);
   return (
     <div className=" bg-white justify-center md:justify-start flex flex-wrap p-2 pb-16 rounded-md">
       {data.map((product) => (

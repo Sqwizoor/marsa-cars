@@ -1,7 +1,7 @@
 "use client";
 
 // React
-import { FC, useEffect } from "react";
+import { useEffect } from "react";
 
 // Form handling utilities
 import * as z from "zod";
@@ -12,7 +12,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ShippingRateFormSchema } from "@/lib/schemas";
 
 // UI Components
-import { AlertDialog } from "@/components/ui/alert-dialog";
 import {
   Card,
   CardContent,
@@ -48,10 +47,10 @@ interface ShippingRateDetailsProps {
   storeUrl: string;
 }
 
-const ShippingRateDetails: FC<ShippingRateDetailsProps> = ({
+const ShippingRateDetails = ({
   data,
   storeUrl,
-}) => {
+}: ShippingRateDetailsProps) => {
   // Initializing necessary hooks
   const { toast } = useToast(); // Hook for displaying toast messages
   const router = useRouter(); // Hook for routing
@@ -130,26 +129,26 @@ const ShippingRateDetails: FC<ShippingRateDetailsProps> = ({
         // Redirect or Refresh data
         router.refresh();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handling form submission errors
+      const message = error instanceof Error ? error.message : "Unknown error";
       console.log(error);
       toast({
         variant: "destructive",
         title: "Oops!",
-        description: error.toString(),
+        description: message,
       });
     }
   };
 
   return (
-    <AlertDialog>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Shipping Rate</CardTitle>
-          <CardDescription>
-            Update Shipping rate information for {data?.countryName}.
-          </CardDescription>
-        </CardHeader>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Shipping Rate</CardTitle>
+        <CardDescription>
+          Update Shipping rate information for {data?.countryName}.
+        </CardDescription>
+      </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)}>
@@ -347,8 +346,7 @@ const ShippingRateDetails: FC<ShippingRateDetailsProps> = ({
           </Form>
         </CardContent>
       </Card>
-    </AlertDialog>
-  );
-};
+    );
+  };
 
 export default ShippingRateDetails;

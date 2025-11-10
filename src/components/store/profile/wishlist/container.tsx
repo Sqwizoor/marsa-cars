@@ -21,7 +21,7 @@ export default function WishlistContainer({
     if (currentPage !== page) {
       router.push(`/profile/wishlist/${currentPage}`);
     }
-  }, [currentPage, page]);
+  }, [currentPage, page, router]);
   return (
     <div>
       <div className="flex flex-wrap pb-16">

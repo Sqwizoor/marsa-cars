@@ -33,7 +33,7 @@ import {
     });
   
     // Loading status& Errors
-    const { errors, isSubmitting } = form.formState;
+  const { errors, isSubmitting } = form.formState;
   
     // Submit handler for form submission
     const handleSubmit = async (
@@ -43,10 +43,12 @@ import {
         const res = await applyCoupon(values.coupon, cartId);
         setCartData(res.cart);
         toast.success(res.message);
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Handling form submission errors
         console.log(error);
-        toast.error(error.toString());
+        toast.error(
+          error instanceof Error ? error.message : "Failed to apply coupon"
+        );
       }
     };
   
@@ -74,6 +76,8 @@ import {
               />
               <Button
                 variant="outline"
+                type="submit"
+                disabled={isSubmitting}
                 className="absolute right-2 top-1/2 -translate-y-1/2 px-6 w-20 rounded-2xl"
               >
                 Apply

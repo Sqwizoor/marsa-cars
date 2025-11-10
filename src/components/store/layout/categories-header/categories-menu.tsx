@@ -3,7 +3,14 @@ import { Category } from "@prisma/client";
 import { ChevronDown, Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 export default function CategoriesMenu({
   categories,
@@ -17,7 +24,8 @@ export default function CategoriesMenu({
   const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const toggleMenu = (state: boolean) => {
+  const toggleMenu = useCallback(
+    (state: boolean) => {
     setOpen(state);
     // Delay showing the dropdown until the trigger has finished expanding
     if (state) {
@@ -27,7 +35,9 @@ export default function CategoriesMenu({
     } else {
       setDropdownVisible(false);
     }
-  };
+    },
+    [setOpen]
+  );
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -44,7 +54,7 @@ export default function CategoriesMenu({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [open]);
+  }, [open, toggleMenu]);
 
   return (
     <div

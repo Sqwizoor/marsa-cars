@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import type { Category, User } from "@prisma/client";
+import type { Category, User, Coupon, OfferTag } from "@prisma/client";
 
 interface ModalProviderProps {
   children: React.ReactNode;
@@ -11,7 +11,7 @@ interface ModalProviderProps {
 
 export type ModalData = {
   user?: User;
-  rowData?: Category;
+  rowData?: Category | Coupon | OfferTag;
 };
 
 type ModalContextType = {

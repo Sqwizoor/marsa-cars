@@ -9,11 +9,12 @@ export default async function SearchPage({
   params,
   searchParams,
 }: {
-  params: { query: string };
-  searchParams: FiltersQueryType;
+  params: Promise<{ query: string }>;
+  searchParams: Promise<FiltersQueryType>;
 }) {
   const { query } = await params;
-  const { category, offer, size, sort, subCategory } = searchParams ?? {};
+  const resolvedSearchParams = await searchParams;
+  const { category, offer, size, sort, subCategory } = resolvedSearchParams ?? {};
   
   await getFilteredSizes({});
   
@@ -39,11 +40,11 @@ export default async function SearchPage({
       <div className="max-w-[95%] mx-auto">
         <h1 className="sr-only">Search Results for {decodeURIComponent(query)}</h1>
         <div className="flex mt-5 gap-x-5">
-          <ProductFilters queries={searchParams} />
+          <ProductFilters queries={resolvedSearchParams} />
           <div className="p-4 space-y-5">
             <div className="mb-4">
               <h2 className="text-2xl font-bold text-main-primary">
-                Search Results for "{decodeURIComponent(query)}"
+                Search Results for &quot;{decodeURIComponent(query)}&quot;
               </h2>
               <p className="text-sm text-gray-600 mt-1">
                 {products.length} product{products.length !== 1 ? 's' : ''} found

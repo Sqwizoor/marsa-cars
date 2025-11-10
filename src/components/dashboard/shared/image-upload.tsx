@@ -1,7 +1,7 @@
 "use client";
 
 // React, Next.js
-import { FC, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 // Cloudinary
@@ -20,7 +20,7 @@ interface ImageUploadProps {
   error?: boolean;
 }
 
-const ImageUpload: FC<ImageUploadProps> = ({
+const ImageUpload = ({
   disabled,
   onChange,
   onRemove,
@@ -28,7 +28,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
   type,
   dontShowPreview,
   error,
-}) => {
+}: ImageUploadProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isBouncing, setIsBouncing] = useState(false); // Add state for bounce
 
@@ -50,8 +50,13 @@ const ImageUpload: FC<ImageUploadProps> = ({
     return null;
   }
 
-  const onUpload = (result: any) => {
-    onChange(result.info.secure_url);
+  type CloudinarySuccess = { info?: { secure_url?: string } };
+  const onUpload = (result: unknown) => {
+    const r = result as CloudinarySuccess;
+    const url = r?.info?.secure_url;
+    if (typeof url === "string" && url.length > 0) {
+      onChange(url);
+    }
   };
 
   if (type === "profile") {

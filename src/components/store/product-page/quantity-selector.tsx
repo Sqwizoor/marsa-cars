@@ -1,9 +1,8 @@
 import { useCartStore } from "@/cart-store/useCartStore";
 import useFromStore from "@/hooks/useFromStore";
 import { CartProductType } from "@/lib/types";
-import { Size } from "@prisma/client";
 import { Minus, Plus } from "lucide-react";
-import { FC, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 interface QuantitySelectorProps {
   productId: string;
@@ -11,47 +10,49 @@ interface QuantitySelectorProps {
   sizeId: string | null;
   quantity: number;
   stock: number;
-  handleChange: (property: keyof CartProductType, value: any) => void;
-  sizes: Size[];
+  handleChange: (
+    property: keyof CartProductType,
+    value: CartProductType[keyof CartProductType]
+  ) => void;
 }
 
-const QuantitySelector: FC<QuantitySelectorProps> = ({
+const QuantitySelector = ({
   handleChange,
   productId,
   quantity,
   sizeId,
-  sizes,
   variantId,
   stock,
-}) => {
-  // If no sizeId is provided, return null to prevent rendering the component
-  if (!sizeId) return null;
-
-  // Get cart product if it exist in cart, the get added quantity
+}: QuantitySelectorProps) => {
   const cart = useFromStore(useCartStore, (state) => state.cart);
 
   // useEffect hook to handle changes when sizeId updates
   useEffect(() => {
+    if (!sizeId) return;
     handleChange("quantity", 1);
-  }, [sizeId]);
+  }, [sizeId, handleChange]);
 
   const maxQty = useMemo(() => {
+    if (!sizeId) return 0;
     const search_product = cart?.find(
       (p) =>
         p.productId === productId &&
         p.variantId === variantId &&
         p.sizeId === sizeId
     );
-    return search_product
-      ? search_product.stock - search_product.quantity
-      : stock;
+    if (!search_product) {
+      return stock;
+    }
+
+    const remaining = search_product.stock - search_product.quantity;
+    return Math.max(remaining, 0);
   }, [cart, productId, variantId, sizeId, stock]);
+
+  // If no sizeId is provided, return null to prevent rendering the component
+  if (!sizeId) return null;
 
   // Function to handle increasing the quantity of the product
   const handleIncrease = () => {
-    if (quantity < 1) {
-      handleChange("quantity", quantity + 1);
-    }
     if (quantity < maxQty) {
       handleChange("quantity", quantity + 1);
     }
@@ -95,7 +96,7 @@ const QuantitySelector: FC<QuantitySelectorProps> = ({
           <button
             className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-full border border-gray-200 bg-white shadow-sm focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
             onClick={handleIncrease}
-            disabled={quantity === stock}
+            disabled={quantity >= maxQty || maxQty <= 0}
           >
             <Plus className="w-3" />
           </button>

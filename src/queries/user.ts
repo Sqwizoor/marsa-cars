@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { CartItem, Country as CountryDB } from "@prisma/client";
-import { CartProductType, CartWithCartItemsType, Country } from "@/lib/types";
+import { CartProductType, CartWithCartItemsType } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
 import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";
@@ -939,7 +939,7 @@ export const updateCheckoutProductstWithLatest = async (
           },
         });
         return newCartItem;
-      } catch (error) {
+      } catch {
         return cartProduct;
       }
     })

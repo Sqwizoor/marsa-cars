@@ -1,9 +1,7 @@
 import { Check, ChevronRight, Package } from "lucide-react";
 import { FC } from "react";
 
-interface FastDeliveryProps {}
-
-const FastDelivery: FC<FastDeliveryProps> = () => {
+const FastDelivery: FC = () => {
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">

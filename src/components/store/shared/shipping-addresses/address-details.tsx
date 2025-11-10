@@ -1,7 +1,14 @@
 "use client";
 
 // React
-import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
+import {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 // Prisma model
 import { Country } from "@prisma/client";
@@ -54,7 +61,9 @@ const AddressDetails: FC<AddressDetailsProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   // State for selected country
-  const [country, setCountry] = useState<string>("Afghanistan");
+  const [country, setCountry] = useState<string>(
+    () => countries[0]?.name ?? "Afghanistan"
+  );
 
   // Form hook for managing form state and validation
   const form = useForm<z.infer<typeof ShippingAddressSchema>>({
@@ -79,15 +88,26 @@ const AddressDetails: FC<AddressDetailsProps> = ({
   const isLoading = form.formState.isSubmitting;
 
   // Reset form values when data changes
+  const handleCountryChange = useCallback(
+    (name: string) => {
+      const foundCountry = countries.find((c) => c.name === name);
+      if (foundCountry) {
+        form.setValue("countryId", foundCountry.id);
+      }
+      setCountry(name);
+    },
+    [countries, form]
+  );
+
   useEffect(() => {
     if (data) {
       form.reset({
         ...data,
         address2: data.address2 || "",
       });
-      handleCountryChange(data?.country.name);
+      handleCountryChange(data.country.name);
     }
-  }, [data, form]);
+  }, [data, form, handleCountryChange]);
 
   // Submit handler for form submission
   const handleSubmit = async (
@@ -95,7 +115,7 @@ const AddressDetails: FC<AddressDetailsProps> = ({
   ) => {
     try {
       // Upserting category data
-      const response = await upsertShippingAddress({
+      await upsertShippingAddress({
         id: data?.id ? data.id : v4(),
         firstName: values.firstName,
         lastName: values.lastName,
@@ -122,23 +142,15 @@ const AddressDetails: FC<AddressDetailsProps> = ({
       // Refresh data
       router.refresh();
       setShow(false);
-    } catch (error: any) {
-      // Handling form submission errors
-      console.log(error);
+    } catch (error) {
+      const description =
+        error instanceof Error ? error.message : "Failed to save address.";
       toast({
         variant: "destructive",
         title: "Oops!",
-        description: error.toString(),
+        description,
       });
     }
-  };
-
-  const handleCountryChange = (name: string) => {
-    const country = countries.find((c) => c.name === name);
-    if (country) {
-      form.setValue("countryId", country.id);
-    }
-    setCountry(name);
   };
 
   return (
@@ -200,10 +212,18 @@ const AddressDetails: FC<AddressDetailsProps> = ({
                   <FormItem className="flex-1 w-[calc(50%-8px)] !mt-3">
                     <FormControl>
                       <CountrySelector
-                        id={"countries"}
+                        id="countries"
                         open={isOpen}
                         onToggle={() => setIsOpen((prev) => !prev)}
-                        onChange={(val) => handleCountryChange(val)}
+                        onChange={(val) => {
+                          handleCountryChange(val);
+                          const selected = countries.find(
+                            (c) => c.name === val
+                          );
+                          if (selected) {
+                            field.onChange(selected.id);
+                          }
+                        }}
                         selectedValue={
                           (countries.find(
                             (c) => c.name === country

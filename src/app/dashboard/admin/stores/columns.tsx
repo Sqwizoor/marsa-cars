@@ -127,25 +127,8 @@ export const columns: ColumnDef<AdminStoreType>[] = [
     accessorKey: "open",
     header: "",
     cell: ({ row }) => {
-      const { setOpen } = useModal()
       return (
-        <div>
-          <button
-            className="font-sans flex justify-center gap-1 sm:gap-2 items-center mx-auto text-sm sm:text-base text-gray-50 bg-[#0A0D2D] backdrop-blur-md font-medium sm:font-semibold relative z-10 px-3 py-1.5 sm:px-4 sm:py-2 overflow-hidden border-2 rounded-full hover:bg-blue-600 transition-colors duration-300"
-            onClick={() => {
-              setOpen(
-                <CustomModal maxWidth="!max-w-3xl">
-                  <StoreSummary store={row.original} />
-                </CustomModal>,
-              )
-            }}
-          >
-            View
-            <span className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-white grid place-items-center">
-              <Expand className="w-3 sm:w-5 stroke-black" />
-            </span>
-          </button>
-        </div>
+        <OpenCellContent store={row.original} />
       )
     },
   },
@@ -167,7 +150,7 @@ interface CellActionsProps {
 // CellActions component definition
 const CellActions: React.FC<CellActionsProps> = ({ storeId }) => {
   // Hooks
-  const { setOpen, setClose } = useModal()
+  const { setClose } = useModal()
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
@@ -223,6 +206,31 @@ const CellActions: React.FC<CellActionsProps> = ({ storeId }) => {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  )
+}
+
+// OpenCellContent component to handle the modal hook
+const OpenCellContent: React.FC<{ store: AdminStoreType }> = ({ store }) => {
+  const { setOpen } = useModal()
+  
+  return (
+    <div>
+      <button
+        className="font-sans flex justify-center gap-1 sm:gap-2 items-center mx-auto text-sm sm:text-base text-gray-50 bg-[#0A0D2D] backdrop-blur-md font-medium sm:font-semibold relative z-10 px-3 py-1.5 sm:px-4 sm:py-2 overflow-hidden border-2 rounded-full hover:bg-blue-600 transition-colors duration-300"
+        onClick={() => {
+          setOpen(
+            <CustomModal maxWidth="!max-w-3xl">
+              <StoreSummary store={store} />
+            </CustomModal>,
+          )
+        }}
+      >
+        View
+        <span className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-white grid place-items-center">
+          <Expand className="w-3 sm:w-5 stroke-black" />
+        </span>
+      </button>
+    </div>
   )
 }
 

@@ -1,9 +1,8 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { FC, useState } from "react";
+import { useState } from "react";
 
 interface Props {
-  name: string;
   value: string;
   placeholder?: string;
   subPlaceholder?: string;
@@ -11,14 +10,13 @@ interface Props {
   options: { name: string; value: string; image?: string; colors?: string }[];
 }
 
-const Select: FC<Props> = ({
-  name,
+const Select = ({
   onChange,
   options,
   value,
   placeholder,
   subPlaceholder,
-}) => {
+}: Props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const [activeVariant, setActiveVariant] = useState(

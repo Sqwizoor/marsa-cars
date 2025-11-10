@@ -1,6 +1,5 @@
 import ProductFilters from "@/components/store/browse-page/filters";
 import ProductSort from "@/components/store/browse-page/sort";
-import Header from "@/components/store/layout/header/header";
 import ProductList from "@/components/store/shared/product-list";
 import { FiltersQueryType } from "@/lib/types";
 import { getProducts } from "@/queries/product";
@@ -9,7 +8,7 @@ import { getFilteredSizes } from "@/queries/size";
 export default async function BrowsePage({
   searchParams,
 }: {
-  searchParams: FiltersQueryType;
+  searchParams: Promise<FiltersQueryType>;
 }) {
   const params = await searchParams;
   const { category, offer, search, size, sort, subCategory } = params ?? {};

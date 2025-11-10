@@ -19,24 +19,32 @@ export default function ProductCardImageSwiper({
 }: {
   images: ProductVariantImage[];
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const swiperRef = useRef<any>(null);
   useEffect(() => {
-    if (swiperRef.current && swiperRef.current.swiper) {
-      swiperRef.current.swiper.autoplay.stop();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((swiperRef.current as any)?.swiper) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (swiperRef.current as any).swiper.autoplay.stop();
     }
   }, [swiperRef]);
   return (
     <div
       className="relative mb-2 w-full h-[200px] bg-white contrast-[90%] rounded-2xl overflow-hidden"
-      onMouseEnter={() => swiperRef.current.swiper.autoplay.start()}
+      onMouseEnter={() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (swiperRef.current as any)?.swiper?.autoplay?.start();
+      }}
       onMouseLeave={() => {
-        swiperRef.current.swiper.autoplay.stop();
-        swiperRef.current.swiper.slideTo(0);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const swiper = (swiperRef.current as any)?.swiper;
+        swiper?.autoplay?.stop();
+        swiper?.slideTo(0);
       }}
     >
       <Swiper ref={swiperRef} modules={[Autoplay]} autoplay={{ delay: 500 }}>
         {images.map((img) => (
-          <SwiperSlide>
+          <SwiperSlide key={img.id}>
             <Image
               src={img.url}
               alt=""

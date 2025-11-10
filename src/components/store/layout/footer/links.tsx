@@ -20,8 +20,8 @@ export default function Links({ subs }: { subs: SubCategory[] }) {
       {/* Profile links */}
       <div className="space-y-4 md:mt-10">
         <ul className="flex flex-col gap-y-1">
-          {footer_links.slice(0, 6).map((link) => (
-            <Link href={link.link}>
+          {footer_links.slice(0, 6).map((link, i) => (
+            <Link key={i} href={link.link}>
               <li>
                 <span>{link.title}</span>
               </li>
@@ -32,8 +32,8 @@ export default function Links({ subs }: { subs: SubCategory[] }) {
       <div className="space-y-4">
         <h1 className="text-lg font-bold">Customer care</h1>
         <ul className="flex flex-col gap-y-1">
-          {footer_links.slice(6).map((link) => (
-            <Link href={link.link}>
+          {footer_links.slice(6).map((link, i) => (
+            <Link key={i} href={link.link}>
               <li>
                 <span>{link.title}</span>
               </li>

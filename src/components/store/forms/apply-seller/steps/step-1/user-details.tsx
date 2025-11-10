@@ -19,7 +19,7 @@ export default function UserDetails() {
       <div className="relative">
         {/* User Image */}
         <Image
-          src={user?.imageUrl!}
+          src={user?.imageUrl || "/placeholder.svg"}
           alt="User avatar"
           width={200}
           height={200}

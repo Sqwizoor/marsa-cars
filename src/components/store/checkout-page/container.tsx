@@ -35,17 +35,22 @@ const CheckoutContainer: FC<Props> = ({
 
   useEffect(() => {
     const hydrateCheckoutCart = async () => {
-      const updatedCart = await updateCheckoutProductstWithLatest(
-        cartItems,
-        activeCountry
-      );
-      setCartData(updatedCart);
+      if (!cartItems.length) return;
+      try {
+        const updatedCart = await updateCheckoutProductstWithLatest(
+          cartItems,
+          activeCountry
+        );
+        setCartData(updatedCart);
+      } catch (error) {
+        console.error("Failed to fetch latest checkout cart:", error);
+      }
     };
 
-    if (cartItems.length > 0) {
-      hydrateCheckoutCart();
+    if (activeCountry) {
+      void hydrateCheckoutCart();
     }
-  }, [activeCountry]);
+  }, [activeCountry, cartItems]);
   return (
     <div className="flex">
       <div className="flex-1 my-3">

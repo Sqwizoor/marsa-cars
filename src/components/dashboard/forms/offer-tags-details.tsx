@@ -1,7 +1,7 @@
 "use client";
 
 // React
-import { FC, useEffect } from "react";
+import { useEffect } from "react";
 
 // Prisma model
 import { OfferTag } from "@prisma/client";
@@ -46,7 +46,7 @@ interface OfferTagDetailsProps {
   data?: OfferTag;
 }
 
-const OfferTagDetails: FC<OfferTagDetailsProps> = ({ data }) => {
+const OfferTagDetails = ({ data }: OfferTagDetailsProps) => {
   // Initializing necessary hooks
   const { toast } = useToast(); // Hook for displaying toast messages
   const router = useRouter(); // Hook for routing
@@ -100,13 +100,14 @@ const OfferTagDetails: FC<OfferTagDetailsProps> = ({ data }) => {
       } else {
         router.push("/dashboard/admin/offer-tags");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handling form submission errors
+      const message = error instanceof Error ? error.message : "Unknown error";
       console.log(error);
       toast({
         variant: "destructive",
         title: "Oops!",
-        description: error.toString(),
+        description: message,
       });
     }
   };

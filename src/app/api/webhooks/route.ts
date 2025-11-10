@@ -50,9 +50,6 @@ export async function POST(req: Request) {
   }
 
   // Do something with payload
-  const { id } = evt.data;
-  const eventType = evt.type;
-
   if (evt.type === "user.created") {
     const data = JSON.parse(body).data;
 

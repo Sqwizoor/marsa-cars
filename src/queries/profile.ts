@@ -12,7 +12,6 @@ import {
   ReviewFilter,
 } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
-import { PaymentMethod } from "@prisma/client";
 import { subMonths, subYears } from "date-fns";
 
 // Function: getUserOrders
@@ -42,6 +41,7 @@ export const getUserOrders = async (
   const skip = (page - 1) * pageSize;
 
   // Construct the base query
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const whereClause: any = {
     AND: [
       {
@@ -150,7 +150,7 @@ export const getUserOrders = async (
  * @name getUserPayments
  * @description - Retrieves paginated payment details for the authenticated user, with optional filters and search functionality.
  * @access User
- * @param filter - A string to filter payments by method (e.g., "paypal", "credit-card").
+ * @param filter - A string to filter payments by method (e.g., "credit-card").
  * @param period - A string representing the time range for payments (e.g., "last-6-months").
  * @param search - A string to search within payment details (e.g., paymentMethod or currency).
  * @param page - The page number for pagination (default: 1).
@@ -179,6 +179,7 @@ export const getUserPayments = async (
   const skip = (page - 1) * pageSize;
 
   // Construct the base query
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const whereClause: any = {
     AND: [
       {
@@ -188,7 +189,6 @@ export const getUserPayments = async (
   };
 
   // Apply filters
-  if (filter === "paypal") whereClause.AND.push({ paymentMethod: "Paypal" });
   if (filter === "credit-card")
     whereClause.AND.push({ paymentMethod: "Stripe" });
 
@@ -284,6 +284,7 @@ export const getUserReviews = async (
   const skip = (page - 1) * pageSize;
 
   // Construct the base query
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const whereClause: any = {
     AND: [
       {
@@ -404,6 +405,7 @@ export const getUserWishlist = async (
     name: item.product.name,
     rating: item.product.rating,
     sales: item.product.sales,
+    numReviews: 0, // Add numReviews field
     variants: [
       {
         variantId: item.product.variants[0].id,

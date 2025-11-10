@@ -13,14 +13,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Dispatch,
-  FC,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { Dispatch, SetStateAction, useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -31,13 +24,13 @@ interface Props {
   userCountry: Country;
 }
 
-const CartProduct: FC<Props> = ({
+const CartProduct = ({
   product,
   selectedItems,
   setSelectedItems,
   setTotalShipping,
   userCountry,
-}) => {
+}: Props) => {
   const {
     productId,
     variantId,
@@ -58,10 +51,6 @@ const CartProduct: FC<Props> = ({
     extraShippingFee,
   } = product;
 
-  // Store previous values to avoid unnecessary re-renders
-  const prevShippingFeeRef = useRef(shippingFee);
-  const prevUserCountryRef = useRef(userCountry);
-
   const unique_id = `${productId}-${variantId}-${sizeId}`;
 
   const totalPrice = price * quantity;
@@ -71,62 +60,46 @@ const CartProduct: FC<Props> = ({
     extraFee: 0,
     totalFee: 0,
     method: shippingMethod,
-    weight: weight,
-    shippingService: shippingService,
+    weight,
+    shippingService,
   });
 
-  // Function to calculate shipping fee
-  const calculateShipping = () => {
-    let initialFee = 0;
-    let extraFee = 0;
-    let totalFee = 0;
+  // Stable calculator to keep dependencies minimal and avoid stale totals
+  const calculateShipping = useCallback(() => {
+    if (stock <= 0) return;
+    setShippingInfo((prev) => {
+      let initialFee = 0;
+      let extraFee = 0;
+      let totalFee = 0;
 
-    if (shippingMethod === "ITEM") {
-      initialFee = shippingFee;
-      extraFee = quantity > 1 ? extraShippingFee * (quantity - 1) : 0;
-      totalFee = initialFee + extraFee;
-    } else if (shippingMethod === "WEIGHT") {
-      totalFee = shippingFee * weight * quantity;
-    } else if (shippingMethod === "FIXED") {
-      totalFee = shippingFee;
-    }
+      if (shippingMethod === "ITEM") {
+        initialFee = shippingFee;
+        extraFee = quantity > 1 ? extraShippingFee * (quantity - 1) : 0;
+        totalFee = initialFee + extraFee;
+      } else if (shippingMethod === "WEIGHT") {
+        totalFee = shippingFee * weight * quantity;
+      } else if (shippingMethod === "FIXED") {
+        totalFee = shippingFee;
+      }
 
-    // Subtract the previous shipping total for this product before updating
-    if (stock > 0) {
-      setTotalShipping(
-        (prevTotal) => prevTotal - shippingInfo.totalFee + totalFee
-      );
-    }
+      // Adjust aggregate shipping total (remove previous, add new)
+      setTotalShipping((prevTotal) => prevTotal - prev.totalFee + totalFee);
 
-    // Update state
-    setShippingInfo({
-      initialFee,
-      extraFee,
-      totalFee,
-      method: shippingMethod,
-      weight,
-      shippingService,
+      return {
+        initialFee,
+        extraFee,
+        totalFee,
+        method: shippingMethod,
+        weight,
+        shippingService,
+      };
     });
-  };
+  }, [extraShippingFee, quantity, setTotalShipping, shippingFee, shippingMethod, shippingService, stock, weight]);
 
-  // Recalculate shipping fees whenever quantity, country or fees changes
+  // Recalculate on relevant changes or on mount
   useEffect(() => {
-    if (
-      shippingFee !== prevShippingFeeRef.current ||
-      userCountry !== prevUserCountryRef.current
-    ) {
-      calculateShipping();
-    }
-
-    // Update refs after calculating shipping
-    prevShippingFeeRef.current = shippingFee;
-    prevUserCountryRef.current = userCountry;
-
-    // Add a check to recalculate shipping fee on component load (after a refresh)
-    if (!shippingInfo.totalFee) {
-      calculateShipping();
-    }
-  }, [quantity, shippingFee, userCountry, shippingInfo.totalFee, stock]);
+    calculateShipping();
+  }, [calculateShipping, userCountry]);
 
   const selected = selectedItems.find(
     (p) => unique_id === `${p.productId}-${p.variantId}-${p.sizeId}`
@@ -169,8 +142,8 @@ const { updateProductQuantity, removeFromCart } = useCartStore((state) => state)
     try {
       const res = await addToWishlist(productId, variantId, sizeId);
       if (res) toast.success("Product successfully added to wishlist.");
-    } catch (error: any) {
-      toast.error(error.toString());
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : String(error));
     }
   };
 

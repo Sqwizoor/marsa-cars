@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const search = searchParams.get("search") || "";
   const action = searchParams.get("action") || "search";
 
   try {
@@ -38,11 +37,12 @@ export async function GET(request: Request) {
           success: true, 
           message: "Successfully created 'products' index and added a sample document" 
         });
-      } catch (createError: any) {
+      } catch (createError: unknown) {
+        const errorMessage = createError instanceof Error ? createError.message : "Unknown error";
         return NextResponse.json({ 
           success: false, 
           message: "Failed to create index", 
-          error: createError.message 
+          error: errorMessage 
         }, { status: 500 });
       }
     }
@@ -74,12 +74,14 @@ export async function GET(request: Request) {
       total: response.hits.total
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : "No stack trace";
     return NextResponse.json({ 
       success: false, 
       message: "Error processing request", 
-      error: error.message,
-      stack: error.stack
+      error: errorMessage,
+      stack: errorStack
     }, { status: 500 });
   }
 }

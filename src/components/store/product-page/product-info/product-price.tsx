@@ -1,6 +1,5 @@
 import { CartProductType } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { usePathname, useRouter } from "next/navigation";
 import { FC, useEffect } from "react";
 
 interface SimplifiedSize {
@@ -14,18 +13,33 @@ interface Props {
   sizeId?: string | undefined;
   sizes: SimplifiedSize[];
   isCard?: boolean;
-  handleChange: (property: keyof CartProductType, value: any) => void;
+  handleChange: (
+    property: keyof CartProductType,
+    value: CartProductType[keyof CartProductType]
+  ) => void;
 }
 
 const ProductPrice: FC<Props> = ({ sizeId, sizes, isCard, handleChange }) => {
-  // Check if the sizes array is either undefined or empty
-  if (!sizes || sizes.length === 0) {
-    // If no sizes are available, simply return from the function, performing no further actions
-    return;
+  const hasSizes = Array.isArray(sizes) && sizes.length > 0;
+  const selectedSize = sizeId
+    ? sizes.find((size) => size.id === sizeId)
+    : undefined;
+  const discountedPrice = selectedSize
+    ? selectedSize.price * (1 - selectedSize.discount / 100)
+    : null;
+
+  useEffect(() => {
+    if (!selectedSize || discountedPrice === null) return;
+    handleChange("price", discountedPrice);
+    handleChange("stock", selectedSize.quantity);
+  }, [selectedSize, discountedPrice, handleChange]);
+
+  if (!hasSizes) {
+    return null;
   }
 
   // Scenario 1: No sizeId passed, calculate range of prices and total quantity
-  if (!sizeId) {
+  if (!sizeId || !selectedSize) {
     // Calculate discounted prices for all sizes
     const discountedPrices = sizes.map(
       (size) => size.price * (1 - size.discount / 100)
@@ -42,15 +56,6 @@ const ProductPrice: FC<Props> = ({ sizeId, sizes, isCard, handleChange }) => {
     // If all prices are the same, return a single price; otherwise, return range
     const priceDisplay =
       minPrice === maxPrice ? `R${minPrice}` : `R${minPrice} - R${maxPrice}`;
-
-    // If a discount exist when minPrice=MaxPrice
-    let discount = 0;
-    if (minPrice === maxPrice) {
-      let check_discount = sizes.find((s) => s.discount > 0);
-      if (check_discount) {
-        discount = check_discount.discount;
-      }
-    }
 
     return (
       <div>
@@ -76,21 +81,9 @@ const ProductPrice: FC<Props> = ({ sizeId, sizes, isCard, handleChange }) => {
   }
 
   // Scenario 2: SizeId passed, find the specific size and return its details
-  const selectedSize = sizes.find((size) => size.id === sizeId);
-
-  if (!selectedSize) {
-    return <></>;
+  if (!selectedSize || discountedPrice === null) {
+    return null;
   }
-
-  // Calculate the price after the discount
-  const discountedPrice =
-    selectedSize.price * (1 - selectedSize.discount / 100);
-
-  // Update product to be added to cart with price and stock quantity
-  useEffect(() => {
-    handleChange("price", discountedPrice);
-    handleChange("stock", selectedSize.quantity);
-  }, [sizeId]);
 
   return (
     <div>

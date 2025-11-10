@@ -1,21 +1,17 @@
 import StoreStatusTag from "@/components/shared/store-status";
 import { useToast } from "@/hooks/use-toast";
 import { StoreStatus } from "@/lib/types";
-import { updateOrderGroupStatus } from "@/queries/order";
 import { updateStoreStatus } from "@/queries/store";
-import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { useState } from "react";
 
 interface Props {
   storeId: string;
   status: StoreStatus;
 }
 
-const StoreStatusSelect: FC<Props> = ({ status, storeId }) => {
+const StoreStatusSelect = ({ status, storeId }: Props) => {
   const [newStatus, setNewStatus] = useState<StoreStatus>(status);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  const router = useRouter();
 
   const { toast } = useToast();
 
@@ -30,11 +26,12 @@ const StoreStatusSelect: FC<Props> = ({ status, storeId }) => {
         setNewStatus(response as StoreStatus);
         setIsOpen(false);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.toString(),
+        description:
+          error instanceof Error ? error.message : "Failed to update status",
       });
     }
   };

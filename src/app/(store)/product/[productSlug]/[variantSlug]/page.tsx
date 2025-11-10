@@ -10,28 +10,29 @@ import ProductReviews from "@/components/store/product-page/reviews/product-revi
 import StoreProducts from "@/components/store/product-page/store-products";
 import { Separator } from "@/components/ui/separator";
 import { getProductPageData, getProducts } from "@/queries/product";
-
-import { currentUser } from "@clerk/nextjs/server";
 import { notFound, redirect } from "next/navigation";
 
 interface PageProps {
-  params: { productSlug: string; variantSlug: string };
-  searchParams: {
+  params: Promise<{ productSlug: string; variantSlug: string }>;
+  searchParams?: Promise<{
     size?: string;
-  };
+  }>;
 }
 
-export default async function ProductVariantPage(props: PageProps) {
-  const { productSlug, variantSlug } = await props.params;
-  const { size: sizeId } = await props.searchParams;
+export default async function ProductVariantPage({
+  params,
+  searchParams,
+}: PageProps) {
+  const { productSlug, variantSlug } = await params;
+  const resolvedSearchParams = await searchParams;
+  const sizeId = resolvedSearchParams?.size;
 
   // Fetch product data based on the product slug and variant slug
   const productData = await getProductPageData(productSlug, variantSlug);
 
   // If no product data is found, show the 404 Not Found page
   if (!productData) {
-    return notFound();
-    //return redirect("/");
+    notFound();
   }
 
   // Extract the available sizes for the product variant
@@ -44,18 +45,17 @@ export default async function ProductVariantPage(props: PageProps) {
 
     // If the sizeId is not valid, redirect to the same product page without the size parameter
     if (!isValidSize) {
-      return redirect(`/product/${productSlug}/${variantSlug}`);
+      redirect(`/product/${productSlug}/${variantSlug}`);
     }
   }
   // If no sizeId is provided and there's only one size available, automatically select it
   else if (sizes.length === 1) {
-    return redirect(
+    redirect(
       `/product/${productSlug}/${variantSlug}?size=${sizes[0].id}` // Redirect to the URL with the size parameter prefilled
     );
   }
 
   const {
-    productId,
     variantInfo,
     specs,
     questions,
@@ -74,8 +74,8 @@ export default async function ProductVariantPage(props: PageProps) {
 
   return (
     <div>
-       <Header />
-      <CategoriesHeader /> 
+      <Header />
+      <CategoriesHeader />
       <div className="md:max-w-[1650px] mx-auto p-8 overflow-x-hidden">
         <ProductPageContainer productData={productData} sizeId={sizeId}>
           {relatedProducts.products && (

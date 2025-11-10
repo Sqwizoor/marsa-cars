@@ -7,7 +7,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 
 // Prisma model
-import { Category, SubCategory } from "@prisma/client";
+import { SubCategory } from "@prisma/client";
 
 // Function: upsertSubCategory
 // Description: Upserts a subCategory into the database, updating if it exists or creating a new one if not.
@@ -161,15 +161,17 @@ export const getSubcategories = async (
     // Define the query options
     const queryOptions = {
       take: limit || undefined, // Use the provided limit or undefined for no limit
-      orderBy: random ? { createdAt: SortOrder.desc } : undefined, // Use SortOrder for ordering
+  // When not random, order by newest first. If random is true we won't use orderBy.
+  orderBy: random ? undefined : { createdAt: SortOrder.desc }, // Use SortOrder for ordering
     };
 
     // If random selection is required, use a raw query to randomize
     if (random) {
+      // Use Postgres-compatible random ordering and quote the mixed-case table name
       const subcategories = await db.$queryRaw<SubCategory[]>`
-    SELECT * FROM SubCategory
-    ORDER BY RAND()
-    LIMIT ${limit || 10} 
+    SELECT * FROM "SubCategory"
+    ORDER BY RANDOM()
+    LIMIT ${limit || 10}
     `;
       return subcategories;
     } else {

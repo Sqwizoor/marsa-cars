@@ -2,7 +2,6 @@
 import { ProductType, VariantSimplified } from "@/lib/types";
 import Link from "next/link";
 import { useState } from "react";
-import ReactStars from "react-rating-stars-component";
 import ProductCardImageSwiper from "./swiper";
 import VariantSwitcher from "./variant-switcher";
 import { cn } from "@/lib/utils";
@@ -15,15 +14,17 @@ import StarRatings from "react-star-ratings";
 
 export default function ProductCard({ product }: { product: ProductType }) {
   const { name, slug, rating, sales, variantImages, variants, id } = product;
-  const [variant, setVariant] = useState<VariantSimplified>(variants[0]);
+  const [variant, setVariant] = useState<VariantSimplified>(variants[0] as VariantSimplified);
   const { variantSlug, variantName, images, sizes } = variant;
 
   const handleaddToWishlist = async () => {
     try {
       const res = await addToWishlist(id, variant.variantId);
       if (res) toast.success("Product successfully added to wishlist.");
-    } catch (error: any) {
-      toast.error(error.toString());
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to add to wishlist"
+      );
     }
   };
 
@@ -49,7 +50,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
               {name} · {variantName}
             </div>
             {/* Rating - Sales */}
-            {product.rating > 0 && product.sales > 0 && (
+            {rating > 0 && sales > 0 && (
               <div className="flex items-center gap-x-1 h-5">
                 {/* <ReactStars
                   count={5}
@@ -60,14 +61,14 @@ export default function ProductCard({ product }: { product: ProductType }) {
                   isHalf
                   edit={false}
                 /> */}
-                    <StarRatings
-                            rating={rating}
-                            starRatedColor="#ffb400" // Active star color (yellow)
-                            starEmptyColor="#e2dfdf" // Inactive star color (gray)
-                            numberOfStars={5}
-                            starDimension="15px"
-                            starSpacing="1px"
-                          />
+                <StarRatings
+                  rating={rating}
+                  starRatedColor="#ffb400"
+                  starEmptyColor="#e2dfdf"
+                  numberOfStars={5}
+                  starDimension="15px"
+                  starSpacing="1px"
+                />
                 <div className="pl-2 text-xs text-main-secondary">{sales} sold</div>
               </div>
             )}
@@ -79,7 +80,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
           {/* Variant switcher */}
           <VariantSwitcher
             images={variantImages}
-            variants={variants}
+            variants={variants as VariantSimplified[]}
             setVariant={setVariant}
             selectedVariant={variant}
           />

@@ -1,15 +1,15 @@
-import { Coupon, ShippingAddress } from "@prisma/client";
+import { ShippingAddress } from "@prisma/client";
 import { Dispatch, FC, SetStateAction, useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/store/ui/button";
 import FastDelivery from "./fast-delivery";
-import { SecurityPrivacyCard } from "../product-page/returns-security-privacy-card";
+import { SecurityPrivacyCard } from "@/components/store/product-page/returns-security-privacy-card";
 import toast from "react-hot-toast";
 import { emptyUserCart, placeOrder } from "@/queries/user";
 import { useCartStore } from "@/cart-store/useCartStore";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { CartWithCartItemsType } from "@/lib/types";
-import ApplyCouponForm from "../forms/apply-coupon";
+import ApplyCouponForm from "@/components/store/forms/apply-coupon";
 import { PulseLoader } from "react-spinners";
 
 interface Props {

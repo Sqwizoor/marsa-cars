@@ -35,7 +35,7 @@ const ProductShippingFee: FC<Props> = ({
               <span className="text-xs flex gap-x-1">
                 <Check className="min-w-3 max-w-3 stroke-green-400" />
                 <span className="mt-1">
-                  If you purchase multiple items, you'll receive a discounted
+                  If you purchase multiple items, you&apos;ll receive a discounted
                   delivery fee.
                 </span>
               </span>
@@ -199,7 +199,7 @@ const ProductShippingFee: FC<Props> = ({
               </tr>
               <tr className="flex gap-x-1 text-xs px-4 mt-1 text-center font-semibold">
                 <td className="w-full bg-black text-white px-1 py-1">
-                  <span>{formatCurrencyZAR(fee)} (quantity doesn't affect shipping fee.)</span>
+                  <span>{formatCurrencyZAR(fee)} (quantity doesn&apos;t affect shipping fee.)</span>
                 </td>
               </tr>
             </tbody>

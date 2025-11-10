@@ -21,33 +21,28 @@ export default function CartContainer({
   const setCart = useCartStore((state) => state.setCart);
 
   const [loading, setLoading] = useState<boolean>(true);
-  const [isCartLoaded, setIsCartLoaded] = useState<boolean>(false);
 
   const [selectedItems, setSelectedItems] = useState<CartProductType[]>([]);
   const [totalShipping, setTotalShipping] = useState<number>(0);
 
   useEffect(() => {
-    if (cartItems !== undefined) {
-      setIsCartLoaded(true); // Flag indicating cartItems has finished loading
-    }
-  }, [cartItems]);
-
-  useEffect(() => {
     const loadAndSyncCart = async () => {
-      if (cartItems?.length) {
-        try {
-          const updatedCart = await updateCartWithLatest(cartItems);
-          setCart(updatedCart);
-          setLoading(false);
-        } catch (error) {
-          setLoading(false);
-          console.error("Failed to sync cart:", error);
-        }
+      if (!cartItems?.length) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const updatedCart = await updateCartWithLatest(cartItems);
+        setCart(updatedCart);
+      } catch (error) {
+        console.error("Failed to sync cart:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadAndSyncCart();
-  }, [isCartLoaded, userCountry]);
+    void loadAndSyncCart();
+  }, [cartItems, setCart]);
 
   return (
     <div>
@@ -72,6 +67,7 @@ export default function CartContainer({
                     {/* Cart items */}
                     {cartItems.map((product) => (
                       <CartProduct
+                        key={product.id || `${product.productId}-${product.variantId}-${product.sizeId}`}
                         product={product}
                         selectedItems={selectedItems}
                         setSelectedItems={setSelectedItems}

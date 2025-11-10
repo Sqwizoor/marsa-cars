@@ -73,20 +73,11 @@ export default function Step3({
       if (response.id) {
         setStep((prev) => prev + 1)
       }
-    } catch (error: any) {
-      toast.error(error.toString())
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast.error(errorMessage)
       console.error("Error submitting form:", error)
     }
-  }
-  interface FormData {
-    defaultShippingService: string
-    defaultShippingFeePerItem: number
-    defaultShippingFeePerKg: number
-    defaultShippingFeeForAdditionalItem: number
-    defaultShippingFeeFixed: number
-    defaultDeliveryTimeMin: number
-    defaultDeliveryTimeMax: number
-    returnPolicy: string
   }
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target
@@ -102,11 +93,11 @@ export default function Step3({
     <div className="h-full">
       <AnimatedContainer>
         <div className="pl-1 text-gray-600 mt-2 mb-4">
-          <p className="font-medium">Fill out your store's default shipping details (this is optional).</p>
+          <p className="font-medium">Fill out your store&apos;s default shipping details (this is optional).</p>
           <ul className="list-disc text-sm ml-4 mt-2">
             <li>Any fields left empty will default to our pre-set formData.</li>
-            <li>Don't worry, you can update your details anytime from your seller dashboard.</li>
-            <li>You'll also be able to customize shipping details for each country later on.</li>
+            <li>Don&apos;t worry, you can update your details anytime from your seller dashboard.</li>
+            <li>You&apos;ll also be able to customize shipping details for each country later on.</li>
           </ul>
         </div>
         <Form {...form}>

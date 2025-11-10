@@ -1,6 +1,6 @@
 "use client";
 import { CartProductType, ProductPageDataType } from "@/lib/types";
-import { FC, ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import ProductSwiper from "./product-swiper";
 import ProductInfo from "./product-info/product-info";
 import ShipTo from "./shipping/ship-to";
@@ -22,79 +22,123 @@ interface Props {
   children: ReactNode;
 }
 
-const ProductPageContainer: FC<Props> = ({ productData, sizeId, children }) => {
-  // If there is no product data available, render nothing (null)
-  if (!productData) return null;
-  const { productId, variantId, variantSlug, images, shippingDetails, sizes } =
-    productData;
-  if (typeof shippingDetails === "boolean") return null;
-
+const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
+  // Hooks must be called before any conditional returns
   // State for temporary product images
-  const [variantImages, setVariantImages] =
-    useState<ProductVariantImage[]>(images);
+  const normalizedImages = useMemo(
+    () => productData?.images ?? [],
+    [productData?.images]
+  );
+  const shippingDetails =
+    productData && typeof productData.shippingDetails !== "boolean"
+      ? productData.shippingDetails
+      : null;
+
+  const [variantImages, setVariantImages] = useState<ProductVariantImage[]>(
+    normalizedImages
+  );
 
   // useState hook to manage the active image being displayed, initialized to the first image in the array
   const [activeImage, setActiveImage] = useState<ProductVariantImage | null>(
-    images[0]
+    normalizedImages[0] ?? null
   );
 
-  // Initialize the default product data for the cart item
-  const data: CartProductType = {
-    productId: productData.productId,
-    variantId: productData.variantId,
-    productSlug: productData.productSlug,
-    variantSlug: productData.variantSlug,
-    name: productData.name,
-    variantName: productData.variantName,
-    image: productData.images[0].url,
-    variantImage: productData.variantImage,
-    quantity: 1,
-    price: 0,
-    sizeId: sizeId || "",
-    size: "",
-    stock: 1,
-    weight: productData.weight,
-    shippingMethod: shippingDetails.shippingFeeMethod,
-    shippingService: shippingDetails.shippingService,
-    shippingFee: shippingDetails.shippingFee,
-    extraShippingFee: shippingDetails.extraShippingFee,
-    deliveryTimeMin: shippingDetails.deliveryTimeMin,
-    deliveryTimeMax: shippingDetails.deliveryTimeMax,
-    isFreeShipping: shippingDetails.isFreeShipping,
-    id: undefined
-  };
-
   // useState hook to manage the product's state in the cart
+  const baseCartProduct = useMemo(() => {
+    if (!productData || !shippingDetails) {
+      return null;
+    }
+
+    return {
+      productId: productData.productId,
+      variantId: productData.variantId,
+      productSlug: productData.productSlug,
+      variantSlug: productData.variantSlug,
+      name: productData.name,
+      variantName: productData.variantName,
+      image: normalizedImages[0]?.url ?? "",
+      variantImage: productData.variantImage,
+      quantity: 1,
+      price: 0,
+      sizeId: sizeId || "",
+      size: "",
+      stock: 1,
+      weight: productData.weight,
+      shippingMethod: shippingDetails.shippingFeeMethod,
+      shippingService: shippingDetails.shippingService,
+      shippingFee: shippingDetails.shippingFee,
+      extraShippingFee: shippingDetails.extraShippingFee,
+      deliveryTimeMin: shippingDetails.deliveryTimeMin,
+      deliveryTimeMax: shippingDetails.deliveryTimeMax,
+      isFreeShipping: shippingDetails.isFreeShipping,
+      id: undefined,
+    } satisfies CartProductType;
+  }, [normalizedImages, productData, shippingDetails, sizeId]);
+
   const [productToBeAddedToCart, setProductToBeAddedToCart] =
-    useState<CartProductType>(data);
+    useState<CartProductType | null>(baseCartProduct);
 
-  const { stock } = productToBeAddedToCart;
-
-  // Usestate hook to manage product validity to be added to cart
   const [isProductValid, setIsProductValid] = useState<boolean>(false);
 
+  // Get the store action to add items to cart
+  const addToCart = useCartStore((state) => state.addToCart);
+
+  // Get the set Cart action to update items in cart
+  const cartItems = useFromStore(useCartStore, (state) => state.cart);
+  const productId = productData?.productId ?? "";
+  const variantId = productData?.variantId ?? "";
+
+  useEffect(() => {
+    if (!baseCartProduct) {
+      setProductToBeAddedToCart(null);
+      return;
+    }
+
+    setProductToBeAddedToCart((prev) => {
+      if (!prev || prev.variantId !== baseCartProduct.variantId) {
+        return baseCartProduct;
+      }
+
+      return {
+        ...prev,
+        ...baseCartProduct,
+        quantity: prev.quantity,
+        size: prev.size,
+        stock: prev.stock,
+      };
+    });
+  }, [baseCartProduct]);
+
+  useEffect(() => {
+    setVariantImages(normalizedImages);
+    setActiveImage(normalizedImages[0] ?? null);
+  }, [normalizedImages]);
+
+  const stock =
+    productToBeAddedToCart?.stock ?? baseCartProduct?.stock ?? 0;
+
   // Function to handle state changes for the product properties
-  const handleChange = (property: keyof CartProductType, value: any) => {
+  const handleChange = (
+    property: keyof CartProductType,
+    value: CartProductType[keyof CartProductType]
+  ) => {
     setProductToBeAddedToCart((prevProduct) => ({
-      ...prevProduct,
+      ...prevProduct!,
       [property]: value,
     }));
   };
 
+  // Keeping cart state updated
+
   useEffect(() => {
-    const check = isProductValidToAdd(productToBeAddedToCart);
-    setIsProductValid(check);
+    if (productToBeAddedToCart) {
+      const check = isProductValidToAdd(productToBeAddedToCart);
+      setIsProductValid(check);
+    } else {
+      setIsProductValid(false);
+    }
   }, [productToBeAddedToCart]);
 
-  // // Get the store action to add items to cart
-  const addToCart = useCartStore((state) => state.addToCart);
-
-  // Get the set Cart action to update items in cart
-  const setCart = useCartStore((state) => state.setCart);
-
-  const cartItems = useFromStore(useCartStore, (state) => state.cart);
-
-  // Keeping cart state updated
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
       // Check if the "cart" key was changed in localStorage
@@ -110,7 +154,7 @@ const ProductPageContainer: FC<Props> = ({ productData, sizeId, children }) => {
             parsedValue.state &&
             Array.isArray(parsedValue.state.cart)
           ) {
-            // setCart(parsedValue.state.cart);
+            // Optionally sync cart state here if required in future.
           }
         } catch (error) {
           console.error("Failed to parse updated cart data:", error);
@@ -127,39 +171,56 @@ const ProductPageContainer: FC<Props> = ({ productData, sizeId, children }) => {
     };
   }, []);
 
-  // Add product to history
-  updateProductHistory(variantId);
+  useEffect(() => {
+    if (variantId) {
+      updateProductHistory(variantId);
+    }
+  }, [variantId]);
+
+  useEffect(() => {
+    if (productId) {
+      setCookie(`viewedProduct_${productId}`, "true", {
+        maxAge: 3600,
+        path: "/",
+      });
+    }
+  }, [productId]);
 
   const handleAddToCart = () => {
-    if (maxQty <= 0) return;
+    if (maxQty <= 0 || !productToBeAddedToCart) return;
     addToCart(productToBeAddedToCart);
     toast.success("Product added to cart successfully.");
   };
 
   const maxQty = useMemo(() => {
-    const search_product = cartItems?.find(
+    if (!productId || !variantId) {
+      return stock;
+    }
+
+    const searchProduct = cartItems?.find(
       (p) =>
         p.productId === productId &&
         p.variantId === variantId &&
         p.sizeId === sizeId
     );
-    return search_product
-      ? search_product.stock - search_product.quantity
-      : stock;
+
+    if (!searchProduct) {
+      return stock;
+    }
+
+    return searchProduct.stock - searchProduct.quantity;
   }, [cartItems, productId, variantId, sizeId, stock]);
 
-  // Set view cookie
-  setCookie(`viewedProduct_${productId}`, "true", {
-    maxAge: 3600,
-    path: "/",
-  });
+  if (!productData || !shippingDetails) {
+    return null;
+  }
 
   return (
     <div className="relative">
       <div className="w-full xl:flex xl:gap-4">
         <ProductSwiper
-          images={variantImages.length > 0 ? variantImages : images}
-          activeImage={activeImage || images[0]}
+          images={variantImages.length > 0 ? variantImages : normalizedImages}
+          activeImage={activeImage || normalizedImages[0]}
           setActiveImage={setActiveImage}
         />
         <div className="w-full mt-4 md:mt-0 flex flex-col gap-4 md:flex-row">
@@ -192,13 +253,13 @@ const ProductPageContainer: FC<Props> = ({ productData, sizeId, children }) => {
                     <ReturnPrivacySecurityCard
                       returnPolicy={shippingDetails.returnPolicy}
                     />
-                    <FastDelivery/>
+                    <FastDelivery />
                   </>
                 )}
                 {/* Action buttons */}
                 <div className="mt-5 bg-white bottom-0 pb-4 space-y-3 sticky">
                   {/* Qty selector */}
-                  {sizeId && (
+                  {sizeId && productToBeAddedToCart && (
                     <div className="w-full flex justify-end mt-4">
                       <QuantitySelector
                         productId={productToBeAddedToCart.productId}
@@ -207,7 +268,6 @@ const ProductPageContainer: FC<Props> = ({ productData, sizeId, children }) => {
                         quantity={productToBeAddedToCart.quantity}
                         stock={productToBeAddedToCart.stock}
                         handleChange={handleChange}
-                        sizes={sizes}
                       />
                     </div>
                   )}

@@ -123,6 +123,7 @@ export default function OrdersTable({
                           <div className="flex">
                             {images.slice(0, 5).map((img, i) => (
                               <Image
+                                key={`${order.id}-img-${i}`}
                                 src={img}
                                 alt=""
                                 width={50}

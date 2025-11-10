@@ -24,17 +24,21 @@ export default function Sideline() {
             </span>
             <div className="hidden group-hover:block w-0 h-0 border-[12px] border-transparent border-l-[#373737] border-r-0 absolute left-[-15px] top-[38%]  transition-all duration-500 ease-in-out" />
           </Link>
-          <SidelineItem link="/prfoile" image={CouponImg} children="Coupons" />
+          <SidelineItem link="/prfoile" image={CouponImg}>
+            Coupons
+          </SidelineItem>
           <SidelineItem
             link="/profile/wishlist"
             image={WishlistImg}
-            children="Wishlist"
-          />
+          >
+            Wishlist
+          </SidelineItem>
           <SidelineItem
             link="/profile/history"
             image={HistoryImg}
-            children="History"
-          />
+          >
+            History
+          </SidelineItem>
         </div>
         <div className="fixed top-[60%] -translate-y-1/2 text-left">
           <SidelineItem
@@ -49,8 +53,9 @@ export default function Sideline() {
           <SidelineItem
             link="/feedback"
             image={FeedbackImg}
-            children="Feedback"
-          />
+          >
+            Feedback
+          </SidelineItem>
         </div>
       </div>
     </div>

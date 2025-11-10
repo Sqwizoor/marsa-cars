@@ -1,5 +1,5 @@
 // React, Next.js
-import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Image from "next/image";
 
 // Import of the image shown when there are no images available
@@ -19,14 +19,14 @@ interface ImagesPreviewGridProps {
   setColors: Dispatch<SetStateAction<{ color: string }[]>>; // Setter function for colors
 }
 
-const ImagesPreviewGrid: FC<ImagesPreviewGridProps> = ({
+const ImagesPreviewGrid = ({
   images,
   onRemove,
   colors,
   setColors,
-}) => {
+}: ImagesPreviewGridProps) => {
   // Calculate the number of images
-  let imagesLength = images.length;
+  const imagesLength = images.length;
 
   // Get the grid class name based on the number of images
   const GridClassName = getGridClassName(imagesLength);
@@ -40,7 +40,7 @@ const ImagesPreviewGrid: FC<ImagesPreviewGridProps> = ({
           try {
             const colors = await getDominantColors(img.url);
             return colors;
-          } catch (error) {
+          } catch {
             return [];
           }
         })
@@ -51,7 +51,7 @@ const ImagesPreviewGrid: FC<ImagesPreviewGridProps> = ({
     if (imagesLength > 0) {
       fecthColors();
     }
-  }, [images]);
+  }, [images, imagesLength]);
 
   console.log("colorPalettes--->", colorPalettes);
 

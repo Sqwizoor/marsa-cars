@@ -1,13 +1,12 @@
 "use client"
 
-import { type FC, useEffect } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import type { Store } from "@prisma/client"
 import type * as z from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { StoreFormSchema } from "@/lib/schemas"
-import { AlertDialog } from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -23,7 +22,7 @@ interface StoreDetailsProps {
   data?: Store
 }
 
-const StoreDetails: FC<StoreDetailsProps> = ({ data }) => {
+const StoreDetails = ({ data }: StoreDetailsProps) => {
   const { toast } = useToast()
   const router = useRouter()
 
@@ -98,22 +97,22 @@ const StoreDetails: FC<StoreDetailsProps> = ({ data }) => {
       } else {
         router.push(`/dashboard/seller/stores/${response.url}`)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error"
       console.error(error)
       toast({
         variant: "destructive",
         title: "Oops!",
-        description: error.toString(),
+        description: message,
       })
     }
   }
 
   return (
-    <AlertDialog>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Store Information</CardTitle>
-          <CardDescription>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Store Information</CardTitle>
+        <CardDescription>
             {data?.id
               ? `Update ${data.name} store information.`
               : "Let's create a store. You can edit store later from the store settings page."}
@@ -253,9 +252,8 @@ const StoreDetails: FC<StoreDetailsProps> = ({ data }) => {
           </Form>
         </CardContent>
       </Card>
-    </AlertDialog>
-  )
-}
+    )
+  }
 
 export default StoreDetails
 

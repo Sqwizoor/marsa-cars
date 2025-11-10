@@ -112,8 +112,9 @@ const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
                   <OfferTagDetails data={{ ...rowData }} />
                 </CustomModal>,
                 async () => {
+                  const offerTag = await getOfferTag(rowData?.id);
                   return {
-                    rowData: await getOfferTag(rowData?.id),
+                    rowData: offerTag ?? undefined,
                   };
                 }
               );

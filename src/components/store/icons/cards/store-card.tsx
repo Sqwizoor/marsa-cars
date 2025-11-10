@@ -40,8 +40,12 @@ const StoreCard: FC<Props> = ({ store }) => {
         setStoreFollowersCount((prev) => prev - 1);
         // toast.success(`You unfollowed ${name}`);
       }
-    } catch (error) {
-      toast.error("Something happend, Try again later !");
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Something happend, Try again later !"
+      );
     }
   };
   return (

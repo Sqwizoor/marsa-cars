@@ -39,6 +39,7 @@ export const generateUniqueSlug = async (
   let suffix = 1;
 
   while (true) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const exisitngRecord = await (db[model] as any).findFirst({
       where: {
         [field]: slug,
@@ -180,10 +181,7 @@ export const isProductValidToAdd = (product: CartProductType): boolean => {
     sizeId,
     size,
     stock,
-    shippingFee,
-    extraShippingFee,
     shippingMethod,
-    shippingService,
     variantImage,
     weight,
     deliveryTimeMin,
@@ -290,7 +288,7 @@ export const updateProductHistory = (variantId: string) => {
   if (historyString) {
     try {
       productHistory = JSON.parse(historyString);
-    } catch (error) {
+    } catch {
       productHistory = [];
     }
   }

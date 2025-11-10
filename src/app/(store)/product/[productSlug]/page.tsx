@@ -2,15 +2,19 @@
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProductPage({
   params,
 }: {
-  params: { productSlug: string };
+  params: Promise<{ productSlug: string }>;
 }) {
+  const { productSlug } = await params;
+  
   // Fetch the product from the database using the provided slug
   const product = await db.product.findUnique({
     where: {
-      slug: params.productSlug,
+      slug: productSlug,
     },
     include: { variants: true }, // Include product variants in the query
   });

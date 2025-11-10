@@ -1,7 +1,6 @@
 import { OrderStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Truck } from "lucide-react";
-import { FC } from "react";
 
 interface OrderStatusTagProps {
   status: OrderStatus;
@@ -72,7 +71,7 @@ const statusStyles: {
   },
 };
 
-const OrderStatusTag: FC<OrderStatusTagProps> = ({ status }) => {
+const OrderStatusTag = ({ status }: OrderStatusTagProps) => {
   const styles = statusStyles[status];
   const { bgColor, textColor, label } = styles;
   return (
@@ -85,7 +84,7 @@ const OrderStatusTag: FC<OrderStatusTagProps> = ({ status }) => {
         )}
       >
         <Truck className="shrin- size-3" />
-        {status}
+        {label}
       </span>
     </div>
   );

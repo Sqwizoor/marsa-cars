@@ -1,7 +1,7 @@
 "use client";
 import { ProductShippingDetailsType } from "@/lib/types";
 import { ChevronDown, ChevronRight, ChevronUp, Truck } from "lucide-react";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import ProductShippingFee from "./shipping-fee";
 import { getShippingDatesRange } from "@/lib/utils";
 
@@ -12,36 +12,45 @@ interface Props {
 }
 
 const ShippingDetails: FC<Props> = ({ shippingDetails, quantity, weight }) => {
-  if (typeof shippingDetails === "boolean") return null;
   const [toggle, setToggle] = useState<boolean>(false);
+  
+  const shippingTotal = useMemo(() => {
+    if (!shippingDetails) return 0;
+    
+    const { shippingFee, extraShippingFee, shippingFeeMethod } = shippingDetails;
+    switch (shippingFeeMethod) {
+      case "ITEM": {
+        const additionalQty = Math.max(quantity - 1, 0);
+        return shippingFee + additionalQty * extraShippingFee;
+      }
+      case "WEIGHT":
+        return shippingFee * quantity;
+      case "FIXED":
+        return shippingFee;
+      default:
+        return shippingFee;
+    }
+  }, [shippingDetails, quantity]);
+
+  useEffect(() => {
+    setToggle(false);
+  }, [shippingDetails]);
+  
+  // Handle case where shippingDetails is false
+  if (!shippingDetails) {
+    return null;
+  }
+  
   const {
     countryName,
     deliveryTimeMax,
     deliveryTimeMin,
     shippingFee,
     extraShippingFee,
-    returnPolicy,
     shippingFeeMethod,
     shippingService,
+    isFreeShipping,
   } = shippingDetails;
-  const [shippingTotal, setShippingTotal] = useState<number>();
-
-  useEffect(() => {
-    switch (shippingFeeMethod) {
-      case "ITEM":
-        let qty = quantity - 1;
-        setShippingTotal(shippingFee + qty * extraShippingFee);
-        break;
-      case "WEIGHT":
-        setShippingTotal(shippingFee * quantity);
-        break;
-      case "FIXED":
-        setShippingTotal(shippingFee);
-        break;
-      default:
-        break;
-    }
-  }, [quantity, countryName]);
 
   const { minDate, maxDate } = getShippingDatesRange(
     deliveryTimeMin,
@@ -53,7 +62,7 @@ const ShippingDetails: FC<Props> = ({ shippingDetails, quantity, weight }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-x-1">
             <Truck className="w-4" />
-            {shippingDetails.isFreeShipping ? (
+            {isFreeShipping ? (
               <span className="text-sm font-bold flex items-center">
                 <span>
                   Free Shipping to <span>{countryName}</span>
@@ -64,7 +73,7 @@ const ShippingDetails: FC<Props> = ({ shippingDetails, quantity, weight }) => {
                 <span>
                   Shipping to <span>{countryName}</span>
                 </span>
-                <span>&nbsp;for ${shippingTotal}</span>
+                <span>&nbsp;for ${shippingTotal.toFixed(2)}</span>
               </span>
             )}
           </div>
@@ -80,7 +89,7 @@ const ShippingDetails: FC<Props> = ({ shippingDetails, quantity, weight }) => {
           </strong>
         </span>
         {/* Product shipping fee */}
-        {!shippingDetails.isFreeShipping && toggle && (
+        {!isFreeShipping && toggle && (
           <ProductShippingFee
             fee={shippingFee}
             extraFee={extraShippingFee}

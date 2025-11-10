@@ -4,12 +4,12 @@ import React, { useEffect, useState } from "react";
 
 export default function ProductWatch({ productId }: { productId: string }) {
   const [watcherCount, setWatcherCount] = useState<number>(0);
-  const [socket, setSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
     // const ws = new WebSocket(`ws:aquamarine-imaginary-apricot.glitch.me/${productId}`);
-    const ws = new WebSocket(`wss://aquamarine-imaginary-apricot.glitch.me/${productId}`);
-    setSocket(ws);
+    const ws = new WebSocket(
+      `wss://aquamarine-imaginary-apricot.glitch.me/${productId}`
+    );
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -24,12 +24,10 @@ export default function ProductWatch({ productId }: { productId: string }) {
 
     ws.onerror = (error) => {
       console.error("WebSocket error:", error);
-      setSocket(null);
     };
 
     ws.onclose = () => {
       console.log("Disconnected from WebSocket server");
-      setSocket(null);
     };
 
     return () => {
@@ -49,4 +47,6 @@ export default function ProductWatch({ productId }: { productId: string }) {
       </div>
     );
   }
+
+  return null;
 }

@@ -1,4 +1,3 @@
-import { Country } from "@/lib/types";
 import { Info } from "lucide-react";
 
 export default function CountryNote({ country }: { country: string }) {

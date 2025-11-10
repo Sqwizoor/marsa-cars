@@ -1,6 +1,6 @@
 "use client";
 // React, Next.js
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import Image from "next/image";
 
 // Image zoom

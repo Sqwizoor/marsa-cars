@@ -1,25 +1,16 @@
 import PaymentStatusTag from "@/components/shared/payment-status";
-import {
-  OrderStatus,
-  PaymentStatus,
-  ProductStatus,
-  StoreOrderType,
-  UserShippingAddressType,
-} from "@/lib/types";
-import { getShippingDatesRange } from "@/lib/utils";
-import { PaymentDetails } from "@prisma/client";
-import { FC } from "react";
-import OrderStatusSelect from "../forms/order-status-select";
-import { Gruppo } from "next/font/google";
+import { OrderStatus, PaymentStatus, ProductStatus, StoreOrderType } from "@/lib/types";
 import Image from "next/image";
-import ProductStatusTag from "@/components/shared/product-status";
+import OrderStatusSelect from "../forms/order-status-select";
+// ProductStatusTag unused here (selection handled via ProductStatusSelect)
 import ProductStatusSelect from "../forms/product-status-select";
+import { getShippingDatesRange } from "@/lib/utils";
 
 interface Props {
   group: StoreOrderType;
 }
 
-const StoreOrderSummary: FC<Props> = ({ group }) => {
+const StoreOrderSummary = ({ group }: Props) => {
   const paymentDetails = group.order.paymentDetails;
   const paymentStatus = group.order.paymentStatus as PaymentStatus;
   const shippingAddress = group.order.shippingAddress;
@@ -43,12 +34,6 @@ const StoreOrderSummary: FC<Props> = ({ group }) => {
     user,
   } = shippingAddress;
 
-  const { coupon, couponId, subTotal, total, shippingFees } = group;
-
-  let discountedAmount = 0;
-  if (couponId && coupon) {
-    discountedAmount = ((subTotal + shippingFees) * coupon.discount) / 100;
-  }
   return (
     <div className="py-2 relative">
       <div className="w-full px-1">

@@ -1,7 +1,7 @@
 "use client";
 
 // React
-import { FC, useEffect } from "react";
+import { useEffect } from "react";
 
 // Prisma model
 import { Coupon } from "@prisma/client";
@@ -55,7 +55,7 @@ interface CouponDetailsProps {
   storeUrl: string;
 }
 
-const CouponDetails: FC<CouponDetailsProps> = ({ data, storeUrl }) => {
+const CouponDetails = ({ data, storeUrl }: CouponDetailsProps) => {
   // Initializing necessary hooks
   const { toast } = useToast(); // Hook for displaying toast messages
   const router = useRouter(); // Hook for routing
@@ -114,13 +114,14 @@ const CouponDetails: FC<CouponDetailsProps> = ({ data, storeUrl }) => {
       } else {
         router.push(`/dashboard/seller/stores/${storeUrl}/coupons`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handling form submission errors
+      const message = error instanceof Error ? error.message : "Unknown error";
       console.log(error);
       toast({
         variant: "destructive",
         title: "Oops!",
-        description: error.toString(),
+        description: message,
       });
     }
   };

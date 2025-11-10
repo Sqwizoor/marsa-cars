@@ -7,10 +7,9 @@ import {
   VariantInfoType,
 } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import ReactStars from "react-rating-stars-component";
 import { z } from "zod";
 import Select from "../ui/selector";
 import Input from "../ui/input";
@@ -34,16 +33,14 @@ export default function ReviewDetails({
   reviews: ReviewWithImageType[];
   setReviews: Dispatch<SetStateAction<ReviewWithImageType[]>>;
 }) {
-  // State for selected Variant
-  const [activeVariant, setActiveVariant] = useState<VariantInfoType>(
-    variantsInfo[0]
-  );
-
-  // Temporary state for images
-  const [images, setImages] = useState<{ url: string }[]>([]);
-
   // State for sizes
   const [sizes, setSizes] = useState<{ name: string; value: string }[]>([]);
+
+  const defaultVariantName = useMemo(
+    () => data?.variant || variantsInfo[0]?.variantName || "",
+    [data?.variant, variantsInfo]
+  );
+  const defaultRating = data?.rating ?? 0;
 
   // Form hook for managing form state and validation
   const form = useForm<z.infer<typeof AddReviewSchema>>({
@@ -51,8 +48,8 @@ export default function ReviewDetails({
     resolver: zodResolver(AddReviewSchema), // Resolver for form validation
     defaultValues: {
       // Setting default form values from data (if available)
-      variantName: data?.variant || activeVariant.variantName,
-      rating: data?.rating || 0,
+      variantName: defaultVariantName,
+      rating: defaultRating,
       size: data?.size || "",
       review: data?.review || "",
       quantity: data?.quantity || undefined,
@@ -66,6 +63,8 @@ export default function ReviewDetails({
 
   // Errors
   const errors = form.formState.errors;
+  const ratingValue = form.watch("rating") ?? 0;
+  const variantName = form.watch("variantName") || "";
 
   // Submit handler for form submission
   const handleSubmit = async (values: z.infer<typeof AddReviewSchema>) => {
@@ -85,36 +84,58 @@ export default function ReviewDetails({
         setReviews([...rev, response]);
       }
       toast.success("Review Added Successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handling form submission errors
       console.log(error);
-      toast.error(error.toString());
+      toast.error(
+        error instanceof Error ? error.message : "Failed to submit review"
+      );
     }
   };
 
-  const variants = variantsInfo.map((v) => ({
-    name: v.variantName,
-    value: v.variantName,
-    image: v.variantImage,
-    colors: v.colors.map((c) => c.name).join(","),
+  const variants = variantsInfo.map((variant) => ({
+    name: variant.variantName,
+    value: variant.variantName,
+    image: variant.variantImage,
+    colors: variant.colors
+      .map((color) => color?.name)
+      .filter((name): name is string => Boolean(name))
+      .join(","),
   }));
 
   useEffect(() => {
-    form.setValue("size", "");
-    const name = form.getValues().variantName;
-    const variant = variantsInfo.find((v) => v.variantName === name);
-    if (variant) {
-      const sizes_data = variant.sizes.map((s) => ({
-        name: s.size,
-        value: s.size,
-      }));
-      setActiveVariant(variant);
-      if (sizes) setSizes(sizes_data);
-      form.setValue("color", variant.colors.join(","));
+    const variant = variantsInfo.find((v) => v.variantName === variantName);
+    if (!variant) {
+      return;
     }
-  }, [form.getValues().variantName]);
 
-  console.log("review data", form.watch());
+    const variantSizes = variant.sizes.map((s) => ({
+      name: s.size,
+      value: s.size,
+    }));
+
+    setSizes(variantSizes);
+
+    const colorNames = variant.colors
+      .map((color) => color?.name)
+      .filter((name): name is string => Boolean(name));
+    form.setValue("color", colorNames.join(","));
+
+    const currentSize = form.getValues("size");
+    const hasMatchingSize = variantSizes.some(
+      (size) => size.value === currentSize
+    );
+
+    if (!hasMatchingSize) {
+      form.setValue("size", "");
+    }
+  }, [form, variantName, variantsInfo]);
+
+  useEffect(() => {
+    if (!variantName && variantsInfo.length > 0) {
+      form.setValue("variantName", variantsInfo[0].variantName);
+    }
+  }, [form, variantName, variantsInfo]);
 
   return (
     <div>
@@ -155,9 +176,7 @@ export default function ReviewDetails({
                             starSpacing="2px"
                             changeRating={field.onChange}
                           />
-                          <span>
-                            ( {form.getValues().rating.toFixed(1)} out of 5.0)
-                          </span>
+                          <span>({ratingValue.toFixed(1)} out of 5.0)</span>
                         </div>
                       </FormControl>
                     </FormItem>
@@ -172,7 +191,6 @@ export default function ReviewDetails({
                         <FormItem>
                           <FormControl>
                             <Select
-                              name={field.name}
                               value={field.value}
                               onChange={field.onChange}
                               options={variants}
@@ -191,7 +209,6 @@ export default function ReviewDetails({
                       <FormItem className="flex-1">
                         <FormControl>
                           <Select
-                            name={field.name}
                             value={field.value}
                             onChange={field.onChange}
                             options={sizes}
@@ -212,10 +229,11 @@ export default function ReviewDetails({
                             name="quantity"
                             type="number"
                             placeholder="Quantity (Optional)"
-                            onChange={(e) => {
-                              field.onChange(e.target.value);
+                            onChange={(event) => {
+                              const value = event.target.value;
+                              field.onChange(value);
                             }}
-                            value={field.value ? field.value : ""} // Handle undefined gracefully
+                            value={field.value ?? ""}
                           />
                         </FormControl>
                       </FormItem>
@@ -248,22 +266,15 @@ export default function ReviewDetails({
                           value={field.value.map((image) => image.url)}
                           disabled={isLoading}
                           onChange={(url) => {
-                            setImages((prevImages) => {
-                              const updatedImages = [...prevImages, { url }];
-                              if (updatedImages.length <= 3) {
-                                field.onChange(updatedImages);
-                                return updatedImages;
-                              } else {
-                                return prevImages;
-                              }
-                            });
+                            const nextImages = [...field.value, { url }];
+                            if (nextImages.length <= 3) {
+                              field.onChange(nextImages);
+                            }
                           }}
                           onRemove={(url) =>
-                            field.onChange([
-                              ...field.value.filter(
-                                (current) => current.url !== url
-                              ),
-                            ])
+                            field.onChange(
+                              field.value.filter((current) => current.url !== url)
+                            )
                           }
                           maxImages={3}
                         />

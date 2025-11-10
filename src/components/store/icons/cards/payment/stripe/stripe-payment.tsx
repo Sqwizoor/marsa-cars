@@ -19,13 +19,16 @@ export default function StripePayment({ orderId }: { orderId: string }) {
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    getClientSecret();
+    const fetchSecret = async () => {
+      const res = await createStripePaymentIntent({
+        amount: 0, // Amount should be fetched from order
+        currency: "usd",
+        metadata: { orderId },
+      });
+      if (res.clientSecret) setClientSecret(res.clientSecret);
+    };
+    fetchSecret();
   }, [orderId]);
-
-  const getClientSecret = async () => {
-    const res = await createStripePaymentIntent(orderId);
-    if (res.clientSecret) setClientSecret(res.clientSecret);
-  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -54,11 +57,16 @@ export default function StripePayment({ orderId }: { orderId: string }) {
 
       if (!error && paymentIntent) {
         try {
-          const res = await createStripePayment(orderId, paymentIntent);
-          if (!res.paymentDetails?.paymentInetntId) throw new Error("Failed");
+          const res = await createStripePayment({
+            orderId,
+            paymentIntentId: paymentIntent.id,
+          });
+          if (!res.success) throw new Error("Failed");
           router.refresh();
-        } catch (error: any) {
-          setErrorMessage(error.toString());
+        } catch (error: unknown) {
+          setErrorMessage(
+            error instanceof Error ? error.message : "Unknown error"
+          );
         }
       }
     }

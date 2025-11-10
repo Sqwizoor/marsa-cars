@@ -2,6 +2,7 @@
 import { ProductType, SimpleProduct } from "@/lib/types";
 import { FC, ReactNode } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
+import type { SwiperProps } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -14,7 +15,7 @@ interface Props {
   products: SimpleProduct[] | ProductType[];
   type: "main" | "curved" | "simple";
   slidesPerView?: number;
-  breakpoints?: any;
+  breakpoints?: SwiperProps["breakpoints"];
   spaceBetween?: number;
 }
 

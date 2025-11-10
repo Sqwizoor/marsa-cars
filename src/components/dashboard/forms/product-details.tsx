@@ -2,7 +2,7 @@
 "use client";
 
 // React, Next.js
-import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 // Prisma model
@@ -38,7 +38,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -47,13 +46,12 @@ import ImageUpload from "../shared/image-upload";
 import { useToast } from "@/hooks/use-toast";
 
 import { MultiSelect } from "react-multi-select-component";
+import { WithContext as ReactTags } from "react-tag-input";
 
 // Queries
 import { upsertProduct } from "@/queries/products";
 import { getAllCategoriesForCategory } from "@/queries/category";
 
-// ReactTags
-const ReactTags = require("react-tag-input").WithOutContext;
 // Utils
 import { v4 } from "uuid";
 
@@ -84,16 +82,6 @@ import { ArrowRight, Dot } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface Tag {
-  id: string;
-  text: string;
-}
-
-interface Keyword {
-  id: string;
-  text: string;
-}
-
 const shippingFeeMethods = [
   {
     value: ShippingFeeMethod.ITEM,
@@ -117,13 +105,13 @@ interface ProductDetailsProps {
   countries: Country[];
 }
 
-const ProductDetails: FC<ProductDetailsProps> = ({
+const ProductDetails = ({
   data,
   categories,
   offerTags,
   storeUrl,
   countries,
-}) => {
+}: ProductDetailsProps) => {
   // Initializing necessary hooks
   const { toast } = useToast(); // Hook for displaying toast messages
   const router = useRouter(); // Hook for routing
@@ -223,14 +211,19 @@ const ProductDetails: FC<ProductDetailsProps> = ({
     hour12: false, // 12-hour format (change to false for 24-hour format)
   });
 
-  // UseEffect to get subCategories when user pick/change a category
+  // UseEffect to get subCategories when user picks/changes a category
+  const categoryId = form.watch("categoryId");
   useEffect(() => {
     const getSubCategories = async () => {
-      const res = await getAllCategoriesForCategory(form.watch().categoryId);
+      const res = await getAllCategoriesForCategory(categoryId);
       setSubCategories(res);
     };
-    getSubCategories();
-  }, [form.watch().categoryId]);
+    if (categoryId) {
+      getSubCategories();
+    } else {
+      setSubCategories([]);
+    }
+  }, [categoryId]);
 
   // Extract errors state from form
   const errors = form.formState.errors;
@@ -252,7 +245,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
   const handleSubmit = async (values: z.infer<typeof ProductFormSchema>) => {
     try {
       // Upserting product data
-      const response = await upsertProduct(
+      await upsertProduct(
         {
           productId: data?.productId ? data.productId : v4(),
           variantId: data?.variantId ? data.variantId : v4(),
@@ -299,13 +292,14 @@ const ProductDetails: FC<ProductDetailsProps> = ({
       } else {
         router.push(`/dashboard/seller/stores/${storeUrl}/products`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handling form submission errors
       console.log(error);
       toast({
         variant: "destructive",
         title: "Oops!",
-        description: error.toString(),
+        description:
+          error instanceof Error ? error.message : "Failed to save product",
       });
     }
   };
@@ -340,7 +334,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
     form.setValue("product_specs", productSpecs);
     form.setValue("variant_specs", variantSpecs);
     form.setValue("questions", questions);
-  }, [colors, sizes, keywords, productSpecs, questions, variantSpecs, data]);
+  }, [colors, sizes, keywords, productSpecs, questions, variantSpecs, data, form]);
 
   //Countries options
   type CountryOption = {
@@ -505,7 +499,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                       disabled={isLoading}
                       control={form.control}
                       name="description"
-                      render={({ field }) => (
+                      render={() => (
                         <FormItem className="flex-1">
                           <FormControl>
                             <JoditEditor
@@ -527,7 +521,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                       disabled={isLoading}
                       control={form.control}
                       name="variantDescription"
-                      render={({ field }) => (
+                      render={() => (
                         <FormItem className="flex-1">
                           <FormControl>
                             <JoditEditor
@@ -749,13 +743,17 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                   <FormField
                     control={form.control}
                     name="keywords"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem className="relative flex-1">
                         <FormLabel>Product Keywords</FormLabel>
                         <FormControl>
                           <ReactTags
+                            tags={keywords.map((k, i) => ({
+                              id: String(i),
+                              text: k,
+                            }))}
                             handleAddition={handleAddition}
-                            handleDelete={() => {}}
+                            handleDelete={handleDeleteKeyword}
                             placeholder="Keywords (e.g., winter jacket, warm, stylish)"
                             classNames={{
                               tagInputField:
@@ -919,8 +917,9 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                               />
                               <Checkbox
                                 checked={field.value}
-                                // @ts-ignore
-                                onCheckedChange={field.onChange}
+                                onCheckedChange={(checked) => {
+                                  field.onChange(checked === true);
+                                }}
                               />
                             </div>
                           </FormControl>
@@ -954,7 +953,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                       ✖️
                                     </span>
                                   }
-                                  onChange={(date: any) => {
+                                  onChange={(date: Date | null) => {
                                     field.onChange(
                                       date
                                         ? format(date, "yyyy-MM-dd'T'HH:mm:ss")
@@ -1043,8 +1042,9 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                 />
                                 <Checkbox
                                   checked={field.value}
-                                  // @ts-ignore
-                                  onCheckedChange={field.onChange}
+                                  onCheckedChange={(checked) => {
+                                    field.onChange(checked === true);
+                                  }}
                                 />
                               </div>
                             </FormControl>

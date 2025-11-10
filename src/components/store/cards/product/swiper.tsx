@@ -3,6 +3,7 @@ import Image from "next/image";
 
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
+import type { SwiperRef } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 
 // Import Swiper styles
@@ -19,19 +20,17 @@ export default function ProductCardImageSwiper({
 }: {
   images: ProductVariantImage[];
 }) {
-  const swiperRef = useRef<any>(null);
+  const swiperRef = useRef<SwiperRef | null>(null);
   useEffect(() => {
-    if (swiperRef.current && swiperRef.current.swiper) {
-      swiperRef.current.swiper.autoplay.stop();
-    }
-  }, [swiperRef]);
+    swiperRef.current?.swiper?.autoplay?.stop();
+  }, []);
   return (
     <div
       className="relative mb-2 w-full h-[200px]  contrast-[90%] rounded-2xl overflow-hidden"
-      onMouseEnter={() => swiperRef.current.swiper.autoplay.start()}
+      onMouseEnter={() => swiperRef.current?.swiper?.autoplay?.start()}
       onMouseLeave={() => {
-        swiperRef.current.swiper.autoplay.stop();
-        swiperRef.current.swiper.slideTo(0);
+        swiperRef.current?.swiper?.autoplay?.stop();
+        swiperRef.current?.swiper?.slideTo(0);
       }}
     >
       <Swiper ref={swiperRef} modules={[Autoplay]} autoplay={{ delay: 500 }}>

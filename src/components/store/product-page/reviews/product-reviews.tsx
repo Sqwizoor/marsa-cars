@@ -6,7 +6,7 @@ import {
   ReviewWithImageType,
   VariantInfoType,
 } from "@/lib/types";
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import RatingCard from "../../cards/product-rating";
 import RatingStatisticsCard from "../../cards/rating-statistics";
 import ReviewCard from "../../cards/review";
@@ -33,7 +33,7 @@ const ProductReviews: FC<Props> = ({
 }) => {
   const [data, setData] = useState<ReviewWithImageType[]>(reviews);
   const { totalReviews, ratingStatistics } = statistics;
-  const half = Math.ceil(data.length / 2);
+  const half = useMemo(() => Math.ceil(data.length / 2), [data.length]);
 
   // Filtering
   const filtered_data = {
@@ -47,19 +47,9 @@ const ProductReviews: FC<Props> = ({
 
   // Pagination
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(2);
+  const pageSize = 2;
 
-  useEffect(() => {
-    if (filters.rating || filters.hasImages || sort) {
-      setPage(1);
-      handleGetReviews();
-    }
-    if (page) {
-      handleGetReviews();
-    }
-  }, [filters, sort, page]);
-
-  const handleGetReviews = async () => {
+  const handleGetReviews = useCallback(async () => {
     const res = await getProductFilteredReviews(
       productId,
       filters,
@@ -68,7 +58,15 @@ const ProductReviews: FC<Props> = ({
       pageSize
     );
     setData(res);
-  };
+  }, [filters, page, pageSize, productId, sort]);
+
+  useEffect(() => {
+    handleGetReviews();
+  }, [handleGetReviews]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters, sort]);
 
   return (
     <div id="reviews" className="pt-6">
@@ -119,9 +117,11 @@ const ProductReviews: FC<Props> = ({
             <Paginaion
               page={page}
               totalPages={
-                filters.rating || filters.hasImages
-                  ? data.length / pageSize
-                  : totalReviews / pageSize
+                Math.ceil(
+                  (filters.rating || filters.hasImages
+                    ? data.length
+                    : totalReviews) / pageSize
+                )
               }
               setPage={setPage}
             />

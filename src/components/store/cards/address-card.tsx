@@ -2,7 +2,7 @@ import { UserShippingAddressType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Country } from "@prisma/client";
 import { Check } from "lucide-react";
-import { FC, useState } from "react";
+import { useState } from "react";
 import Modal from "../shared/modal";
 import AddressDetails from "../shared/shipping-addresses/address-details";
 import toast from "react-hot-toast";
@@ -16,27 +16,31 @@ interface Props {
   countries: Country[];
 }
 
-const ShippingAddressCard: FC<Props> = ({
+const ShippingAddressCard = ({
   address,
   countries,
   isSelected,
   onSelect,
-}) => {
+}: Props) => {
   const router = useRouter();
   const [show, setShow] = useState(false);
   const handleMakeDefault = async () => {
     try {
-      const { country, ...newAddress } = address;
+      const { country, user, ...addressPayload } = address;
+      void country;
+      void user;
       const response = await upsertShippingAddress({
-        ...newAddress,
+        ...addressPayload,
         default: true,
       });
       if (response) {
         toast.success("New Default Address saved.");
         router.refresh();
       }
-    } catch (error) {
-      toast.error("Something went wrong ! ");
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error ? error.message : "Something went wrong !"
+      );
     }
   };
 

@@ -47,7 +47,10 @@ export default function ProductSort() {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   return (
-    <div className="relative w-full transition-all duration-[30ms]">
+    <div
+      className="relative w-full transition-all"
+      style={{ transitionDuration: "30ms" }}
+    >
       <div className="pr-[50px] inline-block relative">
         <div className="flex">
           <div className="h-9 w-[227px] !float-right">
@@ -61,7 +64,10 @@ export default function ProductSort() {
                 <div className="h-9 w-[227px]">
                   <div className="inline-flex relative w-full">
                     <div className="relative">
-                      <span className="w-[70px] h-full flex items-center justify-center absolute top-0 transition-all duration-[20ms]">
+                      <span
+                        className="w-[70px] h-full flex items-center justify-center absolute top-0 transition-all"
+                        style={{ transitionDuration: "20ms" }}
+                      >
                         <label htmlFor="">Sort by</label>
                       </span>
                     </div>

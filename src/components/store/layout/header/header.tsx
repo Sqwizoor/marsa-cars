@@ -1,12 +1,10 @@
 import Link from "next/link";
 import UserMenu from "./user-menu/user-menu";
 import Cart from "./cart";
-import DownloadApp from "./download-app";
 import Search from "./search/search";
 import { cookies } from "next/headers";
 import { Country } from "@/lib/types";
 import CountryLanguageCurrencySelector from "./country-lang-curr-selector";
-import CategoriesHeader from "../categories-header/categories-header"; // Import the new component
 
 export default async function Header() {
   // Get cookies from the store

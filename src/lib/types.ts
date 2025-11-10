@@ -39,7 +39,6 @@ import {
   getUserPayments,
   getUserWishlist,
 } from "@/queries/profile";
-import { string } from "zod";
 import { Key } from "react";
 import { getHomeFeaturedCategories } from "@/queries/home";
 
@@ -296,7 +295,7 @@ export type UserPaymentType = Prisma.PromiseReturnType<
   typeof getUserPayments
 >["payments"][0];
 
-export type PaymentTableFilter = "" | "paypal" | "credit-card";
+export type PaymentTableFilter = "" | "credit-card";
 
 export type PaymentTableDateFilter =
   | ""

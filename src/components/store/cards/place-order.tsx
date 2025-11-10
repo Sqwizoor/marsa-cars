@@ -1,5 +1,5 @@
-import { Coupon, ShippingAddress } from "@prisma/client";
-import { Dispatch, FC, SetStateAction, useState } from "react";
+import { ShippingAddress } from "@prisma/client";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "../ui/button";
 import FastDelivery from "./fast-delivery";
 import { SecurityPrivacyCard } from "../product-page/returns-security-privacy-card";
@@ -18,11 +18,11 @@ interface Props {
   setCartData: Dispatch<SetStateAction<CartWithCartItemsType>>;
 }
 
-const PlaceOrderCard: FC<Props> = ({
+const PlaceOrderCard = ({
   shippingAddress,
   setCartData,
   cartData,
-}) => {
+}: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { id, coupon, subTotal, shippingFees, total } = cartData;
   const { push } = useRouter();

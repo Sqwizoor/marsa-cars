@@ -1,9 +1,6 @@
-import { CatgegoryWithSubsType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { OfferTag } from "@prisma/client";
-import { Minus, Plus } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
 
 export default function OfferLink({ offer }: { offer: OfferTag }) {
   const searchParams = useSearchParams();

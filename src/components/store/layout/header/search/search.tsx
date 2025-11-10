@@ -2,7 +2,7 @@
 import { SearchResult } from "@/lib/types";
 import { Search as SearchIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import SearchSuggestions from "./suggestions";
 export default function Search() {
   const searchParams = useSearchParams();
@@ -17,7 +17,7 @@ export default function Search() {
   );
   const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (pathname !== "/browse") {
       // We are not in browse page

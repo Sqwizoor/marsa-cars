@@ -2,7 +2,7 @@ import { db } from "@/lib/db";  // Adjust the import path if needed
 
 async function deleteStoreByUrl(storeUrl: string) {
   try {
-    const deletedStore = await db.store.delete({
+    await db.store.delete({
       where: {
         url: storeUrl,  // Using 'url' as a unique identifier
       },

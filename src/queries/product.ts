@@ -9,14 +9,12 @@ import {
   FreeShippingWithCountriesType,
   ProductPageType,
   ProductShippingDetailsType,
-  ProductType,
   ProductWithVariantType,
   RatingStatisticsType,
   SortOrder,
   VariantImageType,
-  VariantSimplified,
 } from "@/lib/types";
-import { FreeShipping, ProductVariant, Size, Store } from "@prisma/client";
+import { Prisma, Store } from "@prisma/client";
 
 // Clerk
 import { currentUser } from "@clerk/nextjs/server";
@@ -28,7 +26,6 @@ import { generateUniqueSlug } from "@/lib/utils";
 // Cookies
 import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";
-import { setMaxListeners } from "events";
 
 // Function: upsertProduct
 // Description: Upserts a product and its variant into the database, ensuring proper association with the store.
@@ -434,8 +431,30 @@ export const deleteProduct = async (productId: string) => {
 //   - page: The current page number for pagination (default = 1).
 //   - pageSize: The number of products per page (default = 10).
 // Returns: An object containing paginated products, filtered variants, and pagination metadata (totalPages, currentPage, pageSize, totalCount).
+type ProductFilters = {
+  store?: string;
+  category?: string;
+  subCategory?: string;
+  offer?: string;
+  size?: string[];
+  search?: string;
+};
+
+type VariantSizePriceInfo = {
+  price: Prisma.Decimal | number;
+  discount: number | null;
+};
+
+type VariantPriceInfo = {
+  sizes: VariantSizePriceInfo[];
+};
+
+type ProductPriceInfo = {
+  variants: VariantPriceInfo[];
+};
+
 export const getProducts = async (
-  filters: any = {},
+  filters: ProductFilters = {},
   sortBy = "",
   page: number = 1,
   pageSize: number = 10
@@ -446,9 +465,10 @@ export const getProducts = async (
   const skip = (currentPage - 1) * limit;
 
   // Construct the base query
-  const wherClause: any = {
+  const wherClause: Prisma.ProductWhereInput = {
     AND: [],
   };
+  const andConditions = wherClause.AND as Prisma.ProductWhereInput[];
 
   // PERFORMANCE OPTIMIZATION: Run all lookup queries in parallel instead of sequential
   const lookupPromises = [];
@@ -501,16 +521,16 @@ export const getProducts = async (
     if (result.data) {
       switch (result.type) {
         case 'store':
-          wherClause.AND.push({ storeId: result.data.id });
+          andConditions.push({ storeId: result.data.id });
           break;
         case 'category':
-          wherClause.AND.push({ categoryId: result.data.id });
+          andConditions.push({ categoryId: result.data.id });
           break;
         case 'subCategory':
-          wherClause.AND.push({ subCategoryId: result.data.id });
+          andConditions.push({ subCategoryId: result.data.id });
           break;
         case 'offer':
-          wherClause.AND.push({ offerTagId: result.data.id });
+          andConditions.push({ offerTagId: result.data.id });
           break;
       }
     }
@@ -518,7 +538,7 @@ export const getProducts = async (
 
   // Apply size filter (using array of sizes)
   if (filters.size && Array.isArray(filters.size)) {
-    wherClause.AND.push({
+    andConditions.push({
       variants: {
         some: {
           sizes: {
@@ -535,7 +555,7 @@ export const getProducts = async (
 
   // Apply search filter (search term in product name or description)
   if (filters.search) {
-    wherClause.AND.push({
+    andConditions.push({
       OR: [
         {
           name: { contains: filters.search, mode: 'insensitive' },
@@ -620,22 +640,21 @@ export const getProducts = async (
     }),
   ]);
 
-  type VariantWithSizes = ProductVariant & { sizes: Size[] };
+  const getMinPrice = (product: ProductPriceInfo) =>
+    Math.min(
+      ...product.variants.flatMap((variant) =>
+        variant.sizes.map((size) => {
+          const discount = size.discount ?? 0;
+          const price = Number(size.price);
+          const discountedPrice = price * (1 - discount / 100);
+          return discountedPrice;
+        })
+      ),
+      Infinity // Default to Infinity if no sizes exist
+    );
 
   // Product price sorting
   products.sort((a, b) => {
-    // Helper function to get the minimum price from a product's variants
-    const getMinPrice = (product: any) =>
-      Math.min(
-        ...product.variants.flatMap((variant: VariantWithSizes) =>
-          variant.sizes.map((size) => {
-            let discount = size.discount;
-            let discountedPrice = size.price * (1 - discount / 100);
-            return discountedPrice;
-          })
-        ),
-        Infinity // Default to Infinity if no sizes exist
-      );
 
     // Get minimum prices for both products
     const minPriceA = getMinPrice(a);
@@ -657,22 +676,20 @@ export const getProducts = async (
     // Filter the variants based on the filters
     const filteredVariants = product.variants;
 
-    // Transform the filtered variants into the VariantSimplified structure
     const variants = filteredVariants.map((variant) => ({
       variantId: variant.id,
       variantSlug: variant.slug,
       variantName: variant.variantName,
-      images: variant.images as any, // Type assertion for optimized select
-      sizes: variant.sizes as any, // Type assertion for optimized select
+      images: variant.images,
+      sizes: variant.sizes,
     }));
 
     // Extract variant images for the product
     const variantImages: VariantImageType[] = filteredVariants.map(
       (variant) => ({
         url: `/product/${product.slug}/${variant.slug}`,
-        image: variant.variantImage
-          ? variant.variantImage
-          : variant.images[0]?.url || '',
+        image:
+          variant.variantImage ?? variant.images[0]?.url ?? "",
       })
     );
 
@@ -964,7 +981,7 @@ export const getRatingStatistics = async (productId: string) => {
   const ratingCounts = Array(5).fill(0);
 
   ratingStats.forEach((stat) => {
-    let rating = Math.floor(stat.rating);
+    const rating = Math.floor(stat.rating);
     if (rating >= 1 && rating <= 5) {
       ratingCounts[rating - 1] = stat._count.rating;
     }
@@ -1113,6 +1130,7 @@ export const getProductFilteredReviews = async (
   page: number = 1,
   pageSize: number = 4
 ) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const reviewFilter: any = {
     productId,
   };
@@ -1304,6 +1322,7 @@ export const getProductsByIds = async (
   ids: string[],
   page: number = 1,
   pageSize: number = 10
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ products: any; totalPages: number }> => {
   // Check if ids array is empty
   if (!ids || ids.length === 0) {

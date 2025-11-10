@@ -6,7 +6,7 @@ import { Check, MessageSquareMore, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -20,7 +20,7 @@ interface Props {
   };
 }
 
-const StoreCard: FC<Props> = ({ store }) => {
+const StoreCard = ({ store }: Props) => {
   const { id, name, logo, url, followersCount, isUserFollowingStore } = store;
   const [following, setFollowing] = useState<boolean>(isUserFollowingStore);
   const [storeFollowersCount, setStoreFollowersCount] =
@@ -40,8 +40,12 @@ const StoreCard: FC<Props> = ({ store }) => {
         setStoreFollowersCount((prev) => prev - 1);
         toast.success(`You unfollowed ${name}`);
       }
-    } catch (error) {
-      toast.error("Something happend, Try again later !");
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Something happend, Try again later !"
+      );
     }
   };
   return (

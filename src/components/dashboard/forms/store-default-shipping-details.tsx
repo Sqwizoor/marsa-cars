@@ -1,7 +1,7 @@
 "use client";
 
 // React, Next.js
-import { FC, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 // Form handling utilities
@@ -13,7 +13,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { StoreShippingFormSchema } from "@/lib/schemas";
 
 // UI Components
-import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -32,7 +31,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { updateStoreDefaultShippingDetails } from "@/queries/store";
 
 // Utils
-import { v4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 
 // Types
@@ -43,10 +41,10 @@ interface StoreDefaultShippingDetailsProps {
   storeUrl: string;
 }
 
-const StoreDefaultShippingDetails: FC<StoreDefaultShippingDetailsProps> = ({
+const StoreDefaultShippingDetails = ({
   data,
   storeUrl,
-}) => {
+}: StoreDefaultShippingDetailsProps) => {
   // Initializing necessary hooks
   const { toast } = useToast(); // Hook for displaying toast messages
   const router = useRouter(); // Hook for routing
@@ -106,23 +104,23 @@ const StoreDefaultShippingDetails: FC<StoreDefaultShippingDetailsProps> = ({
         //Refresh data
         router.refresh();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handling form submission errors
+      const message = error instanceof Error ? error.message : "Unknown error";
       console.log(error);
       toast({
         variant: "destructive",
         title: "Oops!",
-        description: error.toString(),
+        description: message,
       });
     }
   };
 
   return (
-    <AlertDialog>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Store Default Shipping details</CardTitle>
-        </CardHeader>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Store Default Shipping details</CardTitle>
+      </CardHeader>
         <CardContent>
           <Form {...form}>
             <form
@@ -294,8 +292,7 @@ const StoreDefaultShippingDetails: FC<StoreDefaultShippingDetailsProps> = ({
           </Form>
         </CardContent>
       </Card>
-    </AlertDialog>
-  );
-};
+    );
+  };
 
 export default StoreDefaultShippingDetails;

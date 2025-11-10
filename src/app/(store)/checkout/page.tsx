@@ -1,11 +1,12 @@
 import CheckoutContainer from "@/components/store/checkout-page/container";
-import Header from "@/components/store/layout/header/header";
 import { db } from "@/lib/db";
 import { Country } from "@/lib/types";
 import { getUserShippingAddresses } from "@/queries/user";
 import { currentUser } from "@clerk/nextjs/server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
+export const dynamic = 'force-dynamic';
 
 export default async function CheckoutPage() {
   const user = await currentUser();

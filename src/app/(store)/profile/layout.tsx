@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import Header from "@/components/store/layout/header/header";
 import ProfileSidebar from "@/components/store/layout/profile-sidebar/sidebar";
 
 export default function ProfileLayout({ children }: { children: ReactNode }) {

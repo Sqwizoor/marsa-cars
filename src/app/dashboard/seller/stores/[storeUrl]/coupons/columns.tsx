@@ -2,7 +2,6 @@
 
 // React, Next.js imports
 import { useState } from "react";
-import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 
 // UI components
@@ -33,27 +32,22 @@ import { useModal } from "@/app/providers/modal-provider";
 
 // Lucide icons
 import {
-  CopyPlus,
   Edit,
-  FilePenLine,
   MoreHorizontal,
   Trash,
 } from "lucide-react";
 
 // Queries
-import { deleteProduct } from "@/queries/product";
+import { deleteCoupon, getCoupon } from "@/queries/coupon";
 
 // Tanstack React Table
 import { ColumnDef } from "@tanstack/react-table";
 
 // Types
-import { StoreProductType } from "@/lib/types";
-import Link from "next/link";
 import { Coupon } from "@prisma/client";
 import { getTimeUntil } from "@/lib/utils";
 import CustomModal from "@/components/dashboard/shared/custom-modal";
 
-import { deleteCoupon, getCoupon } from "@/queries/coupon";
 import CouponDetails from "@/components/dashboard/forms/coupon-details";
 
 export const columns: ColumnDef<Coupon>[] = [
@@ -113,7 +107,7 @@ interface CellActionsProps {
 }
 
 // CellActions component definition
-const CellActions: React.FC<CellActionsProps> = ({ coupon }) => {
+const CellActions = ({ coupon }: CellActionsProps) => {
   // Hooks
   const { setOpen, setClose } = useModal();
   const [loading, setLoading] = useState(false);
@@ -149,9 +143,12 @@ const CellActions: React.FC<CellActionsProps> = ({ coupon }) => {
                   />
                 </CustomModal>,
                 async () => {
-                  return {
-                    rowData: await getCoupon(coupon?.id),
-                  };
+                  const couponData = await getCoupon(coupon?.id);
+                  return couponData
+                    ? {
+                        rowData: couponData,
+                      }
+                    : {};
                 }
               );
             }}

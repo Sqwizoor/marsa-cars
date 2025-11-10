@@ -1,9 +1,4 @@
-import {
-  OrderTableDateFilter,
-  OrderTableFilter,
-  PaymentTableDateFilter,
-  PaymentTableFilter,
-} from "@/lib/types";
+import { PaymentTableDateFilter, PaymentTableFilter } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import { useRouter } from "next/navigation";
@@ -49,7 +44,7 @@ const PaymentTableHeader: FC<Props> = ({
         <div className="-ml-3 text-main-primary text-sm">
           <div className="relative overflow-x-hidden">
             <div className="py-4 inline-flex items-center bg-white justify-center relative">
-              {filters.map((f, i) => (
+              {filters.map((f) => (
                 <div
                   key={f.filter}
                   className={cn(
@@ -177,10 +172,6 @@ const filters = [
   {
     title: "View all",
     filter: "",
-  },
-  {
-    title: "Paypal",
-    filter: "paypal",
   },
   {
     title: "Credit card",

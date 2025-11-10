@@ -8,10 +8,11 @@ import CouponDetails from "@/components/dashboard/forms/coupon-details";
 export default async function SellerCouponsPage({
   params,
 }: {
-  params: { storeUrl: string };
+  params: Promise<{ storeUrl: string }>;
 }) {
+  const { storeUrl } = await params;
   // Get all store coupons
-  const coupons = await getStoreCoupons(params.storeUrl);
+  const coupons = await getStoreCoupons(storeUrl);
   return (
     <div>
       <DataTable
@@ -21,8 +22,8 @@ export default async function SellerCouponsPage({
             Create coupon
           </>
         }
-        modalChildren={<CouponDetails storeUrl={params.storeUrl} />}
-        newTabLink={`/dashboard/seller/stores/${params.storeUrl}/coupons/new`}
+        modalChildren={<CouponDetails storeUrl={storeUrl} />}
+        newTabLink={`/dashboard/seller/stores/${storeUrl}/coupons/new`}
         filterValue="name"
         data={coupons}
         columns={columns}

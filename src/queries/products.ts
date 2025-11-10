@@ -9,14 +9,13 @@ import {
   FreeShippingWithCountriesType,
   ProductPageType,
   ProductShippingDetailsType,
-  ProductType,
   ProductWithVariantType,
   RatingStatisticsType,
   SortOrder,
   VariantImageType,
   VariantSimplified,
 } from "@/lib/types";
-import { FreeShipping, ProductVariant, Size, Store } from "@prisma/client";
+import { Store, ProductVariant, Size } from "@prisma/client";
 
 // Clerk
 import { currentUser } from "@clerk/nextjs/server";
@@ -28,7 +27,6 @@ import { generateUniqueSlug } from "@/lib/utils";
 // Cookies
 import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";
-import { setMaxListeners } from "events";
 
 // Function: upsertProduct
 // Description: Upserts a product and its variant into the database, ensuring proper association with the store.
@@ -434,6 +432,7 @@ export const deleteProduct = async (productId: string) => {
 //   - pageSize: The number of products per page (default = 10).
 // Returns: An object containing paginated products, filtered variants, and pagination metadata (totalPages, currentPage, pageSize, totalCount).
 export const getProducts = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   filters: any = {},
   sortBy = "",
   page: number = 1,
@@ -445,6 +444,7 @@ export const getProducts = async (
   const skip = (currentPage - 1) * limit;
 
   // Construct the base query
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wherClause: any = {
     AND: [],
   };
@@ -578,12 +578,13 @@ export const getProducts = async (
   // Product price sorting
   products.sort((a, b) => {
     // Helper function to get the minimum price from a product's variants
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const getMinPrice = (product: any) =>
       Math.min(
         ...product.variants.flatMap((variant: VariantWithSizes) =>
           variant.sizes.map((size) => {
-            let discount = size.discount;
-            let discountedPrice = size.price * (1 - discount / 100);
+            const discount = size.discount;
+            const discountedPrice = size.price * (1 - discount / 100);
             return discountedPrice;
           })
         ),
@@ -925,7 +926,7 @@ export const getRatingStatistics = async (productId: string) => {
   const ratingCounts = Array(5).fill(0);
 
   ratingStats.forEach((stat) => {
-    let rating = Math.floor(stat.rating);
+    const rating = Math.floor(stat.rating);
     if (rating >= 1 && rating <= 5) {
       ratingCounts[rating - 1] = stat._count.rating;
     }
@@ -1074,6 +1075,7 @@ export const getProductFilteredReviews = async (
   page: number = 1,
   pageSize: number = 4
 ) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const reviewFilter: any = {
     productId,
   };
@@ -1265,6 +1267,7 @@ export const getProductsByIds = async (
   ids: string[],
   page: number = 1,
   pageSize: number = 10
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ products: any; totalPages: number }> => {
   // Check if ids array is empty
   if (!ids || ids.length === 0) {

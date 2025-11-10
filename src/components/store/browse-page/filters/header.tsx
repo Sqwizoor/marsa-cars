@@ -2,7 +2,6 @@
 import { FiltersQueryType } from "@/lib/types";
 import { X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function FiltersHeader({
   queries,
@@ -12,15 +11,6 @@ export default function FiltersHeader({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
-
-  const [currentParams, setCurrentParams] = useState<string>(
-    searchParams.toString()
-  );
-
-  useEffect(() => {
-    // Update currentParams whenever the searchParams change in the URL
-    setCurrentParams(searchParams.toString());
-  }, [searchParams]);
 
   // Destructure queries into an array format
   const queriesArray = Object.entries(queries);
@@ -62,7 +52,6 @@ export default function FiltersHeader({
 
     // Replace the URL with updated params
     replace(`${pathname}?${params.toString()}`);
-    setCurrentParams(params.toString()); // Trigger re-render with updated params
   };
   return (
     <div className="pt-2.5 pb-5">
@@ -97,9 +86,11 @@ export default function FiltersHeader({
                   <X
                     className="w-3 text-main-secondary hover:text-black cursor-pointer inline-block"
                     onClick={() => {
-                      isArrayQuery
-                        ? handleRemoveQuery(queryKey, queryValues, value) // Remove specific value from array query
-                        : handleRemoveQuery(queryKey); // Remove entire query
+                      if (isArrayQuery) {
+                        handleRemoveQuery(queryKey, queryValues, value);
+                      } else {
+                        handleRemoveQuery(queryKey);
+                      }
                     }}
                   />
                 </div>

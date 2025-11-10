@@ -1,5 +1,5 @@
 // React, Next.js
-import React, { FC, useState } from "react";
+import React, { useState } from "react";
 
 // UI Components
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,13 @@ import { SketchPicker } from "react-color";
 import { cn } from "@/lib/utils";
 
 // Define the interface for each detail object
-export interface Detail<T = { [key: string]: string | number | undefined }> {
-  [key: string]: T[keyof T];
+export type DetailValue = string | number | undefined;
+export interface DetailRecord {
+  [key: string]: DetailValue;
 }
 
 // Define props for the ClickToAddInputs component
-interface ClickToAddInputsProps<T extends Detail> {
+interface ClickToAddInputsProps<T extends DetailRecord> {
   details: T[]; // Array of detail objects
   setDetails: React.Dispatch<React.SetStateAction<T[]>>; // Setter function for details
   initialDetail?: T; // Optional initial detail object
@@ -28,7 +29,7 @@ interface ClickToAddInputsProps<T extends Detail> {
 }
 
 // ClickToAddInputs component definition
-const ClickToAddInputs = <T extends Detail>({
+const ClickToAddInputs = <T extends DetailRecord>({
   details,
   setDetails,
   header,

@@ -25,7 +25,7 @@ const FollowingContainer: FC<Props> = ({ stores, page, totalPages }) => {
     if (currentPage !== page) {
       router.push(`/profile/following/${currentPage}`);
     }
-  }, [currentPage, page]);
+  }, [currentPage, page, router]);
   return (
     <div>
       <div className="flex flex-wrap pb-16">

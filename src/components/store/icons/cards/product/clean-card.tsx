@@ -11,7 +11,7 @@ export default function ProductCardClean({
   product: ProductType;
 }) {
   const [variant, setVariant] = useState<VariantSimplified>(
-    product.variants[0]
+    product.variants[0] as VariantSimplified
   );
 
   const size = variant.sizes.reduce((lowest, current) => {
@@ -41,7 +41,7 @@ export default function ProductCardClean({
                   <li
                     key={i}
                     className=""
-                    onMouseEnter={() => setVariant(product.variants[i])}
+                    onMouseEnter={() => setVariant(product.variants[i] as VariantSimplified)}
                   >
                     <Image
                       src={img.image}

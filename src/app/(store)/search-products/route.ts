@@ -1,11 +1,6 @@
 import client from "@/lib/elasticsearch";
 import { NextResponse } from "next/server";
 
-// Define product type
-interface Product {
-  name: string;
-}
-
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("search");
@@ -30,10 +25,11 @@ export async function GET(req: Request) {
         },
       },
     });
-    const results = response.hits.hits.map((hit: any) => hit._source);
+    const results = response.hits.hits.map((hit) => hit._source);
     return NextResponse.json(results);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.log(error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
 }

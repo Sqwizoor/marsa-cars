@@ -2,12 +2,11 @@
 
 import { CategoryFormSchema } from "@/lib/schemas";
 import type { Category } from "@prisma/client";
-import { type FC, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type * as z from "zod";
 
-import { AlertDialog, AlertDialogTitle } from "../../ui/alert-dialog"; // Added DialogTitle and VisuallyHidden
 import {
   Card,
   CardContent,
@@ -35,13 +34,12 @@ import { v4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "../../ui/toast";
 import { useRouter } from "next/navigation";
-import { Dialog } from "../../ui/dialog";
 
 interface CategoryDetailsProps {
   data?: Category;
 }
 
-const CategoryDetails: FC<CategoryDetailsProps> = ({ data }) => {
+const CategoryDetails = ({ data }: CategoryDetailsProps) => {
   // initializing necessary hooks
   const { toast } = useToast();
   const router = useRouter();
@@ -67,7 +65,7 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({ data }) => {
     if (data) {
       form.reset(defaultValues);
     }
-  }, [data, form.reset, defaultValues]);
+  }, [data, form, defaultValues]);
 
   const handleSubmit = async (values: z.infer<typeof CategoryFormSchema>) => {
     try {
@@ -97,27 +95,27 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({ data }) => {
       } else {
         router.push("/dashboard/admin/categories");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error";
       console.log(error);
       toast({
         variant: "destructive",
         title: "Oops!",
-        description: error.toString(),
+        description: message,
       });
     }
   };
 
   return (
-    <AlertDialog>
-      <Card className="w-full">
-        <CardHeader>
-          <AlertDialogTitle>Category Information</AlertDialogTitle>
-          <CardDescription>
-            {data?.id
-              ? `Update ${data.name} category information.`
-              : "Let's create a category. You can edit the category later from the categories table or the category page."}
-          </CardDescription>
-        </CardHeader>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Category Information</CardTitle>
+        <CardDescription>
+          {data?.id
+            ? `Update ${data.name} category information.`
+            : "Let's create a category. You can edit the category later from the categories table or the category page."}
+        </CardDescription>
+      </CardHeader>
         <CardContent>
           <Form {...form}>
             <form
@@ -205,8 +203,7 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({ data }) => {
           </Form>
         </CardContent>
       </Card>
-    </AlertDialog>
-  );
-};
+    );
+  };
 
 export default CategoryDetails;
