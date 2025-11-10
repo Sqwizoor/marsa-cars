@@ -2,7 +2,6 @@ import { PrismaClient } from "@prisma/client";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { db } from "./db";
-import ColorThief from "colorthief";
 import { CartProductType } from "./types";
 import { differenceInDays, differenceInHours } from "date-fns";
 
@@ -72,37 +71,42 @@ export const getGridClassName = (length: number) => {
 };
 
 // Function to get prominent colors from an image
-export const getDominantColors = (imgUrl: string): Promise<string[]> => {
-  return new Promise((resolve, reject) => {
-    // Check if running in a browser environment
-    if (typeof window === "undefined") {
-      // If on the server, return an empty array or a default value
-      resolve([]);
-      return;
-    }
+export const getDominantColors = async (imgUrl: string): Promise<string[]> => {
+  if (typeof window === "undefined") return [];
 
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src = imgUrl;
-    img.onload = () => {
-      try {
-        const colorThief = new ColorThief();
-        const colors = colorThief.getPalette(img, 4).map((color) => {
-          // Convert RGB array to hex string
-          return `#${((1 << 24) + (color[0] << 16) + (color[1] << 8) + color[2])
-            .toString(16)
-            .slice(1)
-            .toUpperCase()}`;
-        });
-        resolve(colors);
-      } catch (error) {
-        reject(error);
-      }
-    };
-    img.onerror = () => {
-      reject(new Error("Failed to load image"));
-    };
-  });
+  try {
+    const { default: ColorThief } = await import("colorthief");
+
+    return await new Promise<string[]>((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src = imgUrl;
+      img.onload = () => {
+        try {
+          const colorThief = new ColorThief();
+          const colors = colorThief
+            .getPalette(img, 4)
+            .map((color: number[]) => {
+              const [r = 0, g = 0, b = 0] = color;
+              // Convert RGB array to hex string
+              return `#${((1 << 24) + (r << 16) + (g << 8) + b)
+                .toString(16)
+                .slice(1)
+                .toUpperCase()}`;
+            });
+          resolve(colors);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      img.onerror = () => {
+        reject(new Error("Failed to load image"));
+      };
+    });
+  } catch (error) {
+    console.error("Failed to load ColorThief", error);
+    return [];
+  }
 };
 
 /**
