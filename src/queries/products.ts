@@ -22,7 +22,7 @@ import { currentUser } from "@clerk/nextjs/server";
 
 // Slugify
 import slugify from "slugify";
-import { generateUniqueSlug } from "@/lib/utils";
+import { generateUniqueSlug } from "@/lib/server-utils";
 
 // Cookies
 import { getCookie } from "cookies-next";

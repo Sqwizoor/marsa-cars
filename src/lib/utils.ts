@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { db } from "./db";
 import { CartProductType } from "./types";
 import { differenceInDays, differenceInHours } from "date-fns";
 
@@ -24,32 +22,6 @@ export const formatCurrencyZAR = (amount: number): string => {
     const fixed = Number(amount ?? 0).toFixed(2);
     return `R ${fixed}`;
   }
-};
-
-// Helper function to genarae a unique slug
-export const generateUniqueSlug = async (
-  baseSlug: string,
-  model: keyof PrismaClient,
-  field: string = "slug",
-  separator: string = "-"
-) => {
-  let slug = baseSlug;
-  let suffix = 1;
-
-  while (true) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const exisitngRecord = await (db[model] as any).findFirst({
-      where: {
-        [field]: slug,
-      },
-    });
-    if (!exisitngRecord) {
-      break;
-    }
-    slug = `${slug}${separator}${suffix}`;
-    suffix += 1;
-  }
-  return slug;
 };
 
 // Helper function to grid grid classnames dependng on length

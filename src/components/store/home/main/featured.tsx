@@ -10,9 +10,12 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
   const is1700px = useMediaQuery({ query: "(min-width: 1700px)" });
 
   // State to store the current width of the screen
-  const [screenWidth, setScreenWidth] = useState<number>(window.innerWidth);
+  const [screenWidth, setScreenWidth] = useState<number>(0);
 
   useEffect(() => {
+    // Initialize screen width on mount
+    setScreenWidth(window.innerWidth);
+
     // Function to handle resize event and update screen width
     const handleResize = () => {
       setScreenWidth(window.innerWidth);
