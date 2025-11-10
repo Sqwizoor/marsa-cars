@@ -74,6 +74,13 @@ export const getGridClassName = (length: number) => {
 // Function to get prominent colors from an image
 export const getDominantColors = (imgUrl: string): Promise<string[]> => {
   return new Promise((resolve, reject) => {
+    // Check if running in a browser environment
+    if (typeof window === "undefined") {
+      // If on the server, return an empty array or a default value
+      resolve([]);
+      return;
+    }
+
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.src = imgUrl;
