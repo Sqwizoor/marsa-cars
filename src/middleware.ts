@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { getUserCountry } from "./lib/utils";
+import { getUserCountry } from "./lib/get-user-country";
 
 const isProtectedRoute = createRouteMatcher([
   "/dashboard",
@@ -12,21 +12,14 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  const response = NextResponse.next();
   if (isProtectedRoute(req)) await auth.protect();
-
-  //Create a basic response
-
-  let response = NextResponse.next();
 
   /*---------Handle Country detection----------*/
   // Step 1: Check if country is already set in cookies
   const countryCookie = req.cookies.get("userCountry");
 
-  if (countryCookie) {
-    // If the user has already selected a country, use that for subsequent requests
-    response = NextResponse.next();
-  } else {
-    response = NextResponse.redirect(new URL(req.url));
+  if (!countryCookie) {
     // Step 2: Get the user country using the helper function
     const userCountry = await getUserCountry();
 
