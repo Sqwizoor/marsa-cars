@@ -1,4 +1,6 @@
-export const poppingTransition = {
+import { Variants } from "framer-motion";
+
+export const poppingTransition: Variants = {
   hidden: { opacity: 0, scale: 0.9 },
   visible: {
     opacity: 1,
