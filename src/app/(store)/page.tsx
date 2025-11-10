@@ -6,7 +6,6 @@ import Sideline from "@/components/store/home/sideline/sideline";
 import CategoriesHeader from "@/components/store/layout/categories-header/categories-header";
 import Footer from "@/components/store/layout/footer/footer";
 import Header from "@/components/store/layout/header/header";
-import SuperDealsImg from "@/public/assets/images/ads/super-deals.avif";
 import MainSwiper from "@/components/store/shared/swiper";
 import { SimpleProduct } from "@/lib/types";
 import { getHomeDataDynamic, getHomeFeaturedCategories } from "@/queries/home";
@@ -90,7 +89,7 @@ export default async function HomePage() {
                 <MainSwiper products={products_super_deals} type="curved">
                   <div className="mb-4 pl-4 flex items-center justify-between">
                     <Image
-                      src={SuperDealsImg}
+                      src="/assets/images/ads/super-deals.avif"
                       alt="Super deals"
                       width={200}
                       height={50}

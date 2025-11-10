@@ -1,7 +1,6 @@
 import type { SimpleProduct } from "@/lib/types"
 import { currentUser } from "@clerk/nextjs/server"
 import Image from "next/image"
-import UserImg from "@/public/assets/images/default-user.avif"
 import Link from "next/link"
 import { Button } from "../../../ui/button"
 import UserCardProducts from "./products"
@@ -33,7 +32,7 @@ export default async function HomeUserCard({
         <div className="w-full h-[76px] relative z-10">
           <div className="mx-auto cursor-pointer">
             <Image
-              src={user ? user.imageUrl : UserImg}
+              src={user ? user.imageUrl : "/assets/images/default-user.avif"}
               alt=""
               width={48}
               height={48}
