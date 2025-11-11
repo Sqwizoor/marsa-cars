@@ -1,11 +1,16 @@
-
+import type { SubCategory } from "@prisma/client";
 import { getSubcategories } from "@/queries/subCategories";
 import Contact from "./contact";
 import Links from "./links";
 import Newsletter from "./newsletter";
 
 export default async function Footer() {
-  const subs = await getSubcategories(7, true);
+  let subs: SubCategory[] = [];
+  try {
+    subs = await getSubcategories(7, true);
+  } catch (error) {
+    console.error("Footer getSubcategories failed", error);
+  }
   return (
     <footer className="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
       {/* Animated background pattern */}

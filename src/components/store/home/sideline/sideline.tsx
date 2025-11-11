@@ -24,7 +24,7 @@ export default function Sideline() {
             </span>
             <div className="hidden group-hover:block w-0 h-0 border-[12px] border-transparent border-l-[#373737] border-r-0 absolute left-[-15px] top-[38%]  transition-all duration-500 ease-in-out" />
           </Link>
-          <SidelineItem link="/prfoile" image={CouponImg}>
+          <SidelineItem link="/profile" image={CouponImg}>
             Coupons
           </SidelineItem>
           <SidelineItem

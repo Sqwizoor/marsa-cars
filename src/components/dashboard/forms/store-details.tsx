@@ -85,7 +85,7 @@ const StoreDetails = ({ data }: StoreDetailsProps) => {
         defaultShippingFeeFixed: 0,
         defaultDeliveryTimeMin: 0,
         defaultDeliveryTimeMax: 0,
-        userId: ""
+        userId: data?.userId || ""
       })
 
       toast({
