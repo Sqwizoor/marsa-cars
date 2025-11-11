@@ -214,11 +214,10 @@ export const ProductFormSchema = z.object({
     message: "Please provide a valid product weight.",
   }),
   keywords: z
-    .string({
+    .array(z.string(), {
       required_error: "Product keywords are mandatory.",
       invalid_type_error: "Keywords must be valid strings.",
     })
-    .array()
     .min(5, {
       message: "Please provide at least 5 keywords.",
     })
