@@ -59,6 +59,12 @@ const ImageUpload = ({
     }
   };
 
+  const handleButtonClick = (open: () => void) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    open();
+  };
+
   if (type === "profile") {
     return (
       <div
@@ -81,17 +87,13 @@ const ImageUpload = ({
         )}
         <CldUploadWidget onSuccess={onUpload} uploadPreset="m3jl9tli">
           {({ open }) => {
-            const onClick = () => {
-              open();
-            };
-
             return (
               <>
                 <button
                   type="button"
                   className="z-20 absolute right-0 bottom-6 flex items-center font-medium text-[17px] h-14 w-14 justify-center  text-white bg-gradient-to-t from-blue-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm"
                   disabled={disabled}
-                  onClick={onClick}
+                  onClick={handleButtonClick(open)}
                 >
                   <svg
                     viewBox="0 0 640 512"
@@ -131,16 +133,12 @@ const ImageUpload = ({
         )}
         <CldUploadWidget onSuccess={onUpload} uploadPreset="m3jl9tli">
           {({ open }) => {
-            const onClick = () => {
-              open();
-            };
-
             return (
               <button
                 type="button"
                 className="absolute bottom-4 right-4 flex items-center font-medium text-[17px] py-3 px-6 text-white bg-gradient-to-t from-blue-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm"
                 disabled={disabled}
-                onClick={onClick}
+                onClick={handleButtonClick(open)}
               >
                 <svg
                   viewBox="0 0 640 512"
@@ -195,17 +193,13 @@ const ImageUpload = ({
         </div>
         <CldUploadWidget onSuccess={onUpload} uploadPreset="m3jl9tli">
           {({ open }) => {
-            const onClick = () => {
-              open();
-            };
-
             return (
               <>
                 <button
                   type="button"
                   className="flex items-center font-medium text-[17px] py-3 px-6 text-white bg-gradient-to-t from-blue-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm"
                   disabled={disabled}
-                  onClick={onClick}
+                  onClick={handleButtonClick(open)}
                 >
                   <svg
                     viewBox="0 0 640 512"
