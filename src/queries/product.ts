@@ -1431,6 +1431,51 @@ const incrementProductViews = async (productId: string) => {
   }
 };
 
+// Function: updateProductStock
+// Description: Updates the stock quantity for a specific product size.
+// Access Level: Seller Only
+// Parameters:
+//   - sizeId: The ID of the size to update.
+//   - quantity: The new quantity value.
+// Returns: Updated size details.
+export const updateProductStock = async (
+  sizeId: string,
+  quantity: number
+) => {
+  try {
+    // Get current user
+    const user = await currentUser();
+
+    // Check if user is authenticated
+    if (!user) throw new Error("Unauthenticated.");
+
+    // Ensure user has seller privileges
+    if (user.privateMetadata.role !== "SELLER")
+      throw new Error(
+        "Unauthorized Access: Seller Privileges Required for Entry."
+      );
+
+    // Validate input
+    if (!sizeId) throw new Error("Size ID is required.");
+    if (quantity < 0) throw new Error("Quantity cannot be negative.");
+
+    // Update the size quantity
+    const updatedSize = await db.size.update({
+      where: {
+        id: sizeId,
+      },
+      data: {
+        quantity,
+      },
+    });
+
+    return updatedSize;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 
 // "use server";
 
