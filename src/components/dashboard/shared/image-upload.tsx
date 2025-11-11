@@ -82,7 +82,7 @@ const ImageUpload = ({
             alt=""
             width={300}
             height={300}
-            className="w-52 h-52 rounded-full object-cover absolute top-0 left-0 bottom-0 right-0"
+            className="w-52 h-52 rounded-full object-cover absolute top-0 left-0 bottom-0 right-0 pointer-events-none"
           />
         )}
         <CldUploadWidget onSuccess={onUpload} uploadPreset="m3jl9tli">
@@ -91,9 +91,10 @@ const ImageUpload = ({
               <>
                 <button
                   type="button"
-                  className="z-20 absolute right-0 bottom-6 flex items-center font-medium text-[17px] h-14 w-14 justify-center  text-white bg-gradient-to-t from-blue-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm"
+                  className="z-50 absolute right-0 bottom-6 flex items-center font-medium text-[17px] h-14 w-14 justify-center text-white bg-gradient-to-t from-blue-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm cursor-pointer hover:scale-105 transition-transform"
                   disabled={disabled}
                   onClick={handleButtonClick(open)}
+                  style={{ pointerEvents: 'auto' }}
                 >
                   <svg
                     viewBox="0 0 640 512"
@@ -128,7 +129,7 @@ const ImageUpload = ({
             alt=""
             width={1200}
             height={1200}
-            className="w-full h-full rounded-lg object-cover"
+            className="w-full h-full rounded-lg object-cover pointer-events-none"
           />
         )}
         <CldUploadWidget onSuccess={onUpload} uploadPreset="m3jl9tli">
@@ -136,9 +137,10 @@ const ImageUpload = ({
             return (
               <button
                 type="button"
-                className="absolute bottom-4 right-4 flex items-center font-medium text-[17px] py-3 px-6 text-white bg-gradient-to-t from-blue-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm"
+                className="z-50 absolute bottom-4 right-4 flex items-center font-medium text-[17px] py-3 px-6 text-white bg-gradient-to-t from-blue-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm cursor-pointer hover:scale-105 transition-transform"
                 disabled={disabled}
                 onClick={handleButtonClick(open)}
+                style={{ pointerEvents: 'auto' }}
               >
                 <svg
                   viewBox="0 0 640 512"
@@ -197,9 +199,10 @@ const ImageUpload = ({
               <>
                 <button
                   type="button"
-                  className="flex items-center font-medium text-[17px] py-3 px-6 text-white bg-gradient-to-t from-blue-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm"
+                  className="flex items-center font-medium text-[17px] py-3 px-6 text-white bg-gradient-to-t from-blue-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm cursor-pointer hover:scale-105 transition-transform"
                   disabled={disabled}
                   onClick={handleButtonClick(open)}
+                  style={{ pointerEvents: 'auto' }}
                 >
                   <svg
                     viewBox="0 0 640 512"
