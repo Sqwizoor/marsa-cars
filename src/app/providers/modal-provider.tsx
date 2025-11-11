@@ -58,6 +58,7 @@ const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
   const setClose = () => {
     setIsOpen(false);
     setData({});
+    setShowingModal(null);
   };
 
   if (!isMounted) return null;

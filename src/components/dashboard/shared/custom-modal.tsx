@@ -30,8 +30,17 @@ const CustomModal = ({
   maxWidth,
 }: Props) => {
   const { isOpen, setClose } = useModal();
+  const open = Boolean(isOpen || defaultOpen);
+
   return (
-    <Dialog open={isOpen || defaultOpen} onOpenChange={setClose}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          setClose();
+        }
+      }}
+    >
       <DialogContent
         className={cn(
           "overflow-y-scroll md:max-h-[700px] md:h-fit h-screen bg-card",

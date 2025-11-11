@@ -69,6 +69,19 @@ export default function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
   });
 
+  const handleOpenModal = () => {
+    if (modalChildren) {
+      setOpen(
+        <CustomModal
+          heading={heading || "Modal"}
+          subheading={subheading || ""}
+        >
+          {modalChildren}
+        </CustomModal>
+      );
+    }
+  };
+
   return (
     <>
       {/* Search input and action button */}
@@ -90,24 +103,14 @@ export default function DataTable<TData, TValue>({
           {modalChildren && (
             <Button
               className="flex- gap-2"
-              onClick={() => {
-                if (modalChildren)
-                  setOpen(
-                    <CustomModal
-                      heading={heading || ""}
-                      subheading={subheading || ""}
-                    >
-                      {modalChildren}
-                    </CustomModal>
-                  );
-              }}
+              onClick={handleOpenModal}
             >
               {actionButtonText}
             </Button>
           )}
           {newTabLink && (
             <Link href={newTabLink}>
-              <Button variant="outline">
+              <Button className="bg-primary hover:bg-primary/90">
                 <FilePlus2 className="me-1" /> Create in new page
               </Button>
             </Link>

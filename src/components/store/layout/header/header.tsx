@@ -6,9 +6,8 @@ import { cookies } from "next/headers";
 import { Country } from "@/lib/types";
 import CountryLanguageCurrencySelector from "./country-lang-curr-selector";
 import Logo from "@/components/shared/logo";
-import { getAllCategories } from "@/queries/category";
 import { getAllOfferTags } from "@/queries/offer-tag";
-import CategoriesHeaderContainer from "../categories-header/container";
+import OfferTagsWrapper from "./offer-tags-wrapper";
 
 export default async function Header() {
   // Get cookies from the store
@@ -28,14 +27,13 @@ export default async function Header() {
     userCountry = JSON.parse(userCountryCookie.value) as Country;
   }
 
-  // Fetch categories and offer tags
-  const categories = await getAllCategories();
+  // Fetch offer tags
   const offerTags = await getAllOfferTags();
 
   return (
     <div className="sticky top-0 z-50 w-full bg-gradient-to-r from-slate-700/80 to-slate-900/70 backdrop-blur-md supports-[backdrop-filter]:bg-slate-900/60">
-      <div className="mx-auto h-full w-full max-w-7xl px-3 sm:px-4 lg:px-6 text-white">
-        <div className="flex items-center gap-3 py-0.5 sm:py-1">
+      <div className="mx-auto h-full w-full max-w-7xl text-white">
+        <div className="flex items-center gap-3 py-0.5 sm:py-1 pr-3 sm:pr-4 lg:pr-6">
           {/* Left: Logo + mobile actions */}
           <div className="flex w-full items-center justify-between gap-3 lg:w-auto lg:justify-start">
             <Link href="/" className="inline-flex items-center">
@@ -44,22 +42,19 @@ export default async function Header() {
               </div>
             </Link>
             {/* Mobile quick actions */}
-            <div className="flex items-center gap-1 lg:hidden">
+            <div className="flex items-center gap-1 lg:hidden pr-3 sm:pr-4">
               <UserMenu />
               <Cart />
             </div>
           </div>
 
-          {/* Middle: Search + Categories */}
+          {/* Middle: Search + Offer Tags */}
           <div className="hidden flex-1 items-center gap-3 lg:flex">
             <div className="w-full max-w-2xl rounded-xl border border-white/10 bg-white/5 p-1 shadow-sm ring-1 ring-inset ring-white/10">
               <Search />
             </div>
             <div className="flex-shrink-0">
-              <CategoriesHeaderContainer
-                categories={categories}
-                offerTags={offerTags}
-              />
+              <OfferTagsWrapper offerTags={offerTags} />
             </div>
           </div>
 
@@ -73,7 +68,7 @@ export default async function Header() {
         </div>
 
         {/* Secondary row: Search on mobile */}
-        <div className="pb-0.5 lg:hidden">
+        <div className="pb-0.5 lg:hidden pr-3 sm:pr-4">
           <div className="rounded-xl border border-white/10 bg-white/5 p-1 shadow-sm ring-1 ring-inset ring-white/10">
             <Search />
           </div>

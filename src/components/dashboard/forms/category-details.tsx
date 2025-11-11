@@ -127,6 +127,7 @@ const CategoryDetails = ({ data }: CategoryDetailsProps) => {
                 name="image"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel>Category Image</FormLabel>
                     <FormControl>
                       <ImageUpload
                         type="profile"

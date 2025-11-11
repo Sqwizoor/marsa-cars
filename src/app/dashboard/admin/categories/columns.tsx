@@ -58,16 +58,16 @@ import { Category } from "@prisma/client";
 export const columns: ColumnDef<Category>[] = [
   {
     accessorKey: "image",
-    header: "",
+    header: "Image",
     cell: ({ row }) => {
       return (
-        <div className="relative h-44 min-w-64 rounded-xl overflow-hidden">
+        <div className="relative w-16 h-16 rounded-lg overflow-hidden">
           <Image
             src={row.original.image}
             alt="Category Image"
-            width={1000}
-            height={1000}
-            className="w-40 h-40 rounded-full object-cover shadow-2xl"
+            width={64}
+            height={64}
+            className="w-16 h-16 rounded-lg object-cover"
           />
         </div>
       );
@@ -78,9 +78,7 @@ export const columns: ColumnDef<Category>[] = [
     header: "Name",
     cell: ({ row }) => {
       return (
-        <span className="font-extrabold text-lg capitalize">
-          {row.original.name}
-        </span>
+        <span className="font-semibold capitalize">{row.original.name}</span>
       );
     },
   },

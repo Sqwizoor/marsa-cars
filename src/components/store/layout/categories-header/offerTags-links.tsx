@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { OfferTag } from "@prisma/client";
 import Link from "next/link";
@@ -26,10 +28,10 @@ export default function OfferTagsLinks({
     return value;
   })();
   return (
-    <div className="relative w-fit">
+    <div className="relative w-fit ml-6">
       <div
         className={cn(
-          "flex items-center flex-wrap xl:-translate-x-6 transition-all duration-100 ease-in-out",
+          "flex items-center gap-0.5 flex-wrap transition-all duration-100 ease-in-out",
           {
             "!translate-x-0": open,
           }
@@ -40,9 +42,9 @@ export default function OfferTagsLinks({
             key={tag.id}
             href={`/browse?offer=${tag.url}`}
             className={cn(
-              "font-bold text-center text-white px-4 leading-10 rounded-[20px] hover:bg-[#ffffff33]",
+              "font-bold text-center text-white px-3 py-1 text-sm rounded-full hover:bg-white/20 transition-colors whitespace-nowrap",
               {
-                "text-orange-background": i === 0,
+                "text-primary bg-white/10": i === 0,
               }
             )}
           >
