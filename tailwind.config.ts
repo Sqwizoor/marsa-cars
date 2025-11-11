@@ -55,12 +55,18 @@ const config = {
         blue: {
           primary: "#0D6EFD",
         },
+        pink: {
+          primary: "#FF1744",
+          light: "#FF4569",
+          dark: "#E01038",
+          background: "#FFE8ED",
+        },
         orange: {
-          background: "#FD384F",
-          hover: "#e23246",
-          primary: "#FA6338",
-          seconadry: "#d3031c",
-          border: "#ffe6e7",
+          background: "#FF1744",
+          hover: "#E01038",
+          primary: "#FF1744",
+          seconadry: "#E01038",
+          border: "#FFE8ED",
         },
         main: {
           primary: "#191919",

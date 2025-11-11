@@ -1,19 +1,22 @@
 import Image from "next/image";
 import { FC } from "react";
 
-import LogoImg from "../../../public/main-logo.png";
+import LogoImg from "../../../public/marsacars-logo2.png";
 
 interface logoProps {
-  width: string;
-  height: string;
+  width?: string;
+  height?: string;
 }
 
-const Logo: FC<logoProps> = ({ width, height }) => {
+const Logo: FC<logoProps> = ({ width = "auto", height = "auto" }) => {
   return (
-    <div className="z-50" style={{width:width, height:height }}>
-      <Image src={LogoImg} 
-       alt="jauma cars"
-      className="w-full h-full object-cover overflow-visible"/>
+    <div className="relative" style={{width, height }}>
+      <Image 
+        src={LogoImg} 
+        alt="Marsa Cars"
+        className="w-full h-full object-contain"
+        priority
+      />
     </div>
   );
 };

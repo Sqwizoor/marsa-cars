@@ -123,7 +123,7 @@ export default async function HomeUserCard({
             {/* Background image */}
             <div className="absolute inset-0 z-0">
               <Image
-                src="/assets/images/featured/shocks.png"
+                src="/assets/images/swiper/here-slider3.png"
                 alt="Featured"
                 fill
                 className="object-cover"

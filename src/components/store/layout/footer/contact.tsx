@@ -1,6 +1,7 @@
 "use client";
 import { Headset, MapPin, Mail } from "lucide-react";
 import SocialLogo from "social-logos";
+import Logo from "@/components/shared/logo";
 
 const socialLinks = [
   { icon: "facebook" as const, label: "Facebook", url: "#" },
@@ -15,6 +16,11 @@ const socialLinks = [
 export default function Contact() {
   return (
     <div className="flex flex-col gap-y-8 text-white">
+      {/* Logo */}
+      <div className="mb-2">
+        <Logo width="150px" height="50px" />
+      </div>
+
       {/* Customer Support */}
       <div className="space-y-4">
         <div className="flex items-start gap-x-4 group">

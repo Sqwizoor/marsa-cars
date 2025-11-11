@@ -1,6 +1,5 @@
 import ProductFilters from "@/components/store/browse-page/filters";
 import ProductSort from "@/components/store/browse-page/sort";
-import CategoriesHeader from "@/components/store/layout/categories-header/categories-header";
 import Header from "@/components/store/layout/header/header";
 import StoreDEetails from "@/components/store/store-page/store-details";
 import StoreProducts from "@/components/store/store-page/store-products";
@@ -20,7 +19,6 @@ export default async function StorePage({
   return (
     <>
       <Header />
-      <CategoriesHeader />
       <StoreDEetails details={store} />
       <div className="max-w-[95%] mx-auto border-t">
         <div className="flex mt-5 gap-x-5">

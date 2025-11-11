@@ -35,7 +35,7 @@ export default async function Footer() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-2 text-slate-300">
                 <span className="text-sm">
-                  <b className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">© 2025 GoShop</b> - All Rights Reserved
+                  <b className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">© 2025 Marsa Cars</b> - All Rights Reserved
                 </span>
               </div>
               <div className="flex items-center gap-6 text-xs text-slate-400">

@@ -1,8 +1,8 @@
 "use client"
 import Image, { type StaticImageData } from "next/image"
-import Img1 from "@/public/assets/images/swiper/here-slider1.png"
-import Img2 from "@/public/assets/images/swiper/here-slider3.png"
-import Img3 from "@/public/assets/images/swiper/here-slider2.png"
+import Img1 from "@/public/assets/images/swiper/pink-slider.png"
+import Img2 from "@/public/assets/images/swiper/slider4.png"
+import Img3 from "@/public/assets/images/swiper/slider5.png"
 import { useState, useEffect } from "react"
 
 const images: { id: number; url: StaticImageData }[] = [
@@ -39,7 +39,7 @@ export default function BasicSwiper() {
   return (
     <div className="relative w-full overflow-hidden rounded-lg shadow-lg">
       {/* Slides */}
-      <div className="relative w-full h-[200px] sm:h-[240px] md:h-[300px] lg:h-[350px]">
+      <div className="relative w-full h-[180px] sm:h-[280px] md:h-[380px] lg:h-[450px]">
         {images.map((img, index) => (
           <div
             key={img.id}
@@ -52,7 +52,7 @@ export default function BasicSwiper() {
               alt={`Slide ${img.id}`}
               fill
               priority={index === 0}
-              className="object-cover"
+              className="object-cover w-full"
               placeholder="blur"
               sizes="100vw"
             />
