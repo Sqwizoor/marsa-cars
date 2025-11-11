@@ -37,6 +37,24 @@ export const upsertStore = async (store: Store) => {
     // Ensure store data is provided
     if (!store) throw new Error("Please provide store data.");
 
+    // Ensure user exists in database (sync from Clerk if needed)
+    let dbUser = await db.user.findUnique({
+      where: { id: user.id },
+    });
+
+    if (!dbUser) {
+      // Create user in database if not exists
+      dbUser = await db.user.create({
+        data: {
+          id: user.id,
+          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",
+          email: user.emailAddresses[0]?.emailAddress || "",
+          picture: user.imageUrl || "",
+          role: (user.privateMetadata.role as "USER" | "ADMIN" | "SELLER") || "USER",
+        },
+      });
+    }
+
     // Check if store with same name, email,url, or phone number already exists
     const existingStore = await db.store.findFirst({
       where: {
