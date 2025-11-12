@@ -163,7 +163,7 @@ export const ProductFormSchema = z.object({
   images: z
     .object({ url: z.string() })
     .array()
-    .min(3, "Please upload at least 3 images for the product.")
+    .min(1, "Please upload at least 1 image for the product.")
     .max(6, "You can upload up to 6 images for the product."),
   variantImage: z
     .object({ url: z.string() })
