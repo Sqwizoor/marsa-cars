@@ -47,93 +47,56 @@ import Link from "next/link"
 
 export const columns: ColumnDef<StoreProductType>[] = [
   {
-    accessorKey: "name",
-    header: "Name",
-    cell: () => {
-      return <span></span>
-    },
-  },
-  {
-    accessorKey: "image",
-    header: "",
+    accessorKey: "product",
+    header: "Product",
     cell: ({ row }) => {
       return (
-        <div className="flex flex-col gap-y-3 p-0">
+        <div className="flex flex-col gap-y-2 py-2">
           {/* Product name */}
-          <h1 className="font-bold truncate pb-3 border-b capitalize">{row.original.name}</h1>
+          <h1 className="font-bold text-sm pb-2 border-b capitalize">{row.original.name}</h1>
           {/* Product variants */}
-          <div className="relative flex flex-wrap gap-2">
+          <div className="relative flex flex-col gap-1.5">
             {row.original.variants?.map((variant) => (
-              <div key={variant.id} className="mb-4 border-b pb-3 last:border-b-0">
-                {/* Variant Name */}
-                <h2 className="capitalize text-sm font-medium mb-2">{variant.variantName}</h2>
-
-                {/* Variant Details */}
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {/* Colors */}
-                  <div className="flex gap-1 items-center">
-                    <span className="text-xs text-muted-foreground">Colors:</span>
-                    {variant.colors?.map((color) => (
-                      <span
-                        key={color.name}
-                        className="w-4 h-4 rounded-full shadow-md"
-                        style={{ backgroundColor: color.name }}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Sizes */}
-                  <div className="flex flex-wrap gap-1">
-                    {variant.sizes?.map((size) => (
-                      <span
-                        key={size.size}
-                        className="px-1.5 py-0.5 rounded-md text-[10px] font-medium border bg-white/10"
-                      >
-                        {size.size} ({size.quantity}) - ${size.price}
-                      </span>
-                    ))}
-                  </div>
+              <div key={variant.id} className="flex items-center gap-2 pb-1.5 border-b last:border-b-0">
+                {/* Variant image thumbnail */}
+                <div className="relative group flex-shrink-0">
+                  <Image
+                    src={variant.images?.[0]?.url || "/placeholder.png"}
+                    alt={variant.variantName}
+                    width={60}
+                    height={60}
+                    className="w-12 h-12 rounded object-cover shadow-sm"
+                  />
+                  <Link
+                    href={`/dashboard/seller/stores/${row.original.store?.url}/products/${row.original.id}/variants/${variant.id}`}
+                  >
+                    <div className="absolute inset-0 bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <FilePenLine className="text-white w-3 h-3" />
+                    </div>
+                  </Link>
                 </div>
 
-                {/* Images - side by side */}
-                <div className="flex flex-wrap gap-2">
-                  {variant.images?.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <Image
-                        src={image?.url || "/placeholder.png"}
-                        alt={`${variant.variantName} image ${index + 1}`}
-                        width={100}
-                        height={100}
-                        className="w-20 h-20 rounded-md object-cover shadow-sm"
+                {/* Variant details */}
+                <div className="flex-1 min-w-0">
+                  <h2 className="capitalize text-xs font-medium mb-1 truncate">{variant.variantName}</h2>
+                  <div className="flex flex-wrap gap-1.5 items-center text-[10px]">
+                    {/* Colors */}
+                    {variant.colors?.slice(0, 3).map((color) => (
+                      <span
+                        key={color.name}
+                        className="w-3 h-3 rounded-full shadow-sm border border-gray-300"
+                        style={{ backgroundColor: color.name }}
+                        title={color.name}
                       />
-                      <Link
-                        href={`/dashboard/seller/stores/${row.original.store?.url}/products/${row.original.id}/variants/${variant.id}`}
-                      >
-                        <div className="absolute inset-0 bg-black/50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <FilePenLine className="text-white w-4 h-4" />
-                        </div>
-                      </Link>
-                    </div>
-                  ))}
-                  {/* Fallback if no images */}
-                  {(!variant.images || variant.images.length === 0) && (
-                    <div className="relative group">
-                      <Image
-                        src="/placeholder.png"
-                        alt={`${variant.variantName} placeholder`}
-                        width={100}
-                        height={100}
-                        className="w-20 h-20 rounded-md object-cover shadow-sm"
-                      />
-                      <Link
-                        href={`/dashboard/seller/stores/${row.original.store?.url}/products/${row.original.id}/variants/${variant.id}`}
-                      >
-                        <div className="absolute inset-0 bg-black/50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <FilePenLine className="text-white w-4 h-4" />
-                        </div>
-                      </Link>
-                    </div>
-                  )}
+                    ))}
+                    {variant.colors && variant.colors.length > 3 && (
+                      <span className="text-[9px] text-muted-foreground">+{variant.colors.length - 3}</span>
+                    )}
+                    {/* Size count */}
+                    <span className="px-1 py-0.5 rounded text-[9px] bg-muted">
+                      {variant.sizes?.length || 0} sizes
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}

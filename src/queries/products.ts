@@ -675,46 +675,51 @@ export const getProductPageData = async (
   productSlug: string,
   variantSlug: string
 ) => {
-  // Get current user
-  const user = await currentUser();
+  try {
+    // Get current user
+    const user = await currentUser();
 
-  // Retrieve product variant details from the database
-  const product = await retrieveProductDetails(productSlug, variantSlug);
-  if (!product) return;
+    // Retrieve product variant details from the database
+    const product = await retrieveProductDetails(productSlug, variantSlug);
+    if (!product) return null;
 
-  // Retrieve user country
-  const userCountry = getUserCountry();
+    // Retrieve user country
+    const userCountry = await getUserCountry();
 
-  // Calculate and retrieve the shipping details
-  const productShippingDetails = await getShippingDetails(
-    product.shippingFeeMethod,
-    await userCountry,
-    product.store,
-    product.freeShipping
-  );
+    // Calculate and retrieve the shipping details
+    const productShippingDetails = await getShippingDetails(
+      product.shippingFeeMethod,
+      userCountry,
+      product.store,
+      product.freeShipping
+    );
 
-  // Fetch store followers count
-  const storeFollwersCount = await getStoreFollowersCount(product.storeId);
+    // Fetch store followers count
+    const storeFollwersCount = await getStoreFollowersCount(product.storeId);
 
-  // Check if user is following store
-  const isUserFollowingStore = await checkIfUserFollowingStore(
-    product.storeId,
-    user?.id
-  );
+    // Check if user is following store
+    const isUserFollowingStore = await checkIfUserFollowingStore(
+      product.storeId,
+      user?.id
+    );
 
-  // Handle product views
-  await incrementProductViews(product.id);
+    // Handle product views
+    await incrementProductViews(product.id);
 
-  // Reviews stats
-  const ratingStatistics = await getRatingStatistics(product.id);
+    // Reviews stats
+    const ratingStatistics = await getRatingStatistics(product.id);
 
-  return formatProductResponse(
-    product,
-    productShippingDetails,
-    storeFollwersCount,
-    isUserFollowingStore,
-    ratingStatistics
-  );
+    return formatProductResponse(
+      product,
+      productShippingDetails,
+      storeFollwersCount,
+      isUserFollowingStore,
+      ratingStatistics
+    );
+  } catch (error) {
+    console.error("Error in getProductPageData:", error);
+    return null;
+  }
 };
 
 // Helper functions
@@ -759,7 +764,7 @@ export const retrieveProductDetails = async (
     },
   });
 
-  console.log(product);
+  // console.log(product);
 
   if (!product) return null;
   // Get variants info
@@ -793,7 +798,7 @@ export const retrieveProductDetails = async (
 
 const getUserCountry = async () => {
   const userCountryCookie = await getCookie("userCountry", { cookies }) || "";
-  const defaultCountry = { name: "United States", code: "US" };
+  const defaultCountry = { name: "United States", code: "US", city: "" };
   
   try {
     const parsedCountry = JSON.parse(userCountryCookie);
@@ -803,11 +808,16 @@ const getUserCountry = async () => {
       "name" in parsedCountry &&
       "code" in parsedCountry
     ) {
-      return parsedCountry;
+      return {
+        name: parsedCountry.name,
+        code: parsedCountry.code,
+        city: parsedCountry.city || ""
+      };
     }
     return defaultCountry;
   } catch (error) {
     console.error("Failed to parse userCountryCookie", error);
+    return defaultCountry;
   }
 };
 
@@ -1055,7 +1065,9 @@ export const getShippingDetails = async (
 
     return shippingDetails;
   }
-  return false;
+  
+  // Return default shipping details if country not found
+  return shippingDetails;
 };
 
 // Function: getProductFilteredReviews
@@ -1360,7 +1372,7 @@ const incrementProductViews = async (productId: string) => {
   const isProductAlreadyViewed = getCookie(`viewedProduct_${productId}`, {
     cookies,
   });
-  console.log("isProductAlreadyViewed", isProductAlreadyViewed);
+  // console.log("isProductAlreadyViewed", isProductAlreadyViewed);
 
   if (!isProductAlreadyViewed) {
     await db.product.update({

@@ -1,6 +1,6 @@
 "use client";
 import { CartProductType, ProductPageDataType } from "@/lib/types";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import ProductSwiper from "./product-swiper";
 import ProductInfo from "./product-info/product-info";
 import ShipTo from "./shipping/ship-to";
@@ -118,7 +118,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     productToBeAddedToCart?.stock ?? baseCartProduct?.stock ?? 0;
 
   // Function to handle state changes for the product properties
-  const handleChange = (
+  const handleChange = useCallback((
     property: keyof CartProductType,
     value: CartProductType[keyof CartProductType]
   ) => {
@@ -126,7 +126,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
       ...prevProduct!,
       [property]: value,
     }));
-  };
+  }, []);
 
   // Keeping cart state updated
 
