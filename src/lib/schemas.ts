@@ -218,8 +218,8 @@ export const ProductFormSchema = z.object({
       required_error: "Product keywords are mandatory.",
       invalid_type_error: "Keywords must be valid strings.",
     })
-    .min(5, {
-      message: "Please provide at least 5 keywords.",
+    .min(1, {
+      message: "Please provide at least 1 keyword.",
     })
     .max(10, {
       message: "You can provide up to 10 keywords.",
