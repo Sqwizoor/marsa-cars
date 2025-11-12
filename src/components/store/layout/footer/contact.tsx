@@ -57,8 +57,8 @@ export default function Contact() {
           
           <div className="flex items-center gap-3 group">
             <Mail className="w-5 h-5 text-purple-400 group-hover:scale-110 transition-transform" />
-            <a href="mailto:support@goshop.com" className="text-sm text-slate-300 hover:text-white transition-colors">
-              support@goshop.com
+            <a href="mailto:support@marsacars.com" className="text-sm text-slate-300 hover:text-white transition-colors">
+              support@marsacars.com
             </a>
           </div>
         </div>

@@ -40,7 +40,7 @@ export default async function HomeUserCard({
             />
           </div>
           <div className="absolute top-16 w-full h-5 font-bold text-black text-center cursor-pointer capitalize">
-            {user ? user.fullName?.toLowerCase() : "Welcome to GoShop"}
+            {user ? user.fullName?.toLowerCase() : "Welcome to MarsaCars"}
           </div>
         </div>
 
