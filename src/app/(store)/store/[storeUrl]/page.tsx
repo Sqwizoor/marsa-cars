@@ -1,6 +1,5 @@
 import ProductFilters from "@/components/store/browse-page/filters";
 import ProductSort from "@/components/store/browse-page/sort";
-import Header from "@/components/store/layout/header/header";
 import StoreDEetails from "@/components/store/store-page/store-details";
 import StoreProducts from "@/components/store/store-page/store-products";
 import { FiltersQueryType } from "@/lib/types";
@@ -18,7 +17,6 @@ export default async function StorePage({
   const store = await getStorePageDetails(storeUrl);
   return (
     <>
-      <Header />
       <StoreDEetails details={store} />
       <div className="max-w-[95%] mx-auto border-t">
         <div className="flex mt-5 gap-x-5">

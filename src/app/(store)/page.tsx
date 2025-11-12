@@ -3,8 +3,6 @@ import Featured from "@/components/store/home/main/featured";
 import HomeMainSwiper from "@/components/store/home/main/home-swiper";
 import HomeUserCard from "@/components/store/home/main/user/user";
 import Sideline from "@/components/store/home/sideline/sideline";
-import Footer from "@/components/store/layout/footer/footer";
-import Header from "@/components/store/layout/header/header";
 import MainSwiper from "@/components/store/shared/swiper";
 import { SimpleProduct } from "@/lib/types";
 import { getHomeDataDynamic, getHomeFeaturedCategories } from "@/queries/home";
@@ -36,7 +34,6 @@ export default async function HomePage() {
   const featuredCategories = await getHomeFeaturedCategories();
   return (
     <>
-      <Header />
       <div className="relative w-full">
         <Sideline />
         <div className="relative w-[calc(100%-40px)] h-full bg-[#e3e3e3]">
@@ -113,7 +110,6 @@ export default async function HomePage() {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 }
