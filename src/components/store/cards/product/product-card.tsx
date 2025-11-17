@@ -29,10 +29,10 @@ export default function ProductCard({ product }: { product: ProductType }) {
   };
 
   return (
-    <div>
+    <div className="w-full max-w-[280px] mx-auto">
       <div
         className={cn(
-          "group w-48 sm:w-[225px] relative transition-all duration-75 bg-white ease-in-out py-3 px-4 rounded-t-3xl border  hover:shadow-xl border-border",
+          "group w-full relative transition-all duration-300 bg-white ease-in-out p-4 rounded-2xl border border-gray-200 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1",
           {
             "": true,
           }
@@ -76,7 +76,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
             <ProductPrice sizes={sizes} isCard handleChange={() => {}} />
           </Link>
         </div>
-        <div className=" absolute -left-[1px] bg-white border border-t-0  w-[calc(100%+2px)] px-4 pb-4 rounded-b-3xl shadow-xl z-30 space-y-2">
+        <div className="absolute -left-[1px] top-full bg-white border border-gray-200 border-t-0 w-[calc(100%+2px)] px-4 pb-4 rounded-b-2xl shadow-2xl z-30 space-y-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
           {/* Variant switcher */}
           <VariantSwitcher
             images={variantImages}
