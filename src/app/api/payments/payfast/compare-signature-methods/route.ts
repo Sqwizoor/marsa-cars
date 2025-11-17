@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
 /**
  * Test multiple signature calculation methods to find which one PayFast accepts
  */
-export async function POST(req: NextResponse) {
+export async function POST(req: NextRequest) {
   if (process.env.NODE_ENV !== "development") {
     return NextResponse.json({ error: "Development only" }, { status: 403 });
   }
@@ -77,5 +77,3 @@ export async function POST(req: NextResponse) {
       "Check PayFast dashboard - it should show you the expected signature. Try each method and see which matches.",
   });
 }
-
-import { NextRequest } from "next/server";
