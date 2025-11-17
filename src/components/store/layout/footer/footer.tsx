@@ -2,7 +2,6 @@ import type { SubCategory } from "@prisma/client";
 import { getSubcategories } from "@/queries/subCategories";
 import Contact from "./contact";
 import Links from "./links";
-import Newsletter from "./newsletter";
 
 export default async function Footer() {
   let subs: SubCategory[] = [];
@@ -20,7 +19,6 @@ export default async function Footer() {
       </div>
       
       <div className="relative z-10">
-        <Newsletter />
         
         <div className="max-w-[1430px] mx-auto px-5 py-12">
           <div className="grid md:grid-cols-2 md:gap-x-10 gap-y-10">

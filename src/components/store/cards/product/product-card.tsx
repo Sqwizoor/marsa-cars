@@ -32,35 +32,26 @@ export default function ProductCard({ product }: { product: ProductType }) {
     <div className="w-full max-w-[280px] mx-auto">
       <div
         className={cn(
-          "group w-full relative transition-all duration-300 bg-white ease-in-out p-4 rounded-2xl border border-gray-200 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1",
+          "group w-full relative transition-all duration-300 bg-white ease-in-out p-5 rounded-3xl border border-gray-200 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 flex flex-col h-full min-h-[420px]",
           {
             "": true,
           }
         )}
       >
-        <div className="relative w-full h-full">
+        <div className="relative w-full flex-1 flex flex-col">
           <Link
             href={`/product/${slug}/${variantSlug}`}
-            className="w-full relative inline-block overflow-hidden"
+            className="w-full relative overflow-hidden flex-1 flex flex-col"
           >
             {/* Images Swiper */}
             <ProductCardImageSwiper images={images} />
             {/* Title */}
-            <div className="text-sm text-main-primary h-[18px] overflow-hidden overflow-ellipsis line-clamp-1">
+            <div className="text-sm font-medium text-main-primary h-[18px] overflow-hidden overflow-ellipsis line-clamp-1 mt-3">
               {name} · {variantName}
             </div>
             {/* Rating - Sales */}
             {rating > 0 && sales > 0 && (
-              <div className="flex items-center gap-x-1 h-5">
-                {/* <ReactStars
-                  count={5}
-                  size={24}
-                  color="#F5F5F5"
-                  activeColor="#FFD804"
-                  value={rating}
-                  isHalf
-                  edit={false}
-                /> */}
+              <div className="flex items-center gap-x-1 h-5 mt-2">
                 <StarRatings
                   rating={rating}
                   starRatedColor="#ffb400"
@@ -75,24 +66,27 @@ export default function ProductCard({ product }: { product: ProductType }) {
             {/* Price */}
             <ProductPrice sizes={sizes} isCard handleChange={() => {}} />
           </Link>
-        </div>
-        <div className="absolute -left-[1px] top-full bg-white border border-gray-200 border-t-0 w-[calc(100%+2px)] px-4 pb-4 rounded-b-2xl shadow-2xl z-30 space-y-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-          {/* Variant switcher */}
-          <VariantSwitcher
-            images={variantImages}
-            variants={variants as VariantSimplified[]}
-            setVariant={setVariant}
-            selectedVariant={variant}
-          />
-          {/* Action buttons */}
-          <div className="flex flex-items gap-x-1">
-            <Button>
-              <Link href={`/product/${slug}/${variantSlug}`}>Add to cart</Link>
+          
+          {/* Variant switcher - Always visible */}
+          <div className="mt-4 pt-3 border-t border-gray-100">
+            <VariantSwitcher
+              images={variantImages}
+              variants={variants as VariantSimplified[]}
+              setVariant={setVariant}
+              selectedVariant={variant}
+            />
+          </div>
+          
+          {/* Action buttons - Always visible */}
+          <div className="flex items-center gap-2 mt-3">
+            <Button className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg">
+              <Link href={`/product/${slug}/${variantSlug}`} className="w-full">Add to cart</Link>
             </Button>
             <Button
               variant="black"
               size="icon"
               onClick={() => handleaddToWishlist()}
+              className="bg-gradient-to-br from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white rounded-xl transition-all duration-300 hover:shadow-lg"
             >
               <Heart className="w-5" />
             </Button>

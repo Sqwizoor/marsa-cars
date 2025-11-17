@@ -56,8 +56,8 @@ export async function createStripePayment(
 }
 
 // Optional: utility to format amounts for display (can be reused elsewhere)
-export function formatAmount(amount: number, currency: string = "usd") {
-  return new Intl.NumberFormat("en-US", {
+export function formatAmount(amount: number, currency: string = "zar") {
+  return new Intl.NumberFormat("en-ZA", {
     style: "currency",
     currency: currency.toUpperCase(),
     minimumFractionDigits: 2,
