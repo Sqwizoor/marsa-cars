@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import ImageUpload from "../shared/image-upload"
 import { upsertSubCategory } from "@/queries/subCategories"
@@ -188,7 +189,13 @@ const SubCategoryDetails = ({ data, categories }: SubCategoryDetailsProps) => {
                 )}
               />
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Loading..." : data?.id ? "Save SubCategory information" : "Create SubCategory"}
+                {isLoading ? (
+                  <Skeleton className="h-4 w-48 bg-white/40" />
+                ) : data?.id ? (
+                  "Save SubCategory information"
+                ) : (
+                  "Create SubCategory"
+                )}
               </Button>
             </form>
           </Form>

@@ -5,8 +5,8 @@ import {
   Dispatch,
   FC,
   SetStateAction,
-  useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -41,6 +41,7 @@ import { v4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Button } from "../../ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AddressDetailsProps {
   data?: UserShippingAddressType;
@@ -61,60 +62,64 @@ const AddressDetails: FC<AddressDetailsProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   // State for selected country
-  const [country, setCountry] = useState<string>(
-    () => countries[0]?.name ?? "Afghanistan"
-  );
+  const defaultValues = useMemo(() => {
+    // Ensure countryId is always a valid country ID from the database
+    // Priority: existing address -> first available country
+    let countryId = data?.countryId;
+    
+    // If no existing countryId, use the first country's id
+    if (!countryId && countries?.length > 0) {
+      countryId = countries[0].id;
+    }
+    
+    return {
+      firstName: data?.firstName || "",
+      lastName: data?.lastName || "",
+      address1: data?.address1 || "",
+      address2: data?.address2 || "",
+      city: data?.city || "",
+      countryId: countryId || "", // Will be validated on submit; empty now but form won't submit without a valid value
+      phone: data?.phone || "",
+      state: data?.state || "",
+      zip_code: data?.zip_code || "",
+      default: data?.default || false,
+    } satisfies z.infer<typeof ShippingAddressSchema>;
+  }, [data, countries]);
 
   // Form hook for managing form state and validation
   const form = useForm<z.infer<typeof ShippingAddressSchema>>({
-    mode: "onChange", // Form validation mode
+    mode: "onSubmit", // Validate on submit to avoid transient invalid UUID during selection
     resolver: zodResolver(ShippingAddressSchema), // Resolver for form validation
-    defaultValues: {
-      // Setting default form values from data (if available)
-      firstName: data?.firstName,
-      lastName: data?.lastName,
-      address1: data?.address1,
-      address2: data?.address2 || "",
-      city: data?.city,
-      countryId: data?.countryId,
-      phone: data?.phone,
-      state: data?.state,
-      zip_code: data?.zip_code,
-      default: data?.default,
-    },
+    defaultValues,
   });
 
   // Loading status based on form submission
   const isLoading = form.formState.isSubmitting;
-
-  // Reset form values when data changes
-  const handleCountryChange = useCallback(
-    (name: string) => {
-      const foundCountry = countries.find((c) => c.name === name);
-      if (foundCountry) {
-        form.setValue("countryId", foundCountry.id);
-      }
-      setCountry(name);
-    },
-    [countries, form]
-  );
-
-  useEffect(() => {
-    if (data) {
-      form.reset({
-        ...data,
-        address2: data.address2 || "",
-      });
-      handleCountryChange(data.country.name);
-    }
-  }, [data, form, handleCountryChange]);
 
   // Submit handler for form submission
   const handleSubmit = async (
     values: z.infer<typeof ShippingAddressSchema>
   ) => {
     try {
-      // Upserting category data
+      // Ensure countryId is always set and valid before submission
+      let finalCountryId = values.countryId;
+      
+      // If countryId is empty and countries exist, use the first country
+      if (!finalCountryId && countries?.length > 0) {
+        finalCountryId = countries[0].id;
+      }
+      
+      // If still no valid countryId, reject submission
+      if (!finalCountryId) {
+        toast({
+          variant: "destructive",
+          title: "Oops!",
+          description: "Please select a country.",
+        });
+        return;
+      }
+
+      // Upserting address data
       await upsertShippingAddress({
         id: data?.id ? data.id : v4(),
         firstName: values.firstName,
@@ -123,7 +128,7 @@ const AddressDetails: FC<AddressDetailsProps> = ({
         address1: values.address1,
         address2: values.address2 || "",
         city: values.city,
-        countryId: values.countryId,
+        countryId: finalCountryId,
         state: values.state,
         default: values.default,
         zip_code: values.zip_code,
@@ -208,32 +213,39 @@ const AddressDetails: FC<AddressDetailsProps> = ({
                 disabled={isLoading}
                 control={form.control}
                 name="countryId"
-                render={({ field }) => (
-                  <FormItem className="flex-1 w-[calc(50%-8px)] !mt-3">
-                    <FormControl>
-                      <CountrySelector
-                        id="countries"
-                        open={isOpen}
-                        onToggle={() => setIsOpen((prev) => !prev)}
-                        onChange={(val) => {
-                          handleCountryChange(val);
-                          const selected = countries.find(
-                            (c) => c.name === val
-                          );
-                          if (selected) {
-                            field.onChange(selected.id);
-                          }
-                        }}
-                        selectedValue={
-                          (countries.find(
-                            (c) => c.name === country
-                          ) as SelectMenuOption) || countries[0]
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  // Find selected country by ID
+                  const selectedCountry = countries?.find((c) => c.id === field.value);
+                  
+                  // Display the selected country or default to first
+                  const displayCountry = selectedCountry || (countries?.length > 0 ? countries[0] : null);
+                  
+                  const selectedValue = displayCountry
+                    ? { name: displayCountry.name, code: displayCountry.code }
+                    : { name: "Select Country", code: "ZA" };
+
+                  return (
+                    <FormItem className="flex-1 w-[calc(50%-8px)] !mt-3">
+                      <FormControl>
+                        <CountrySelector
+                          id="countries"
+                          open={isOpen}
+                          onToggle={() => setIsOpen((prev) => !prev)}
+                          onChange={(val) => {
+                            const selected = countries?.find(
+                              (c) => c.name === val
+                            );
+                            if (selected?.id) {
+                              field.onChange(selected.id);
+                            }
+                          }}
+                          selectedValue={selectedValue as SelectMenuOption}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
             </div>
             <div className="!mt-3 flex items-center justify-between gap-3">
@@ -315,11 +327,13 @@ const AddressDetails: FC<AddressDetailsProps> = ({
           </div>
 
           <Button type="submit" disabled={isLoading} className="rounded-md">
-            {isLoading
-              ? "loading..."
-              : data?.id
-              ? "Save address information"
-              : "Create address"}
+            {isLoading ? (
+              <Skeleton className="h-4 w-28 bg-white/40" />
+            ) : data?.id ? (
+              "Save address information"
+            ) : (
+              "Create address"
+            )}
           </Button>
         </form>
       </Form>

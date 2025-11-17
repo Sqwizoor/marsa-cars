@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "../../../ui/button"
 import UserCardProducts from "./products"
+import SubscriptionBadge from "./subscription-badge"
 
 export default async function HomeUserCard({
   products,
@@ -71,7 +72,8 @@ export default async function HomeUserCard({
         {/* Action buttons with improved styling */}
         <div className="w-full px-4 relative z-10">
           {user ? (
-            <div className="w-full">
+            <div className="w-full space-y-2">
+              <SubscriptionBadge />
               {role === "ADMIN" ? (
                 <Button
                   variant="orange-gradient"

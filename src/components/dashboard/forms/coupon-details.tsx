@@ -32,6 +32,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 
 // Queries
@@ -221,11 +222,13 @@ const CouponDetails = ({ data, storeUrl }: CouponDetailsProps) => {
               />
 
               <Button type="submit" disabled={isLoading}>
-                {isLoading
-                  ? "loading..."
-                  : data?.id
-                  ? "Save coupon information"
-                  : "Create coupon"}
+                {isLoading ? (
+                  <Skeleton className="h-4 w-36 bg-white/40" />
+                ) : data?.id ? (
+                  "Save coupon information"
+                ) : (
+                  "Create coupon"
+                )}
               </Button>
             </form>
           </Form>

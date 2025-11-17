@@ -50,7 +50,17 @@ export default function ProfileHistoryPage({
     <div className="bg-white py-4 px-6">
       <h1 className="text-lg mb-3 font-bold">Your product view history</h1>
       {laoding ? (
-        <div>loading...</div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="sr-only">Loading</span>
+            <div className="flex-1">
+              <div className="animate-pulse h-4 w-40 bg-primary/10 rounded-md" />
+            </div>
+            <div className="animate-pulse h-4 w-20 bg-primary/10 rounded-md" />
+          </div>
+          <div className="animate-pulse h-24 w-full bg-primary/10 rounded-md" />
+          <div className="animate-pulse h-24 w-full bg-primary/10 rounded-md" />
+        </div>
       ) : products.length > 0 ? (
         <div className="pb-16">
           <ProductList products={products} />

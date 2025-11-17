@@ -43,22 +43,22 @@ export default async function HomePage() {
               {/* Left */}
               <div
                 className="cursor-pointer hidden min-[1465px]:block bg-cover bg-no-repeat rounded-md"
-                // style={{
-                //   backgroundImage:
-                //     "url(/assets/images/ads/winter-sports-clothing.jpg)",
-                // }}
+                style={{
+                  backgroundImage:
+                    "url(/assets/images/ads/image.png)",
+                }}
               />
               {/* Middle */}
               <div className="space-y-2 h-fit">
                 {/* Main swiper */}
                 <HomeMainSwiper />
                 {/* Featured card */}
-                {/* <Featured
+             <Featured
                   products={products_featured.filter(
                     (product): product is SimpleProduct =>
                       "variantSlug" in product
                   )}
-                /> */}
+                /> 
               </div>
               {/* Right */}
               <div className="h-full">

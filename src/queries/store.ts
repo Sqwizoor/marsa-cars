@@ -7,6 +7,7 @@ import {
   StoreStatus,
   StoreType,
 } from "@/lib/types";
+import { ensureSellerSubscription } from "@/lib/subscription-guard";
 
 // Clerk
 import { currentUser } from "@clerk/nextjs/server";
@@ -33,6 +34,8 @@ export const upsertStore = async (store: Store) => {
       throw new Error(
         "Unauthorized Access: Seller Privileges Required for Entry."
       );
+
+    await ensureSellerSubscription(user.id);
 
     // Ensure store data is provided
     if (!store) throw new Error("Please provide store data.");
@@ -174,6 +177,8 @@ export const updateStoreDefaultShippingDetails = async (
         "Unauthorized Access: Seller Privileges Required for Entry."
       );
 
+    await ensureSellerSubscription(user.id);
+
     // Ensure the store URL is provided
     if (!storeUrl) throw new Error("Store URL is required.");
 
@@ -231,6 +236,8 @@ export const getStoreShippingRates = async (storeUrl: string) => {
       throw new Error(
         "Unauthorized Access: Seller Privileges Required for Entry."
       );
+
+    await ensureSellerSubscription(user.id);
 
     // Ensure the store URL is provided
     if (!storeUrl) throw new Error("Store URL is required.");
@@ -313,6 +320,8 @@ export const upsertShippingRate = async (
         "Unauthorized Access: Seller Privileges Required for Entry."
       );
 
+    await ensureSellerSubscription(user.id);
+
     // Make sure seller is updating their own store
     const check_ownership = await db.store.findUnique({
       where: {
@@ -381,6 +390,8 @@ export const getStoreOrders = async (storeUrl: string) => {
         "Unauthorized Access: Seller Privileges Required for Entry."
       );
 
+    await ensureSellerSubscription(user.id);
+
     // Get store id using url
     const store = await db.store.findUnique({
       where: {
@@ -442,8 +453,66 @@ export const applySeller = async (store: StoreType) => {
     // Ensure user is authenticated
     if (!user) throw new Error("Unauthenticated.");
 
+    const primaryEmail = user.emailAddresses[0]?.emailAddress || "";
+
+    // Ensure user exists in database (sync from Clerk if needed)
+    let dbUser = await db.user.findUnique({
+      where: { id: user.id },
+    });
+
+    if (!dbUser) {
+      // If a user already exists with this email, reuse/update that record
+      const existingByEmail = primaryEmail
+        ? await db.user.findUnique({ where: { email: primaryEmail } })
+        : null;
+
+      if (existingByEmail) {
+        dbUser = await db.user.update({
+          where: { email: primaryEmail },
+          data: {
+            id: user.id,
+            name:
+              `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+              existingByEmail.name ||
+              "User",
+            picture: user.imageUrl || existingByEmail.picture || "",
+            role:
+              (user.privateMetadata.role as "USER" | "ADMIN" | "SELLER") ||
+              existingByEmail.role ||
+              "USER",
+          },
+        });
+      } else {
+        dbUser = await db.user.create({
+          data: {
+            id: user.id,
+            name:
+              `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+              "User",
+            email: primaryEmail,
+            picture: user.imageUrl || "",
+            role:
+              (user.privateMetadata.role as "USER" | "ADMIN" | "SELLER") ||
+              "USER",
+          },
+        });
+      }
+    }
+
     // Ensure store data is provided
     if (!store) throw new Error("Please provide store data.");
+
+    // Save or update draft application instead of creating store immediately
+    await db.storeApplication.upsert({
+      where: { userId: user.id },
+      create: {
+        userId: user.id,
+        data: store,
+      },
+      update: {
+        data: store,
+      },
+    });
 
     // Check if store with same name, email,url, or phone number already exists
     const existingStore = await db.store.findFirst({
@@ -476,18 +545,8 @@ export const applySeller = async (store: StoreType) => {
       throw new Error(errorMessage);
     }
 
-    // Upsert store details into the database
-    const storeDetails = await db.store.create({
-      data: {
-        ...store,
-        defaultShippingService:
-          store.defaultShippingService || "International Delivery",
-        returnPolicy: store.returnPolicy || "Return in 30 days.",
-        userId: user.id,
-      },
-    });
-
-    return storeDetails;
+    // Store creation is handled after successful PayFast trial payment
+    return { id: "draft", status: "PENDING" } as any;
   } catch (error) {
     console.log(error);
     throw error;
@@ -556,6 +615,16 @@ export const updateStoreStatus = async (
   // Verify seller ownership
   if (!store) {
     throw new Error("Store not found !");
+  }
+
+  if (status === "ACTIVE") {
+    try {
+      await ensureSellerSubscription(store.userId);
+    } catch (error) {
+      throw new Error(
+        "Store owner must activate a subscription before approval."
+      );
+    }
   }
 
   // Retrieve the order to be updated

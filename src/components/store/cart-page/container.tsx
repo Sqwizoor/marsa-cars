@@ -2,7 +2,7 @@
 import { useCartStore } from "@/cart-store/useCartStore";
 import useFromStore from "@/hooks/useFromStore";
 import { CartProductType, Country } from "@/lib/types";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import CartHeader from "./car-header";
 import CartProduct from "../cards/cart-product";
 import CartSummary from "./summary";
@@ -11,6 +11,7 @@ import { SecurityPrivacyCard } from "../product-page/returns-security-privacy-ca
 import EmptyCart from "./empty-cat";
 import { updateCartWithLatest } from "@/queries/user";
 import CountryNote from "../shared/country-note";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CartContainer({
   userCountry,
@@ -24,18 +25,35 @@ export default function CartContainer({
 
   const [selectedItems, setSelectedItems] = useState<CartProductType[]>([]);
   const [totalShipping, setTotalShipping] = useState<number>(0);
+  const lastSyncedSnapshotRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!cartItems || cartItems.length === 0) {
+      setLoading(false);
+      lastSyncedSnapshotRef.current = null;
+      return;
+    }
+
+    const snapshot = JSON.stringify(cartItems);
+    if (lastSyncedSnapshotRef.current === snapshot) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
     const loadAndSyncCart = async () => {
-      if (!cartItems?.length) {
-        setLoading(false);
-        return;
-      }
       try {
         const updatedCart = await updateCartWithLatest(cartItems);
-        setCart(updatedCart);
+        const updatedSnapshot = JSON.stringify(updatedCart);
+        lastSyncedSnapshotRef.current = updatedSnapshot;
+
+        if (snapshot !== updatedSnapshot) {
+          setCart(updatedCart);
+        }
       } catch (error) {
         console.error("Failed to sync cart:", error);
+        lastSyncedSnapshotRef.current = snapshot;
       } finally {
         setLoading(false);
       }
@@ -49,7 +67,32 @@ export default function CartContainer({
       {cartItems && cartItems.length > 0 ? (
         <>
           {loading ? (
-            <div>loading...</div>
+            <div className="bg-[#f5f5f5] min-h-[calc(100vh-65px)]">
+              <div className="max-w-[1200px] mx-auto py-6 flex">
+                <div className="min-w-0 flex-1">
+                  <div className="mb-3">
+                    <Skeleton className="h-6 w-48" />
+                  </div>
+                  <div className="my-2">
+                    <Skeleton className="h-5 w-64" />
+                  </div>
+                  <div className="space-y-3 mt-2">
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                  </div>
+                </div>
+                <div className="sticky top-4 ml-5 w-[380px] max-h-max">
+                  <div className="p-4 bg-white space-y-3">
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="bg-[#f5f5f5] min-h-[calc(100vh-65px)]">
               <div className="max-w-[1200px] mx-auto py-6 flex">

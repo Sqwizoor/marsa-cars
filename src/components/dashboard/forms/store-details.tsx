@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import ImageUpload from "../shared/image-upload"
@@ -246,7 +247,13 @@ const StoreDetails = ({ data }: StoreDetailsProps) => {
                 )}
               />
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Loading..." : data?.id ? "Save store information" : "Create store"}
+                {isLoading ? (
+                  <Skeleton className="h-4 w-40 bg-white/40" />
+                ) : data?.id ? (
+                  "Save store information"
+                ) : (
+                  "Create store"
+                )}
               </Button>
             </form>
           </Form>

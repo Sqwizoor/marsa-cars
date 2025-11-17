@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { CartWithCartItemsType } from "@/lib/types";
 import ApplyCouponForm from "@/components/store/forms/apply-coupon";
-import { PulseLoader } from "react-spinners";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props {
   shippingAddress: ShippingAddress | null;
@@ -117,7 +117,7 @@ const PlaceOrderCard: FC<Props> = ({
       <div className="mt-2 p-4 bg-white">
         <Button onClick={() => handlePlaceOrder()}>
           {loading ? (
-            <PulseLoader size={5} color="#fff" />
+            <Skeleton className="h-4 w-20 bg-white/40" />
           ) : (
             <span>Place order</span>
           )}

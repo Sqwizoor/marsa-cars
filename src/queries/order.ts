@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { ensureSellerSubscription } from "@/lib/subscription-guard";
 import { OrderStatus, ProductStatus } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
 
@@ -80,6 +81,8 @@ export const updateOrderGroupStatus = async (
       "Unauthorized Access: Seller Privileges Required for Entry."
     );
 
+  await ensureSellerSubscription(user.id);
+
   const store = await db.store.findUnique({
     where: {
       id: storeId,
@@ -132,6 +135,8 @@ export const updateOrderItemStatus = async (
     throw new Error(
       "Unauthorized Access: Seller Privileges Required for Entry."
     );
+
+  await ensureSellerSubscription(user.id);
 
   const store = await db.store.findUnique({
     where: {

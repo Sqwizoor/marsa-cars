@@ -26,6 +26,7 @@ import {
 import { Input } from "../../ui/input";
 import { Checkbox } from "../../ui/checkbox";
 import { Button } from "../../ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import ImageUpload from "../shared/image-upload";
 // queries
 import { upsertCategory } from "@/queries/category";
@@ -194,11 +195,13 @@ const CategoryDetails = ({ data }: CategoryDetailsProps) => {
                 )}
               />
               <Button type="submit" disabled={isLoading}>
-                {isLoading
-                  ? "Loading..."
-                  : data?.id
-                  ? "Save category information"
-                  : "Create category"}
+                {isLoading ? (
+                  <Skeleton className="h-4 w-36 bg-white/40" />
+                ) : data?.id ? (
+                  "Save category information"
+                ) : (
+                  "Create category"
+                )}
               </Button>
             </form>
           </Form>

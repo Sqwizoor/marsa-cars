@@ -115,6 +115,19 @@ export const saveUserCart = async (
 
   const userId = user.id;
 
+  // Ensure the user exists in our database before proceeding.
+  // This prevents foreign key errors if the user record was not created yet.
+  await db.user.upsert({
+    where: { id: userId },
+    update: {}, // No update needed if user exists
+    create: {
+      id: userId,
+      email: user.emailAddresses[0]?.emailAddress ?? "",
+      name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
+      picture: user.imageUrl,
+    },
+  });
+
   // Search for existing user cart
   const userCart = await db.cart.findFirst({
     where: { userId },
@@ -732,7 +745,7 @@ export const updateCartWithLatest = async (
       };
 
       if (countryCookie) {
-        const country = countryCookie ? JSON.parse(countryCookie as string) : null;
+        const country = JSON.parse(await countryCookie as string);
         const temp_details = await getShippingDetails(
           product.shippingFeeMethod,
           country,

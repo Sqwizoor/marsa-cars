@@ -149,8 +149,8 @@ export const isProductValidToAdd = (product: CartProductType): boolean => {
     price <= 0 ||
     !sizeId || // Ensure sizeId is not empty
     !size || // Ensure size is not empty
-    stock <= 0 ||
-    weight <= 0 || // Weight should be <= 0
+  stock <= 0 ||
+  weight < 0 || // Weight can be zero but not negative
     !shippingMethod ||
     !variantImage ||
     deliveryTimeMin < 0 ||

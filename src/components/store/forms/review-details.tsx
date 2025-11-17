@@ -14,7 +14,7 @@ import { z } from "zod";
 import Select from "../ui/selector";
 import Input from "../ui/input";
 import { Button } from "../ui/button";
-import { PulseLoader } from "react-spinners";
+import { Skeleton } from "@/components/ui/skeleton";
 import ImageUploadStore from "../shared/upload-images";
 import { upsertReview } from "@/queries/review";
 import { v4 } from "uuid";
@@ -291,7 +291,7 @@ export default function ReviewDetails({
               <div className="w-full flex justify-end">
                 <Button type="submit" className="w-36 h-12">
                   {isLoading ? (
-                    <PulseLoader size={5} color="#fff" />
+                    <Skeleton className="h-4 w-24 bg-white/40" />
                   ) : (
                     "Submit Review"
                   )}

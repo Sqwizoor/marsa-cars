@@ -33,13 +33,31 @@ export default function Step3({
     defaultValues: {
       // Setting default form values from data (if available)
       defaultShippingService: formData.defaultShippingService || "",
-      defaultShippingFeePerItem: formData.defaultShippingFeePerItem,
-      defaultShippingFeePerKg: formData.defaultShippingFeePerKg,
-      defaultShippingFeeForAdditionalItem: formData.defaultShippingFeeForAdditionalItem,
-      defaultShippingFeeFixed: formData.defaultShippingFeeFixed,
-      defaultDeliveryTimeMin: formData.defaultDeliveryTimeMin,
-      defaultDeliveryTimeMax: formData.defaultDeliveryTimeMax,
-      returnPolicy: formData.returnPolicy || "",
+      defaultShippingFeePerItem:
+        typeof formData.defaultShippingFeePerItem === "number"
+          ? formData.defaultShippingFeePerItem
+          : 0,
+      defaultShippingFeePerKg:
+        typeof formData.defaultShippingFeePerKg === "number"
+          ? formData.defaultShippingFeePerKg
+          : 0,
+      defaultShippingFeeForAdditionalItem:
+        typeof formData.defaultShippingFeeForAdditionalItem === "number"
+          ? formData.defaultShippingFeeForAdditionalItem
+          : 0,
+      defaultShippingFeeFixed:
+        typeof formData.defaultShippingFeeFixed === "number"
+          ? formData.defaultShippingFeeFixed
+          : 0,
+      defaultDeliveryTimeMin:
+        typeof formData.defaultDeliveryTimeMin === "number"
+          ? formData.defaultDeliveryTimeMin
+          : 7,
+      defaultDeliveryTimeMax:
+        typeof formData.defaultDeliveryTimeMax === "number"
+          ? formData.defaultDeliveryTimeMax
+          : 31,
+      returnPolicy: formData.returnPolicy || "Return in 30 days.",
     },
   })
 
@@ -81,7 +99,8 @@ export default function Step3({
   }
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target
-    const parsedValue = type === "number" ? (value ? Number(value) : undefined) : value
+    const parsedValue =
+      type === "number" ? (value === "" ? undefined : Number(value)) : value
 
     setFormData((prev) => ({
       ...prev,
@@ -136,7 +155,7 @@ export default function Step3({
                     <FormControl>
                       <Input
                         placeholder="Shipping Fee per item"
-                        value={field.value}
+                        value={field.value === undefined || field.value === null ? "" : field.value}
                         type="number"
                         name="defaultShippingFeePerItem"
                         onChange={(e) => {
@@ -159,7 +178,7 @@ export default function Step3({
                     <FormControl>
                       <Input
                         placeholder="Shipping Fee per Kg"
-                        value={field.value}
+                        value={field.value === undefined || field.value === null ? "" : field.value}
                         type="number"
                         name="defaultShippingFeePerKg"
                         onChange={(e) => {
@@ -182,7 +201,7 @@ export default function Step3({
                     <FormControl>
                       <Input
                         placeholder="Shipping Fee for Additional Item"
-                        value={field.value}
+                        value={field.value === undefined || field.value === null ? "" : field.value}
                         type="number"
                         name="defaultShippingFeeForAdditionalItem"
                         onChange={(e) => {
@@ -205,7 +224,7 @@ export default function Step3({
                     <FormControl>
                       <Input
                         placeholder="Fixed Shipping Fee"
-                        value={field.value}
+                        value={field.value === undefined || field.value === null ? "" : field.value}
                         type="number"
                         name="defaultShippingFeeFixed"
                         onChange={(e) => {
@@ -228,7 +247,7 @@ export default function Step3({
                     <FormControl>
                       <Input
                         placeholder="Min Delivery Time"
-                        value={field.value}
+                        value={field.value === undefined || field.value === null ? "" : field.value}
                         type="number"
                         name="defaultDeliveryTimeMin"
                         onChange={(e) => {
@@ -251,7 +270,7 @@ export default function Step3({
                     <FormControl>
                       <Input
                         placeholder="Max Delivery Time"
-                        value={field.value}
+                        value={field.value === undefined || field.value === null ? "" : field.value}
                         type="number"
                         name="defaultDeliveryTimeMax"
                         onChange={(e) => {

@@ -286,7 +286,11 @@ const StoreDefaultShippingDetails = ({
                 )}
               />
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "loading..." : "Save changes"}
+                  {isLoading ? (
+                    <Skeleton className="h-4 w-24 bg-white/40" />
+                  ) : (
+                    "Save changes"
+                  )}
               </Button>
             </form>
           </Form>

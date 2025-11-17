@@ -23,6 +23,9 @@ export default function Instructions() {
 
 const instructions = [
   {
+    info: "Start by selecting the seller subscription package that best suits your goals—this unlocks the right limits for your store.",
+  },
+  {
     info: 'Use your real photo as the profile picture. To update, click on the image, then select "Manage Account."',
   },
   {

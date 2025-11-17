@@ -22,6 +22,12 @@ const SizeSelector: FC<Props> = ({ sizeId, sizes, handleChange }) => {
     (size: Size) => {
       handleChange("sizeId", size.id);
       handleChange("size", size.size);
+      handleChange("stock", size.quantity);
+      // Calculate price with discount if applicable
+      const finalPrice = size.discount
+        ? size.price - (size.price * size.discount) / 100
+        : size.price;
+      handleChange("price", finalPrice);
     },
     [handleChange]
   );

@@ -192,6 +192,13 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     toast.success("Product added to cart successfully.");
   };
 
+  const handleBuyNow = () => {
+    if (maxQty <= 0 || !productToBeAddedToCart) return;
+    addToCart(productToBeAddedToCart);
+    toast.success("Redirecting to checkout...");
+    window.location.href = "/checkout";
+  };
+
   const maxQty = useMemo(() => {
     if (!productId || !variantId) {
       return stock;
@@ -272,7 +279,16 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
                     </div>
                   )}
                   {/* Action buttons */}
-                  <button className="relative w-full py-2.5 min-w-20 bg-orange-background hover:bg-orange-hover text-white h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none">
+                  <button 
+                    disabled={!isProductValid}
+                    className={cn(
+                      "relative w-full py-2.5 min-w-20 bg-orange-background hover:bg-orange-hover text-white h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none",
+                      {
+                        "cursor-not-allowed opacity-50": !isProductValid || maxQty <= 0,
+                      }
+                    )}
+                    onClick={() => handleBuyNow()}
+                  >
                     <span>Buy now</span>
                   </button>
                   <button

@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { ensureSellerSubscription } from "@/lib/subscription-guard";
 import { CartWithCartItemsType } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
 import { Coupon } from "@prisma/client";
@@ -25,6 +26,7 @@ export const upsertCoupon = async (coupon: Coupon, storeUrl: string) => {
       throw new Error(
         "Unauthorized Access: Seller Privileges Required for Entry."
       );
+    await ensureSellerSubscription(user.id);
 
     // Ensure coupon data and storeUrl are provided
     if (!coupon) throw new Error("Please provide coupon data.");
@@ -93,6 +95,7 @@ export const getStoreCoupons = async (storeUrl: string) => {
       throw new Error(
         "Unauthorized Access: Seller Privileges Required for Entry."
       );
+    await ensureSellerSubscription(user.id);
 
     // Ensure storeUrl is provided
     if (!storeUrl) throw new Error("Store URL is required.");
@@ -168,6 +171,7 @@ export const deleteCoupon = async (couponId: string, storeUrl: string) => {
     // Verify seller permission
     if (user.privateMetadata.role !== "SELLER")
       throw new Error("Unauthorized Access: Seller Privileges Required.");
+    await ensureSellerSubscription(user.id);
 
     // Ensure coupon ID and store URL are provided
     if (!couponId || !storeUrl)

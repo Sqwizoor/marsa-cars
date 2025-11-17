@@ -1,16 +1,40 @@
+"use client";
+
 import { MessageIcon, OrderIcon, WishlistIcon } from "@/components/store/icons";
 import { Button } from "@/components/store/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { SignOutButton, UserButton } from "@clerk/nextjs";
-import { currentUser } from "@clerk/nextjs/server";
+import { SignOutButton, UserButton, useUser } from "@clerk/nextjs";
 import { ChevronDown, UserIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
-export default async function UserMenu() {
-  // Get the current user
-  const user = await currentUser();
+export default function UserMenu() {
+  const { user, isLoaded } = useUser();
+  const [subscription, setSubscription] = useState<any>(null);
+  const [subLoading, setSubLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSub() {
+      try {
+        const res = await fetch("/api/subscriptions/current", { 
+          cache: "no-store"
+        });
+        const json = await res.json();
+        setSubscription(json.subscription || null);
+      } catch (e) {
+        console.error("Failed to fetch subscription in dropdown", e);
+        setSubscription(null);
+      } finally {
+        setSubLoading(false);
+      }
+    }
+    
+    fetchSub();
+  }, []);
+
+  if (!isLoaded) return null;
   return (
     <div className="relative group">
       {/* Trigger */}
@@ -79,6 +103,33 @@ export default async function UserMenu() {
                   <p className="my-3 text-center text-sm text-main-primary cursor-pointer">
                     <SignOutButton />
                   </p>
+                )}
+                {user && !subLoading && subscription && (
+                  <>
+                    <div className="my-2 flex items-center justify-center">
+                      <Link
+                        href="/dashboard/advertiser/manage"
+                        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500/80 to-purple-600/80 px-3 py-1 text-xs font-semibold text-white shadow hover:from-indigo-500 hover:to-purple-600 transition"
+                        title="View subscription details"
+                      >
+                        <span>{subscription.phase === "TRIAL" ? "Trial" : subscription.tier}</span>
+                        <span className="rounded bg-white/20 px-2 py-0.5">
+                          {subscription.remainingAds === -1 ? "∞" : `${subscription.remainingAds} left`}
+                        </span>
+                      </Link>
+                    </div>
+                  </>
+                )}
+                {user && !subLoading && !subscription && (
+                  <div className="my-2 flex items-center justify-center">
+                    <Link
+                      href="/subscriptions"
+                      className="inline-flex items-center gap-2 rounded-full bg-yellow-500/20 text-yellow-700 px-3 py-1 text-xs font-semibold hover:bg-yellow-500/30 transition"
+                      title="No active ads plan"
+                    >
+                      <span>No Ads Plan</span>
+                    </Link>
+                  </div>
                 )}
                 <Separator />
               </div>

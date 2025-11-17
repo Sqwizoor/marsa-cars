@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { saveUserCart } from "@/queries/user";
-import { PulseLoader } from "react-spinners";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props {
   cartItems: CartProductType[];
@@ -90,7 +90,7 @@ const CartSummary: FC<Props> = ({ cartItems, shippingFees }) => {
       <div className="my-2 5">
         <Button onClick={() => handleSaveCart()}>
           {loading ? (
-            <PulseLoader size={5} color="#fff" />
+            <Skeleton className="h-4 w-20 bg-white/40" />
           ) : (
             <span>Checkout ({cartItems.length})</span>
           )}

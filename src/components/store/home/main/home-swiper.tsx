@@ -39,7 +39,7 @@ export default function BasicSwiper() {
   return (
     <div className="relative w-full overflow-hidden rounded-lg shadow-lg">
       {/* Slides */}
-      <div className="relative w-full h-[180px] sm:h-[280px] md:h-[380px] lg:h-[450px]">
+      <div className="relative w-full h-[180px] sm:h-[280px] md:h-[250px] lg:h-[400px]">
         {images.map((img, index) => (
           <div
             key={img.id}

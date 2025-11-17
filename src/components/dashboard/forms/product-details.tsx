@@ -1119,11 +1119,13 @@ const ProductDetails = ({
                 </InputFieldset>
               )}
               <Button type="submit" disabled={isLoading}>
-                {isLoading
-                  ? "loading..."
-                  : data?.productId && data.variantId
-                  ? "Save product information"
-                  : "Create product"}
+                {isLoading ? (
+                  <Skeleton className="h-4 w-40 bg-white/40" />
+                ) : data?.productId && data.variantId ? (
+                  "Save product information"
+                ) : (
+                  "Create product"
+                )}
               </Button>
             </form>
           </Form>

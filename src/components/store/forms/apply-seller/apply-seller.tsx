@@ -1,6 +1,11 @@
 "use client";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { StoreType } from "@/lib/types";
-import { useState } from "react";
+import {
+  SubscriptionPlanTier,
+  isValidSubscriptionTier,
+} from "@/constants/subscription-plans";
 import Instructions from "./instructions";
 import ProgressBar from "./progress-bar";
 import Step1 from "./steps/step-1/step-1";
@@ -10,6 +15,20 @@ import Step4 from "./steps/step-4/step-4";
 
 export default function ApplySellerMultiForm() {
   const [step, setStep] = useState<number>(1);
+  const [selectedPlan, setSelectedPlan] =
+    useState<SubscriptionPlanTier | null>(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (selectedPlan) return;
+    const planParam = searchParams.get("plan");
+    if (!planParam) return;
+    const normalizedPlan = planParam.toUpperCase();
+
+    if (isValidSubscriptionTier(normalizedPlan)) {
+      setSelectedPlan(normalizedPlan as SubscriptionPlanTier);
+    }
+  }, [searchParams, selectedPlan]);
 
   const [formData, setFormData] = useState<StoreType>({
     name: "",
@@ -35,7 +54,12 @@ export default function ApplySellerMultiForm() {
         <ProgressBar step={step} />
         {/* Steps */}
         {step === 1 ? (
-          <Step1 step={step} setStep={setStep} />
+          <Step1
+            step={step}
+            setStep={setStep}
+            selectedPlan={selectedPlan}
+            onPlanSelect={setSelectedPlan}
+          />
         ) : step === 2 ? (
           <Step2
             formData={formData}
@@ -51,7 +75,7 @@ export default function ApplySellerMultiForm() {
             setStep={setStep}
           />
         ) : step === 4 ? (
-          <Step4 />
+          <Step4 selectedPlan={selectedPlan} formData={formData} />
         ) : null}
       </div>
     </div>

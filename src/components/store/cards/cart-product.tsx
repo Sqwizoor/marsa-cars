@@ -82,9 +82,6 @@ const CartProduct = ({
         totalFee = shippingFee;
       }
 
-      // Adjust aggregate shipping total (remove previous, add new)
-      setTotalShipping((prevTotal) => prevTotal - prev.totalFee + totalFee);
-
       return {
         initialFee,
         extraFee,
@@ -94,12 +91,22 @@ const CartProduct = ({
         shippingService,
       };
     });
-  }, [extraShippingFee, quantity, setTotalShipping, shippingFee, shippingMethod, shippingService, stock, weight]);
+  }, [extraShippingFee, quantity, shippingFee, shippingMethod, shippingService, stock, weight]);
 
   // Recalculate on relevant changes or on mount
   useEffect(() => {
     calculateShipping();
   }, [calculateShipping, userCountry]);
+
+  // Update the total shipping in the parent component AFTER the local shipping info is updated.
+  useEffect(() => {
+    setTotalShipping((prevTotal) => prevTotal + shippingInfo.totalFee);
+
+    // Cleanup function to subtract the fee when the component unmounts or quantity changes
+    return () => {
+      setTotalShipping((prevTotal) => prevTotal - shippingInfo.totalFee);
+    };
+  }, [shippingInfo.totalFee, setTotalShipping]);
 
   const selected = selectedItems.find(
     (p) => unique_id === `${p.productId}-${p.variantId}-${p.sizeId}`
@@ -268,6 +275,7 @@ const { updateProductQuantity, removeFromCart } = useCartStore((state) => state)
                     min={1}
                     max={stock}
                     className="m-1 h-6 w-[32px] bg-transparent border-none leading-6 tracking-normal text-center outline-none text-gray-900 font-bold"
+                    readOnly
                   />
                   <div
                     className="w-6 h-6 text-xs bg-gray-100 hover:bg-gray-200 leading-6 grid place-items-center rounded-full cursor-pointer"

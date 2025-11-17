@@ -61,14 +61,16 @@ export default function CountrySelector({
           disabled={disabled}
         >
           <span className="truncate flex items-center">
-            <Image
-              alt={`${selectedValue.name}`}
-              src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${selectedValue.code}.svg`}
-              width={32}
-              height={24}
-              className={"inline mr-2 h-4 w-6 rounded-sm object-cover"}
-            />
-            {selectedValue.name}
+            {selectedValue && selectedValue.code && (
+              <Image
+                alt={`${selectedValue.name}`}
+                src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${selectedValue.code}.svg`}
+                width={32}
+                height={24}
+                className={"inline mr-2 h-4 w-6 rounded-sm object-cover"}
+              />
+            )}
+            {selectedValue?.name || "Select a country"}
           </span>
           <span
             className={`absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none ${
@@ -153,7 +155,7 @@ export default function CountrySelector({
                         className={"inline mr-2 h-4 w-6 rounded-sm object-cover"}
                       />
                       <span className="font-normal truncate">{value.name}</span>
-                      {value.name === selectedValue.name && (
+                      {value.name === selectedValue?.name && (
                         <span className="text-blue-600 absolute inset-y-0 right-0 flex items-center pr-8">
                           <svg
                             className="h-5 w-5"

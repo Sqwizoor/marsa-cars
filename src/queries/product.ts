@@ -2,6 +2,7 @@
 
 // DB
 import { db } from "@/lib/db";
+import { ensureSellerSubscription } from "@/lib/subscription-guard";
 
 // Types
 import {
@@ -50,6 +51,8 @@ export const upsertProduct = async (
       throw new Error(
         "Unauthorized Access: Seller Privileges Required for Entry."
       );
+
+    await ensureSellerSubscription(user.id);
 
     // Ensure product data is provided
     if (!product) throw new Error("Please provide product data.");
@@ -412,6 +415,8 @@ export const deleteProduct = async (productId: string) => {
     throw new Error(
       "Unauthorized Access: Seller Privileges Required for Entry."
     );
+
+  await ensureSellerSubscription(user.id);
 
   // Ensure product data is provided
   if (!productId) throw new Error("Please provide product id.");
@@ -1466,6 +1471,8 @@ export const updateProductStock = async (
       throw new Error(
         "Unauthorized Access: Seller Privileges Required for Entry."
       );
+
+    await ensureSellerSubscription(user.id);
 
     // Validate input
     if (!sizeId) throw new Error("Size ID is required.");

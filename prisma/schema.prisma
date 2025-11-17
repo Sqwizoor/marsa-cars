@@ -11,6 +11,21 @@ enum Role {
   USER
   ADMIN
   SELLER
+  ADVERTISER
+}
+
+enum SubscriptionTier {
+  BRONZE
+  SILVER
+  GOLD
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING
 }
 
 model User {
@@ -29,6 +44,10 @@ model User {
   wishlist          Wishlist[]        @relation("WishlistToUser")
   payments          PaymentDetails[]  @relation("PaymentDetailsToUser")
   coupons           Coupon[]          @relation("CouponToUser")
+  subscriptions     Subscription[]    @relation("UserSubscriptions")
+  ads               Advertisement[]   @relation("UserAdvertisements")
+
+  storeApplication StoreApplication?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -684,4 +703,76 @@ model PaymentDetails {
 
   @@index([orderId])
   @@index([userId])
+}
+
+model Subscription {
+  id     String           @id @default(uuid())
+  tier   SubscriptionTier
+  status SubscriptionStatus @default(PENDING)
+  
+  // Pricing
+  amount          Float
+  currency        String @default("ZAR")
+  
+  // Ad limits
+  adLimit         Int // 10 for Bronze, 30 for Silver, -1 for Gold (unlimited)
+  adsUsed         Int @default(0)
+
+  // Trial support
+  isTrial         Boolean  @default(false)
+  trialEndsAt     DateTime?
+  
+  // Billing period
+  startDate       DateTime?
+  endDate         DateTime?
+  
+  // PayFast payment details
+  paymentId       String? // PayFast payment ID
+  paymentStatus   String? @default("PENDING") // PENDING, COMPLETE, FAILED
+  
+  userId String
+  user   User   @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model StoreApplication {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  data Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Advertisement {
+  id          String  @id @default(uuid())
+  title       String
+  description String  @db.Text
+  image       String?
+  url         String? // External link or product link
+  
+  // Ad placement
+  isActive    Boolean @default(true)
+  views       Int     @default(0)
+  clicks      Int     @default(0)
+  
+  // Optional targeting
+  targetCategory    String?
+  targetSubCategory String?
+  
+  userId String
+  user   User   @relation("UserAdvertisements", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isActive])
 }

@@ -1,6 +1,7 @@
 import { ShippingAddress } from "@prisma/client";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "../ui/button";
+import PayFastButton from "@/components/store/checkout-page/payfast-button";
 import FastDelivery from "./fast-delivery";
 import { SecurityPrivacyCard } from "../product-page/returns-security-privacy-card";
 import toast from "react-hot-toast";
@@ -10,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils"; 
 import { CartWithCartItemsType } from "@/lib/types";
 import ApplyCouponForm from "../forms/apply-coupon";
-import { PulseLoader } from "react-spinners";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props {
   shippingAddress: ShippingAddress | null;
@@ -34,6 +35,7 @@ const PlaceOrderCard = ({
     } else {
       const order = await placeOrder(shippingAddress, id);
       if (order) {
+        // Do not empty cart here for PayFast; keep existing flow for manual place order
         emptyCart();
         await emptyUserCart();
         push(`/order/${order.orderId}`);
@@ -114,14 +116,19 @@ const PlaceOrderCard = ({
           </div>
         )}
       </div>
-      <div className="mt-2 p-4 bg-white">
-        <Button onClick={() => handlePlaceOrder()}>
+      <div className="mt-2 p-4 bg-white space-y-2">
+        <Button onClick={() => handlePlaceOrder()} className="w-full">
           {loading ? (
-            <PulseLoader size={5} color="#fff" />
+            <Skeleton className="h-4 w-20 bg-white/40" />
           ) : (
             <span>Place order</span>
           )}
         </Button>
+        {/* Alternative: PayFast gateway - creates order first, then redirects */}
+        {/* Only show when address is selected */}
+        {shippingAddress && (
+          <PayFastButton cartId={cartData.id} shippingAddressId={shippingAddress.id} />
+        )}
       </div>
       <div className="mt-2 p-4 bg-white px-6">
         <FastDelivery />
