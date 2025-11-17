@@ -139,15 +139,9 @@ const OfferTagDetails = ({ data }: OfferTagDetailsProps) => {
                     <FormControl>
                       <Input placeholder="Name" {...field} />
                     </FormControl>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
-                  <Skeleton className="h-4 w-32 bg-white/40" />
-                ) : data?.id ? (
-                  "Save offer tag information"
-                ) : (
-                  "Create offer tag"
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </Button>
               />
               <FormField
                 disabled={isLoading}
