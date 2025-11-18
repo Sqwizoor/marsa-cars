@@ -8,31 +8,36 @@ export default function CategoryCard({
   category: FeaturedCategoryType;
 }) {
   return (
-    <div className="w-full h-full rounded-[10px] bg-white">
+    <div className="group w-full rounded-2xl bg-gradient-to-br from-white to-gray-50 border border-gray-200 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] overflow-hidden">
       <Link href={`/browse?category=${category.url}`}>
-        <div className="px-5 pt-4 flex items-center justify-between">
-          <span className="text-[20px] text-[#222] font-extrabold line-clamp-1 overflow-hidden flex-1">
-            {category.name}
-          </span>
-          <span className="block  text-[14px] text-[#222] mr-2.5 hover:underline">
-            View more
-          </span>
+        <div className="px-3 py-2.5 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-100">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-bold text-gray-800 line-clamp-1 flex-1">
+              {category.name}
+            </span>
+            <span className="text-xs text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap">
+              View →
+            </span>
+          </div>
         </div>
       </Link>
-      <div className="flex gap-x-2 p-4">
-        {category.subCategories.map((sub) => (
+      <div className="grid grid-cols-2 gap-1.5 p-2">
+        {category.subCategories.slice(0, 4).map((sub) => (
           <Link
             key={sub.id}
             href={`/browse?subCategory=${sub.url}`}
-            className="cursor-pointer rounded-[10px] overflow-hidden"
+            className="relative cursor-pointer rounded-lg overflow-hidden group/item"
           >
             <Image
               src={sub.image}
               alt={sub.name}
-              width={180}
-              height={195}
-              className="w-[180px] h-[150px] object-cover rounded-md hover:opacity-80"
+              width={120}
+              height={100}
+              className="w-full h-20 object-cover group-hover/item:scale-110 transition-transform duration-300"
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity duration-300 flex items-end p-1.5">
+              <span className="text-[10px] font-semibold text-white line-clamp-1">{sub.name}</span>
+            </div>
           </Link>
         ))}
       </div>

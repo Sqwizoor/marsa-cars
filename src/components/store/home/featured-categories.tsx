@@ -15,7 +15,7 @@ export default function FeaturedCategories({
         <div className="h-[1px] flex-1 border-t-[2px] border-t-[hsla(0,0%,59.2%,.3)] my-4 mx-[14px]" />
       </div>
       {/* List */}
-      <div className="grid min-[770px]:grid-cols-2 min-[1120px]:grid-cols-3  gap-4 w-full mt-7">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 w-full mt-7">
         {categories.map((category) => (
           <CategoryCard key={category.id} category={category} />
         ))}
