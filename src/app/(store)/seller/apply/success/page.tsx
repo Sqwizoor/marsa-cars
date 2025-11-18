@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import PaymentProcessing from "@/components/store/apply/payment-processing";
 // import MinimalHeader from "@/components/store/layout/minimal-header/header";
 
 export default async function SellerApplySuccessPage() {
@@ -16,7 +17,17 @@ export default async function SellerApplySuccessPage() {
   });
 
   if (!store) {
-    // If somehow no store exists yet, send them back to apply flow
+    // Check if there is a pending application
+    const application = await db.storeApplication.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (application) {
+      // Payment is likely still processing
+      return <PaymentProcessing />;
+    }
+
+    // If somehow no store exists yet AND no application, send them back to apply flow
     redirect("/seller/apply");
   }
 
