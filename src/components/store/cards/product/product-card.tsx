@@ -18,14 +18,14 @@ export default function ProductCard({ product }: { product: ProductType }) {
   const { variantSlug, variantName, images, sizes } = variant;
 
   const handleaddToWishlist = async () => {
-    try {
-      const res = await addToWishlist(id, variant.variantId);
-      if (res) toast.success("Product successfully added to wishlist.");
-    } catch (error: unknown) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to add to wishlist"
-      );
+    const res = await addToWishlist(id, variant.variantId);
+    
+    if (!res.ok) {
+      toast.error(res.error);
+      return;
     }
+    
+    toast.success("Product successfully added to your wishlist!");
   };
 
   return (

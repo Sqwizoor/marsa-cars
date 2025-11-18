@@ -799,7 +799,7 @@ export const updateCartWithLatest = async (
  * @param productId - The ID of the product to add to the wishlist.
  * @param variantId - The ID of the product variant.
  * @param sizeId - Optional size ID if applicable.
- * @returns The created wishlist item.
+ * @returns A structured result with success status and data or error message.
  */
 export const addToWishlist = async (
   productId: string,
@@ -809,12 +809,17 @@ export const addToWishlist = async (
   // Ensure the user is authenticated
   const user = await currentUser();
 
-  if (!user) throw new Error("Unauthenticated.");
+  if (!user) {
+    return { 
+      ok: false as const, 
+      error: "Please sign in to add items to your wishlist" 
+    };
+  }
 
   const userId = user.id;
 
   try {
-    const existingWIshlistItem = await db.wishlist.findFirst({
+    const existingWishlistItem = await db.wishlist.findFirst({
       where: {
         userId,
         productId,
@@ -822,11 +827,14 @@ export const addToWishlist = async (
       },
     });
 
-    if (existingWIshlistItem) {
-      throw new Error("Product is already in the wishlist");
+    if (existingWishlistItem) {
+      return { 
+        ok: false as const, 
+        error: "Product is already in your wishlist" 
+      };
     }
 
-    return await db.wishlist.create({
+    const item = await db.wishlist.create({
       data: {
         userId,
         productId,
@@ -834,8 +842,14 @@ export const addToWishlist = async (
         sizeId,
       },
     });
+
+    return { ok: true as const, item };
   } catch (error) {
-    throw error;
+    console.error("addToWishlist error:", error);
+    return { 
+      ok: false as const, 
+      error: "Failed to add to wishlist. Please try again." 
+    };
   }
 };
 

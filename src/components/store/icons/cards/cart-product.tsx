@@ -132,12 +132,14 @@ const CartProduct: FC<Props> = ({
 
   // Handle add product to wishlist
   const handleaddToWishlist = async () => {
-    try {
-      const res = await addToWishlist(productId, variantId, sizeId);
-      if (res) toast.success("Product successfully added to wishlist.");
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Failed to add to wishlist");
+    const res = await addToWishlist(productId, variantId, sizeId);
+    
+    if (!res.ok) {
+      toast.error(res.error);
+      return;
     }
+    
+    toast.success("Product successfully added to your wishlist!");
   };
 
   return (
