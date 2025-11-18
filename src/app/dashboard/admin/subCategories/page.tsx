@@ -20,13 +20,8 @@ export default async function AdminSubCategoriesPage() {
 
   return (
     <DataTable
-      actionButtonText={
-        <>
-          <Plus size={15} />
-          Create SubCategory
-        </>
-      }
-      modalChildren={<SubCategoryDetails categories={categories} />}
+      actionButtonText={null}
+      modalChildren={null}
       newTabLink="/dashboard/admin/subCategories/new"
       filterValue="name"
       data={subCategories}
