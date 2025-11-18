@@ -15,7 +15,17 @@ export async function POST(req: NextRequest) {
     console.log("PayFast Subscription Webhook received:", data);
 
     // Verify signature
-    const config = getPayFastConfig();
+    let config;
+    try {
+      config = getPayFastConfig();
+    } catch (error) {
+      console.error("PayFast config error in webhook:", error);
+      return NextResponse.json(
+        { error: "Payment gateway configuration error" },
+        { status: 503 }
+      );
+    }
+    
     const receivedSignature = data.signature;
     delete data.signature; // Remove signature before validation
 

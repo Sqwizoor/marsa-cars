@@ -25,7 +25,14 @@ export async function POST(req: NextRequest) {
     if (!orderId) return new NextResponse("Missing order id", { status: 400 });
 
     // Optional: basic source IP check (skip strict check in sandbox)
-    const cfg = getPayFastConfig();
+    let cfg;
+    try {
+      cfg = getPayFastConfig();
+    } catch (error) {
+      console.error("PayFast config error in ITN:", error);
+      return new NextResponse("Payment gateway configuration error", { status: 503 });
+    }
+    
     if (cfg.mode === "live") {
       const fwd = req.headers.get("x-forwarded-for");
       const clientIp = fwd ? fwd.split(",")[0].trim() : (req.headers.get("x-real-ip") || null);

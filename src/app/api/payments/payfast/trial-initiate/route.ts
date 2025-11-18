@@ -41,7 +41,19 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const cfg = getPayFastConfig();
+    let cfg;
+    try {
+      cfg = getPayFastConfig();
+    } catch (configError: any) {
+      console.error("PayFast configuration error:", configError.message);
+      return NextResponse.json(
+        { 
+          error: "Payment system not configured", 
+          details: "PayFast credentials are missing. Please contact support."
+        },
+        { status: 503 }
+      );
+    }
     const email =
       user.emailAddresses?.[0]?.emailAddress ||
       user.primaryEmailAddress?.emailAddress;

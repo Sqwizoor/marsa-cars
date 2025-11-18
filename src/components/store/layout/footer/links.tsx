@@ -78,6 +78,10 @@ const footer_links = [
     link: "/contact",
   },
   {
+    title: "Forum",
+    link: "/forum",
+  },
+  {
     title: "Wishlist",
     link: "/profile/wishlist",
   },

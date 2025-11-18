@@ -171,7 +171,26 @@ export async function POST(req: NextRequest) {
     });
 
     // Create PayFast payment request
-    const config = getPayFastConfig();
+    let config;
+    try {
+      config = getPayFastConfig();
+    } catch (error) {
+      console.error("PayFast config error:", error);
+      
+      // Check if it's a missing credentials error
+      if (!process.env.PAYFAST_MERCHANT_ID || !process.env.PAYFAST_MERCHANT_KEY) {
+        return NextResponse.json({
+          error: "PayFast payment gateway is not configured. Please contact support.",
+          details: "Missing payment gateway credentials"
+        }, { status: 503 });
+      }
+      
+      return NextResponse.json({
+        error: "Payment configuration error",
+        details: error instanceof Error ? error.message : "Unknown error"
+      }, { status: 500 });
+    }
+    
     const baseUrl = getPayFastBaseUrl(config.mode);
 
     const paymentData: PayFastPaymentRequest = {

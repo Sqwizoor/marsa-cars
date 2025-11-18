@@ -26,7 +26,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Order already paid" }, { status: 400 });
     }
 
-    const cfg = getPayFastConfig();
+    let cfg;
+    try {
+      cfg = getPayFastConfig();
+    } catch (error) {
+      console.error("PayFast config error:", error);
+      
+      // Check if it's a missing credentials error
+      if (!process.env.PAYFAST_MERCHANT_ID || !process.env.PAYFAST_MERCHANT_KEY) {
+        return NextResponse.json({
+          error: "PayFast payment gateway is not configured. Please contact support.",
+          details: "Missing payment gateway credentials"
+        }, { status: 503 });
+      }
+      
+      return NextResponse.json({
+        error: "Payment configuration error",
+        details: error instanceof Error ? error.message : "Unknown error"
+      }, { status: 500 });
+    }
 
     // PayFast sandbox limits: max amount ~10,000 ZAR
     let amount = order.total;

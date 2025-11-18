@@ -8,6 +8,7 @@ import CountryLanguageCurrencySelector from "./country-lang-curr-selector";
 import Logo from "@/components/shared/logo";
 import { getAllOfferTags } from "@/queries/offer-tag";
 import OfferTagsWrapper from "./offer-tags-wrapper";
+import { MessageSquare } from "lucide-react";
 
 export default async function Header() {
   // Get cookies from the store
@@ -60,6 +61,13 @@ export default async function Header() {
 
           {/* Right: Desktop actions */}
           <div className="hidden items-center gap-2 lg:flex">
+            <Link
+              href="/forum"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 text-white font-medium"
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span>Forum</span>
+            </Link>
             {/* <DownloadApp /> */}
             <CountryLanguageCurrencySelector userCountry={userCountry} />
             <UserMenu />

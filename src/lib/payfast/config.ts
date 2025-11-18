@@ -13,7 +13,8 @@ export function getPayFastConfig(): PayFastConfig {
   const notifyUrl = process.env.PAYFAST_NOTIFY_URL || `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/payments/payfast/itn`;
 
   if (!merchantId || !merchantKey) {
-    throw new Error("Missing PAYFAST_MERCHANT_ID or PAYFAST_MERCHANT_KEY env vars");
+    console.error("PayFast configuration error: Missing PAYFAST_MERCHANT_ID or PAYFAST_MERCHANT_KEY");
+    throw new Error("PayFast is not configured. Missing merchant credentials.");
   }
 
   return { mode, merchantId, merchantKey, passphrase, returnUrl, cancelUrl, notifyUrl };

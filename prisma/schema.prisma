@@ -49,6 +49,18 @@ model User {
 
   storeApplication StoreApplication?
 
+  // Forum relations
+  forumThreads       ForumThread[]     @relation("UserForumThreads")
+  forumPosts         ForumPost[]       @relation("UserForumPosts")
+  forumReactions     ForumReaction[]   @relation("UserForumReactions")
+  forumBookmarks     ForumBookmark[]   @relation("UserForumBookmarks")
+  forumReports       ForumReport[]     @relation("UserForumReports")
+  forumModeratorRoles ForumModerator[] @relation("UserForumModerators")
+  forumBadges        ForumBadge[]      @relation("UserForumBadges")
+  forumStats         ForumUserStats?   @relation("UserForumStats")
+  threadLastPosts    ForumThread[]     @relation("ThreadLastPost")
+  moderatorReviews   ForumReport[]     @relation("ModeratorReviews")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -775,4 +787,346 @@ model Advertisement {
 
   @@index([userId])
   @@index([isActive])
+}
+
+// ==================== FORUM MODELS ====================
+
+enum ThreadStatus {
+  OPEN
+  CLOSED
+  PINNED
+  LOCKED
+}
+
+enum PostStatus {
+  ACTIVE
+  EDITED
+  DELETED
+  HIDDEN
+}
+
+enum ReactionType {
+  LIKE
+  HELPFUL
+  THANKS
+  INFORMATIVE
+  FUNNY
+  AGREE
+  DISAGREE
+}
+
+enum BadgeType {
+  NEWBIE
+  MEMBER
+  VETERAN
+  EXPERT
+  LEGEND
+  MODERATOR
+  CONTRIBUTOR
+  HELPER
+  ENTHUSIAST
+  TECH_GURU
+  PARTS_SPECIALIST
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+enum ReportReason {
+  SPAM
+  HARASSMENT
+  INAPPROPRIATE
+  OFF_TOPIC
+  DUPLICATE
+  MISINFORMATION
+  OTHER
+}
+
+model ForumCategory {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  slug        String  @unique
+  description String  @db.Text
+  icon        String? // Icon name or URL
+  color       String? // Hex color for category theming
+  order       Int     @default(0)
+  isActive    Boolean @default(true)
+
+  subforums  ForumSubforum[]  @relation("CategoryToSubforum")
+  threads    ForumThread[]    @relation("CategoryToThread")
+  moderators ForumModerator[] @relation("CategoryModerators")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([order])
+}
+
+model ForumSubforum {
+  id          String  @id @default(uuid())
+  name        String
+  slug        String  @unique
+  description String  @db.Text
+  icon        String?
+  order       Int     @default(0)
+  isActive    Boolean @default(true)
+
+  categoryId String
+  category   ForumCategory @relation("CategoryToSubforum", fields: [categoryId], references: [id], onDelete: Cascade)
+
+  threads    ForumThread[]    @relation("SubforumToThread")
+  moderators ForumModerator[] @relation("SubforumModerators")
+
+  // Stats
+  threadCount Int @default(0)
+  postCount   Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([order])
+}
+
+model ForumThread {
+  id      String       @id @default(uuid())
+  title   String
+  slug    String       @unique
+  content String       @db.Text
+  status  ThreadStatus @default(OPEN)
+
+  // Thread metadata
+  views         Int     @default(0)
+  isPinned      Boolean @default(false)
+  isLocked      Boolean @default(false)
+  isFeatured    Boolean @default(false)
+  isAnnouncement Boolean @default(false)
+
+  // Tags for better search
+  tags String[] @default([])
+
+  // Author info
+  authorId String
+  author   User   @relation("UserForumThreads", fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Category relationships
+  categoryId String
+  category   ForumCategory @relation("CategoryToThread", fields: [categoryId], references: [id], onDelete: Cascade)
+
+  subforumId String?
+  subforum   ForumSubforum? @relation("SubforumToThread", fields: [subforumId], references: [id], onDelete: SetNull)
+
+  // Related models
+  posts     ForumPost[]     @relation("ThreadToPosts")
+  bookmarks ForumBookmark[] @relation("ThreadToBookmarks")
+  reports   ForumReport[]   @relation("ThreadToReports")
+
+  // Stats
+  postCount    Int      @default(0)
+  lastPostAt   DateTime @default(now())
+  lastPostById String?
+  lastPostBy   User?    @relation("ThreadLastPost", fields: [lastPostById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([subforumId])
+  @@index([slug])
+  @@index([isPinned, lastPostAt])
+  @@index([lastPostAt])
+  @@index([views])
+}
+
+model ForumPost {
+  id      String     @id @default(uuid())
+  content String     @db.Text
+  status  PostStatus @default(ACTIVE)
+
+  // Post metadata
+  isEdited       Boolean  @default(false)
+  editedAt       DateTime?
+  isAcceptedAnswer Boolean @default(false)
+
+  // Author info
+  authorId String
+  author   User   @relation("UserForumPosts", fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Thread relationship
+  threadId String
+  thread   ForumThread @relation("ThreadToPosts", fields: [threadId], references: [id], onDelete: Cascade)
+
+  // Reply relationships (nested replies)
+  parentPostId String?
+  parentPost   ForumPost?  @relation("PostReplies", fields: [parentPostId], references: [id], onDelete: Cascade)
+  replies      ForumPost[] @relation("PostReplies")
+
+  // Interactions
+  reactions ForumReaction[] @relation("PostToReactions")
+  reports   ForumReport[]   @relation("PostToReports")
+
+  // Stats
+  reactionCount Int @default(0)
+  replyCount    Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([authorId])
+  @@index([threadId])
+  @@index([parentPostId])
+  @@index([createdAt])
+  @@index([isAcceptedAnswer])
+}
+
+model ForumReaction {
+  id   String       @id @default(uuid())
+  type ReactionType
+
+  userId String
+  user   User   @relation("UserForumReactions", fields: [userId], references: [id], onDelete: Cascade)
+
+  postId String
+  post   ForumPost @relation("PostToReactions", fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId, type])
+  @@index([userId])
+  @@index([postId])
+  @@index([type])
+}
+
+model ForumBookmark {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation("UserForumBookmarks", fields: [userId], references: [id], onDelete: Cascade)
+
+  threadId String
+  thread   ForumThread @relation("ThreadToBookmarks", fields: [threadId], references: [id], onDelete: Cascade)
+
+  notes String? @db.Text // Personal notes for the bookmark
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, threadId])
+  @@index([userId])
+  @@index([threadId])
+}
+
+model ForumReport {
+  id     String       @id @default(uuid())
+  reason ReportReason
+  status ReportStatus @default(PENDING)
+  description String?   @db.Text
+
+  // Reporter
+  reporterId String
+  reporter   User   @relation("UserForumReports", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  // What's being reported
+  threadId String?
+  thread   ForumThread? @relation("ThreadToReports", fields: [threadId], references: [id], onDelete: Cascade)
+
+  postId String?
+  post   ForumPost? @relation("PostToReports", fields: [postId], references: [id], onDelete: Cascade)
+
+  // Moderation
+  reviewedById String?
+  reviewedBy   User?    @relation("ModeratorReviews", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt   DateTime?
+  moderatorNotes String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([reporterId])
+  @@index([threadId])
+  @@index([postId])
+  @@index([status])
+  @@index([reviewedById])
+}
+
+model ForumModerator {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation("UserForumModerators", fields: [userId], references: [id], onDelete: Cascade)
+
+  categoryId String?
+  category   ForumCategory? @relation("CategoryModerators", fields: [categoryId], references: [id], onDelete: Cascade)
+
+  subforumId String?
+  subforum   ForumSubforum? @relation("SubforumModerators", fields: [subforumId], references: [id], onDelete: Cascade)
+
+  // Permissions
+  canPin    Boolean @default(true)
+  canLock   Boolean @default(true)
+  canDelete Boolean @default(false)
+  canBan    Boolean @default(false)
+
+  assignedAt DateTime @default(now())
+  assignedBy String? // User ID of admin who assigned
+
+  @@unique([userId, categoryId, subforumId])
+  @@index([userId])
+  @@index([categoryId])
+  @@index([subforumId])
+}
+
+model ForumBadge {
+  id          String    @id @default(uuid())
+  type        BadgeType
+  name        String
+  description String    @db.Text
+  icon        String?
+  color       String?
+
+  userId String
+  user   User   @relation("UserForumBadges", fields: [userId], references: [id], onDelete: Cascade)
+
+  earnedAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+}
+
+model ForumUserStats {
+  id String @id @default(uuid())
+
+  userId String @unique
+  user   User   @relation("UserForumStats", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Activity counts
+  threadCount   Int @default(0)
+  postCount     Int @default(0)
+  reactionCount Int @default(0)
+  helpfulCount  Int @default(0) // Times marked as helpful
+  
+  // Reputation system
+  reputation    Int @default(0)
+  
+  // Engagement stats
+  totalViews    Int      @default(0)
+  lastActiveAt  DateTime @default(now())
+  
+  // Quality metrics
+  acceptedAnswers Int @default(0)
+  bestAnswers     Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([reputation])
+  @@index([postCount])
+  @@index([lastActiveAt])
 }
