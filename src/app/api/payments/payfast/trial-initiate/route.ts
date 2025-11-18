@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     const amountStr = "10.00";
     const paymentId = `trial_${user.id}_${Date.now()}`;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'production' ? "https://marsa-cars.vercel.app" : "http://localhost:3000");
 
     const entries: Array<[string, string]> = [
       ["merchant_id", cfg.merchantId],

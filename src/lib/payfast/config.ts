@@ -7,10 +7,12 @@ export function getPayFastConfig(): PayFastConfig {
   const merchantKey = process.env.PAYFAST_MERCHANT_KEY || "";
   const passphrase = process.env.PAYFAST_PASSPHRASE || undefined;
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'production' ? "https://marsa-cars.vercel.app" : "http://localhost:3000");
+
   // These should be absolute URLs exposed to PayFast
-  const returnUrl = process.env.PAYFAST_RETURN_URL || `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/checkout/payfast-return`;
-  const cancelUrl = process.env.PAYFAST_CANCEL_URL || `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/checkout/payfast-cancel`;
-  const notifyUrl = process.env.PAYFAST_NOTIFY_URL || `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/payments/payfast/itn`;
+  const returnUrl = process.env.PAYFAST_RETURN_URL || `${appUrl}/checkout/payfast-return`;
+  const cancelUrl = process.env.PAYFAST_CANCEL_URL || `${appUrl}/checkout/payfast-cancel`;
+  const notifyUrl = process.env.PAYFAST_NOTIFY_URL || `${appUrl}/api/payments/payfast/itn`;
 
   if (!merchantId || !merchantKey) {
     console.error("PayFast configuration error: Missing PAYFAST_MERCHANT_ID or PAYFAST_MERCHANT_KEY");
