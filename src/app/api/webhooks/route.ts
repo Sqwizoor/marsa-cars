@@ -83,6 +83,28 @@ export async function POST(req: Request) {
     });
   }
 
+  // When user is updated (role changes, etc.)
+  if (evt.type === "user.updated") {
+    const data = JSON.parse(body).data;
+    const userId = data.id;
+    
+    // Get role from privateMetadata
+    const role = data.private_metadata?.role || "USER";
+    
+    // Update user in database
+    await db.user.update({
+      where: { id: userId },
+      data: {
+        name: `${data.first_name || ""} ${data.last_name || ""}`.trim() || data.username || "User",
+        email: data.email_addresses[0]?.email_address,
+        picture: data.image_url,
+        role: role as "USER" | "SELLER" | "ADMIN",
+      },
+    });
+    
+    console.log(`User ${userId} updated with role: ${role}`);
+  }
+
   // When user is deleted
   if (evt.type === "user.deleted") {
     // Parse the incoming event data to get the user ID
