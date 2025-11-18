@@ -713,3 +713,117 @@ export const getStorePageDetails = async (storeUrl: string) => {
   }
   return store;
 };
+
+export const getStoreDashboardStats = async (storeUrl: string) => {
+  try {
+    const user = await currentUser();
+    if (!user) throw new Error("Unauthenticated.");
+
+    const store = await db.store.findUnique({
+      where: { url: storeUrl, userId: user.id },
+    });
+
+    if (!store) throw new Error("Store not found.");
+
+    // 1. Total Revenue (from paid orders)
+    const revenueResult = await db.orderGroup.aggregate({
+      where: {
+        storeId: store.id,
+        order: {
+          paymentStatus: "Paid",
+        },
+      },
+      _sum: {
+        total: true,
+      },
+    });
+    const totalRevenue = revenueResult._sum.total || 0;
+
+    // 2. Total Orders
+    const totalOrders = await db.orderGroup.count({
+      where: {
+        storeId: store.id,
+      },
+    });
+
+    // 3. Total Products
+    const totalProducts = await db.product.count({
+      where: {
+        storeId: store.id,
+      },
+    });
+
+    // 4. Recent Orders
+    const recentOrders = await db.orderGroup.findMany({
+      where: {
+        storeId: store.id,
+      },
+      include: {
+        order: {
+          select: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+                picture: true,
+              },
+            },
+            paymentStatus: true,
+          },
+        },
+        items: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 5,
+    });
+
+    // 5. Graph Data (Last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const last30DaysOrders = await db.orderGroup.findMany({
+      where: {
+        storeId: store.id,
+        createdAt: { gte: thirtyDaysAgo },
+        order: { paymentStatus: "Paid" },
+      },
+      select: {
+        createdAt: true,
+        total: true,
+      },
+    });
+
+    // Aggregate by date
+    const graphDataMap = new Map<string, number>();
+    last30DaysOrders.forEach((order) => {
+      const date = order.createdAt.toISOString().split("T")[0];
+      const current = graphDataMap.get(date) || 0;
+      graphDataMap.set(date, current + order.total);
+    });
+
+    // Fill in missing days
+    const graphData = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split("T")[0];
+      graphData.push({
+        date: dateStr,
+        total: graphDataMap.get(dateStr) || 0,
+      });
+    }
+
+    return {
+      totalRevenue,
+      totalOrders,
+      totalProducts,
+      recentOrders,
+      graphData,
+    };
+  } catch (error) {
+    console.error("Error fetching store dashboard stats:", error);
+    throw error;
+  }
+};
