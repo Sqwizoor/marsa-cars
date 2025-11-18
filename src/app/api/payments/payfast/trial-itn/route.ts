@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
 import { validateITNWithPayFast, verifyITNSignature } from "@/lib/payfast/utils";
-import { clerkClient } from "@clerk/nextjs/server";
+import { activateSellerTrial } from "@/lib/store-activation";
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,77 +44,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: "error" });
     }
 
-    const application = await db.storeApplication.findUnique({
-      where: { userId },
-    });
-    if (!application) {
-      console.error("No store application found for user", userId);
-      return NextResponse.json({ status: "no application" });
-    }
-
-    const storeData = application.data as any;
-
-    await db.$transaction(async (tx) => {
-      await tx.subscription.create({
-        data: {
-          userId,
-          tier: "BRONZE",
-          status: "TRIALING",
-          isTrial: true,
-          amount: 10,
-          currency: "ZAR",
-          adLimit: 10,
-          adsUsed: 0,
-        },
-      });
-
-      await tx.store.create({
-        data: {
-          name: storeData.name,
-          description: storeData.description,
-          email: storeData.email,
-          phone: storeData.phone,
-          url: storeData.url,
-          logo: storeData.logo,
-          cover: storeData.cover,
-          returnPolicy:
-            storeData.returnPolicy || "Return in 30 days.",
-          defaultShippingService:
-            storeData.defaultShippingService || "International Delivery",
-          defaultShippingFeePerItem: storeData.defaultShippingFeePerItem ?? 0,
-          defaultShippingFeeForAdditionalItem:
-            storeData.defaultShippingFeeForAdditionalItem ?? 0,
-          defaultShippingFeePerKg: storeData.defaultShippingFeePerKg ?? 0,
-          defaultShippingFeeFixed: storeData.defaultShippingFeeFixed ?? 0,
-          defaultDeliveryTimeMin: storeData.defaultDeliveryTimeMin ?? 7,
-          defaultDeliveryTimeMax: storeData.defaultDeliveryTimeMax ?? 31,
-          status: "ACTIVE",
-          userId,
-        },
-      });
-
-      const updatedUser = await tx.user.update({
-        where: { id: userId },
-        data: {
-          role: "SELLER",
-        },
-      });
-
-      await tx.storeApplication.delete({
-        where: { userId },
-      });
-    });
-
-    // Also sync role into Clerk metadata so UI immediately reflects seller status
-    try {
-      const client = await clerkClient();
-      await client.users.updateUserMetadata(userId, {
-        privateMetadata: { role: "SELLER" },
-      });
-      console.log(`Successfully updated Clerk privateMetadata for user ${userId} to SELLER`);
-    } catch (err) {
-      console.error("Failed to update Clerk metadata for seller role", err);
-    }
+    await activateSellerTrial(userId);
 
     return NextResponse.json({ status: "ok" });
   } catch (e: any) {

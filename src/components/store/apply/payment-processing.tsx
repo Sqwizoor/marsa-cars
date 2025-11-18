@@ -1,18 +1,63 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export default function PaymentProcessing() {
   const router = useRouter();
+  const { toast } = useToast();
+  const [isChecking, setIsChecking] = useState(false);
+  const [showManual, setShowManual] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
       router.refresh();
     }, 3000);
 
-    return () => clearInterval(interval);
+    // Show manual button after 5 seconds if still stuck
+    const timeout = setTimeout(() => {
+      setShowManual(true);
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, [router]);
+
+  const handleManualCheck = async () => {
+    setIsChecking(true);
+    try {
+      const res = await fetch("/api/payments/payfast/simulate-trial-success", {
+        method: "POST",
+      });
+      
+      if (res.ok) {
+        toast({
+          title: "Success",
+          description: "Payment verified manually. Refreshing...",
+        });
+        router.refresh();
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Error",
+          description: data.error || "Failed to verify payment manually",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChecking(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f5f7fb] text-slate-900 flex items-center justify-center">
@@ -27,6 +72,22 @@ export default function PaymentProcessing() {
           We are confirming your payment with PayFast. This usually takes a few seconds.
           The page will refresh automatically.
         </p>
+
+        {showManual && (
+          <div className="mt-6 pt-6 border-t border-slate-100">
+            <p className="text-xs text-slate-500 mb-3">
+              Taking longer than expected? If you have completed the payment:
+            </p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleManualCheck}
+              disabled={isChecking}
+            >
+              {isChecking ? "Verifying..." : "I have completed the payment"}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

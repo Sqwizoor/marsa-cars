@@ -39,13 +39,31 @@ export function buildRedirectUrl(data: Omit<PayFastPaymentRequest, "signature">)
 
 export async function validateITNWithPayFast(originalBody: string) {
   const cfg = getPayFastConfig();
-  const res = await fetch(getPayFastValidateUrl(cfg.mode), {
+  
+  // Try the configured mode first
+  const primaryUrl = getPayFastValidateUrl(cfg.mode);
+  const res = await fetch(primaryUrl, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: originalBody,
   });
   const text = await res.text();
-  return text.trim().toUpperCase() === "VALID";
+  if (text.trim().toUpperCase() === "VALID") return true;
+
+  // If failed, try the other mode (fallback)
+  // This handles cases where env var is 'sandbox' but payment was 'live' or vice versa
+  const fallbackMode = cfg.mode === "live" ? "sandbox" : "live";
+  const fallbackUrl = getPayFastValidateUrl(fallbackMode);
+  
+  console.warn(`PayFast ITN validation failed on ${cfg.mode}, trying ${fallbackMode}...`);
+  
+  const resFallback = await fetch(fallbackUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: originalBody,
+  });
+  const textFallback = await resFallback.text();
+  return textFallback.trim().toUpperCase() === "VALID";
 }
 
 export function verifyITNSignature(itn: Record<string, any>): boolean {
