@@ -3,14 +3,15 @@ import { updateThread, deleteThread } from "@/queries/forum";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { threadId: string } }
+  { params }: { params: Promise<{ threadId: string }> }
 ) {
   try {
+    const { threadId } = await params;
     const body = await request.json();
     const { title, content, tags } = body;
 
     const result = await updateThread({
-      threadId: params.threadId,
+      threadId,
       title,
       content,
       tags,
@@ -35,10 +36,11 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { threadId: string } }
+  { params }: { params: Promise<{ threadId: string }> }
 ) {
   try {
-    const result = await deleteThread(params.threadId);
+    const { threadId } = await params;
+    const result = await deleteThread(threadId);
 
     if (!result.success) {
       return NextResponse.json(

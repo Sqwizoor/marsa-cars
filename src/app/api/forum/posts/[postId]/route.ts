@@ -3,9 +3,10 @@ import { updatePost, deletePost } from "@/queries/forum";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { postId: string } }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
+    const { postId } = await params;
     const body = await request.json();
     const { content } = body;
 
@@ -17,7 +18,7 @@ export async function PATCH(
     }
 
     const result = await updatePost({
-      postId: params.postId,
+      postId,
       content,
     });
 
@@ -40,10 +41,11 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { postId: string } }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const result = await deletePost(params.postId);
+    const { postId } = await params;
+    const result = await deletePost(postId);
 
     if (!result.success) {
       return NextResponse.json(
