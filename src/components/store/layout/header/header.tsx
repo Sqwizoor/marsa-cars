@@ -17,9 +17,9 @@ export default async function Header() {
 
   // Set default country if cookie is missing
   let userCountry: Country = {
-    name: "United States",
+    name: "South Africa",
     city: "",
-    code: "US",
+    code: "ZA",
     region: "",
   };
 
