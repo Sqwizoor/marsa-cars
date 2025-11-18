@@ -27,39 +27,42 @@ export default function RevenueChart({ data }: RevenueChartProps) {
   }));
 
   return (
-    <Card className="col-span-1 lg:col-span-2">
+    <Card className="col-span-1 lg:col-span-2 border-gray-200 dark:border-gray-700">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Revenue Trend (Last 30 Days)</CardTitle>
+        <CardTitle className="text-lg font-semibold dark:text-white">Revenue Trend (Last 30 Days)</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={formattedData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="stroke-gray-200 dark:stroke-gray-700" />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 12 }}
-              stroke="#888"
+              tick={{ fontSize: 12, fill: 'currentColor' }}
+              className="fill-gray-600 dark:fill-gray-400"
+              stroke="currentColor"
             />
             <YAxis
-              tick={{ fontSize: 12 }}
-              stroke="#888"
-              tickFormatter={(value) => `$${value.toLocaleString()}`}
+              tick={{ fontSize: 12, fill: 'currentColor' }}
+              className="fill-gray-600 dark:fill-gray-400"
+              stroke="currentColor"
+              tickFormatter={(value) => `R${value.toLocaleString()}`}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#fff",
-                border: "1px solid #e5e7eb",
+                backgroundColor: "var(--background)",
+                border: "1px solid var(--border)",
                 borderRadius: "8px",
+                color: "var(--foreground)",
               }}
-              formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
+              formatter={(value: number) => [`R${value.toLocaleString()}`, "Revenue"]}
             />
-            <Legend />
+            <Legend wrapperStyle={{ color: 'var(--foreground)' }} />
             <Line
               type="monotone"
               dataKey="revenue"
-              stroke="#3b82f6"
+              stroke="#FF1744"
               strokeWidth={3}
-              dot={{ fill: "#3b82f6", r: 4 }}
+              dot={{ fill: "#FF1744", r: 4 }}
               activeDot={{ r: 6 }}
               name="Revenue"
             />

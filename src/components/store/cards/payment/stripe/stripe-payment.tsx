@@ -22,7 +22,7 @@ export default function StripePayment({ orderId }: { orderId: string }) {
     const fetchSecret = async () => {
       const res = await createStripePaymentIntent({
         amount: 0, // Amount should be fetched from order
-        currency: "usd",
+        currency: "zar",
         metadata: { orderId },
       });
       if (res.clientSecret) setClientSecret(res.clientSecret);

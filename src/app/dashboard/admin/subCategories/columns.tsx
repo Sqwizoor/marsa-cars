@@ -64,13 +64,13 @@ export const columns: ColumnDef<SubCategoryWithCategoryType>[] = [
     header: "",
     cell: ({ row }) => {
       return (
-        <div className="relative h-44 min-w-64 rounded-xl overflow-hidden">
+        <div className="relative h-16 w-16 rounded-lg overflow-hidden">
           <Image
             src={row.original.image}
             alt=""
-            width={1000}
-            height={1000}
-            className="w-40 h-40 rounded-full object-cover shadow-2xl"
+            width={200}
+            height={200}
+            className="w-full h-full rounded-lg object-cover"
           />
         </div>
       );
@@ -81,7 +81,7 @@ export const columns: ColumnDef<SubCategoryWithCategoryType>[] = [
     header: "Name",
     cell: ({ row }) => {
       return (
-        <span className="font-extrabold text-lg capitalize">
+        <span className="font-semibold text-sm capitalize">
           {row.original.name}
         </span>
       );
