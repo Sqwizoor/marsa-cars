@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ReactionType } from "@prisma/client";
 import { ThumbsUp, Lightbulb, Heart, Smile, CheckCircle, ThumbsDown } from "lucide-react";
@@ -51,20 +52,43 @@ const reactionIcons: Record<ReactionType, { icon: React.ReactNode; label: string
 };
 
 export function ReactionButtons({ postId, reactions = [], currentUserId }: ReactionButtonsProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [localReactions, setLocalReactions] = useState(reactions);
 
   // Group reactions by type and count them
-  const reactionCounts = reactions?.reduce((acc, reaction) => {
+  const reactionCounts = localReactions?.reduce((acc, reaction) => {
     acc[reaction.type] = (acc[reaction.type] || 0) + 1;
     return acc;
   }, {} as Record<ReactionType, number>);
 
-  const userReactions = reactions?.filter(
+  const userReactions = localReactions?.filter(
     (r) => currentUserId && r.user.id === currentUserId
   );
 
   const handleReaction = async (type: ReactionType) => {
+    if (!currentUserId) {
+      alert("Please sign in to react to posts");
+      return;
+    }
+
     setLoading(true);
+    
+    // Optimistically update UI
+    const hasReacted = userReactions?.some((r) => r.type === type);
+    
+    if (hasReacted) {
+      // Remove reaction
+      setLocalReactions(localReactions.filter(r => !(r.user.id === currentUserId && r.type === type)));
+    } else {
+      // Add reaction
+      setLocalReactions([...localReactions, { 
+        type, 
+        user: { id: currentUserId, name: '', picture: '' },
+        id: 'temp-' + Date.now()
+      }]);
+    }
+
     try {
       const response = await fetch("/api/forum/reactions", {
         method: "POST",
@@ -73,11 +97,16 @@ export function ReactionButtons({ postId, reactions = [], currentUserId }: React
       });
 
       if (response.ok) {
-        // Refresh the page or update state
-        window.location.reload();
+        // Refresh server data without full page reload
+        router.refresh();
+      } else {
+        // Revert optimistic update on error
+        setLocalReactions(reactions);
       }
     } catch (error) {
       console.error("Error toggling reaction:", error);
+      // Revert optimistic update on error
+      setLocalReactions(reactions);
     } finally {
       setLoading(false);
     }

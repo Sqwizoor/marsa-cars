@@ -108,7 +108,8 @@ export async function POST(req: NextRequest) {
 
     // Also sync role into Clerk metadata so UI immediately reflects seller status
     try {
-      await clerkClient.users.updateUser(userId, {
+      const client = clerkClient;
+      await client.users.updateUser(userId, {
         publicMetadata: { role: "SELLER" },
       });
       console.log(`Successfully updated Clerk publicMetadata for user ${userId} to SELLER`);

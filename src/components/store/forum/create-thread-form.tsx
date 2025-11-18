@@ -131,10 +131,9 @@ export function CreateThreadForm({ categories }: CreateThreadFormProps) {
               <Label htmlFor="subforum">Subforum (Optional)</Label>
               <Select value={subforumId} onValueChange={setSubforumId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a subforum" />
+                  <SelectValue placeholder="Select a subforum (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
                   {selectedCategory.subforums.map((subforum) => (
                     <SelectItem key={subforum.id} value={subforum.id}>
                       {subforum.name}

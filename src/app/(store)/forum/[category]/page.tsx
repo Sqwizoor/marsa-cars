@@ -15,14 +15,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     category: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     page?: string;
     sort?: string;
     order?: string;
-  };
+  }>;
 }
 
 async function CategoryThreads({
@@ -92,15 +92,18 @@ export default async function CategoryPage({
   params,
   searchParams,
 }: CategoryPageProps) {
-  const category = await getCategoryBySlug(params.category);
+  const { category: categorySlug } = await params;
+  const { page: pageParam, sort, order: orderParam } = await searchParams;
+  
+  const category = await getCategoryBySlug(categorySlug);
 
   if (!category) {
     notFound();
   }
 
-  const page = parseInt(searchParams.page || "1");
-  const sortBy = searchParams.sort || "lastPostAt";
-  const order = searchParams.order || "desc";
+  const page = parseInt(pageParam || "1");
+  const sortBy = sort || "lastPostAt";
+  const order = orderParam || "desc";
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -143,7 +146,7 @@ export default async function CategoryPage({
               {category.subforums.map((subforum) => (
                 <Link
                   key={subforum.id}
-                  href={`/forum/${params.category}/${subforum.slug}`}
+                  href={`/forum/${categorySlug}/${subforum.slug}`}
                   className="p-4 border rounded-lg hover:shadow-md transition-shadow"
                 >
                   <h3 className="font-semibold text-gray-900 mb-1">
@@ -190,7 +193,7 @@ export default async function CategoryPage({
         }
       >
         <CategoryThreads
-          categorySlug={params.category}
+          categorySlug={categorySlug}
           page={page}
           sortBy={sortBy}
           order={order}

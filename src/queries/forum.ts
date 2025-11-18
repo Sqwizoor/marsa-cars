@@ -475,7 +475,9 @@ export async function createPost({
 }) {
   try {
     const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
 
     const post = await db.$transaction(async (tx) => {
       // Check if thread is locked

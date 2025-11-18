@@ -11,9 +11,9 @@ import { Separator } from "@/components/ui/separator";
 import { formatDistanceToNow } from "date-fns";
 
 interface UserProfilePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 async function UserProfile({ userId }: { userId: string }) {
@@ -206,6 +206,8 @@ async function UserProfile({ userId }: { userId: string }) {
 }
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
+  const { id } = await params;
+  
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       {/* Breadcrumb */}
@@ -227,7 +229,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           </div>
         }
       >
-        <UserProfile userId={params.id} />
+        <UserProfile userId={id} />
       </Suspense>
     </div>
   );

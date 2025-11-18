@@ -22,12 +22,12 @@ import { Separator } from "@/components/ui/separator";
 import { formatDistanceToNow } from "date-fns";
 
 interface ThreadPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     page?: string;
-  };
+  }>;
 }
 
 async function ThreadContent({
@@ -194,13 +194,16 @@ export default async function ThreadPage({
   params,
   searchParams,
 }: ThreadPageProps) {
-  const thread = await getThreadBySlug(params.slug);
+  const { slug } = await params;
+  const { page: pageParam } = await searchParams;
+  
+  const thread = await getThreadBySlug(slug);
 
   if (!thread) {
     notFound();
   }
 
-  const page = parseInt(searchParams.page || "1");
+  const page = parseInt(pageParam || "1");
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -242,7 +245,7 @@ export default async function ThreadPage({
           </div>
         }
       >
-        <ThreadContent threadSlug={params.slug} page={page} />
+        <ThreadContent threadSlug={slug} page={page} />
       </Suspense>
     </div>
   );
