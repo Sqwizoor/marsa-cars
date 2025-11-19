@@ -64,6 +64,15 @@ export default function SubscriptionIndicator() {
   const expired = expiresAt ? new Date() > new Date(expiresAt) : false;
   const expiryLabel = expiresAt ? new Date(expiresAt).toLocaleDateString() : null;
 
+  // Calculate days left
+  let daysLeft = null;
+  if (expiresAt) {
+    const now = new Date();
+    const end = new Date(expiresAt);
+    const diffTime = end.getTime() - now.getTime();
+    daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
+
   return (
     <Link
       href="/dashboard/advertiser/manage"
@@ -74,6 +83,11 @@ export default function SubscriptionIndicator() {
       <span className="rounded bg-white/20 px-2 py-0.5">
         {remaining === -1 ? "∞" : `${remaining} left`}
       </span>
+      {isTrial && daysLeft !== null && daysLeft >= 0 && (
+        <span className="ml-1 border-l border-white/20 pl-2">
+          {daysLeft} days left
+        </span>
+      )}
       {/* show renewal info for paid plans only */}
       {!isTrial && expiryLabel && (
         <span className="text-white/70">Renews {expiryLabel}</span>

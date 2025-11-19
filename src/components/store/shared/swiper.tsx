@@ -57,7 +57,9 @@ const MainSwiper: FC<Props> = ({
               ) : type === "deal" ? (
                 <ProductCardDeal product={product as SimpleProduct} />
               ) : type === "curved" ? (
-                <ProductCardModern product={product as ProductType} />
+                <div className="h-[340px]">
+                  <ProductCardModern product={product as ProductType} />
+                </div>
               ) : (
                 <ProductCard product={product as ProductType} />
               )}

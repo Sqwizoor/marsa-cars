@@ -29,10 +29,10 @@ export default function ProductCard({ product }: { product: ProductType }) {
   };
 
   return (
-    <div className="w-full max-w-[280px] mx-auto">
+    <div className="w-full max-w-[280px] mx-auto overflow-hidden">
       <div
         className={cn(
-          "group w-full relative transition-all duration-300 bg-white ease-in-out p-4 rounded-3xl border border-gray-200 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 flex flex-col h-full",
+          "group w-full relative transition-all duration-300 bg-white ease-in-out p-4 rounded-3xl border border-gray-200 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 flex flex-col h-full overflow-hidden",
           {
             "": true,
           }
@@ -46,7 +46,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
             {/* Images Swiper */}
             <ProductCardImageSwiper images={images} />
             {/* Title */}
-            <div className="text-sm font-medium text-main-primary truncate mt-2 w-full">
+            <div className="text-sm font-medium text-main-primary truncate mt-2 w-full max-w-full">
               {name} · {variantName}
             </div>
             {/* Rating - Sales */}

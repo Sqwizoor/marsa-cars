@@ -116,6 +116,11 @@ export default function UserMenu() {
                         <span className="rounded bg-white/20 px-2 py-0.5">
                           {subscription.remainingAds === -1 ? "∞" : `${subscription.remainingAds} left`}
                         </span>
+                        {(subscription.phase === "TRIAL" || subscription.status === "TRIALING") && (subscription.expiresAt || subscription.trialEndsAt) && (
+                            <span className="ml-1 border-l border-white/20 pl-2">
+                                {Math.ceil((new Date(subscription.expiresAt || subscription.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days left
+                            </span>
+                        )}
                       </Link>
                     </div>
                   </>

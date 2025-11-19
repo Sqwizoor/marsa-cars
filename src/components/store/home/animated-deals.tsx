@@ -13,24 +13,24 @@ export default function AnimatedDeals({
   products: SimpleProduct[];
 }) {
   return (
-    <div className="relative w-full py-12 px-4 md:px-8 rounded-3xl overflow-hidden bg-main-primary shadow-2xl">
+    <div className="relative w-full py-12 px-4 md:px-8 rounded-3xl overflow-hidden bg-pink-primary shadow-2xl">
       {/* Background Effects */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-orange-primary/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-primary/10 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2" />
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-8">
           <div className="text-center md:text-left">
-            <div className="inline-block px-4 py-1 rounded-full bg-orange-primary/10 border border-orange-primary/20 text-orange-primary text-sm font-medium mb-4">
+            <div className="inline-block px-4 py-1 rounded-full bg-white/20 border border-white/30 text-white text-sm font-medium mb-4">
               Limited Time Offer
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">
-              Super <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-primary to-pink-primary">Deals</span>
+              Super <span className="text-white">Deals</span>
             </h2>
-            <p className="text-main-secondary text-lg">Save up to 90% on premium auto parts</p>
+            <p className="text-white/90 text-lg">Save up to 90% on premium auto parts</p>
           </div>
           
           <div className="flex items-center gap-6 bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5">
