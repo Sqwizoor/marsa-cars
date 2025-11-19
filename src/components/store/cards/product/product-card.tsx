@@ -41,12 +41,12 @@ export default function ProductCard({ product }: { product: ProductType }) {
         <div className="relative w-full flex flex-col">
           <Link
             href={`/product/${slug}/${variantSlug}`}
-            className="w-full relative overflow-hidden"
+            className="block w-full relative overflow-hidden"
           >
             {/* Images Swiper */}
             <ProductCardImageSwiper images={images} />
             {/* Title */}
-            <div className="text-sm font-medium text-main-primary overflow-hidden overflow-ellipsis line-clamp-1 mt-2">
+            <div className="text-sm font-medium text-main-primary truncate mt-2 w-full">
               {name} · {variantName}
             </div>
             {/* Rating - Sales */}
