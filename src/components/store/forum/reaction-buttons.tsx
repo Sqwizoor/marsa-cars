@@ -14,41 +14,48 @@ interface ReactionButtonsProps {
   currentUserId?: string;
 }
 
-const reactionIcons: Record<ReactionType, { icon: React.ReactNode; label: string; color: string }> = {
+const reactionIcons: Record<ReactionType, { icon: React.ReactNode; label: string; color: string; activeClass: string }> = {
   [ReactionType.LIKE]: {
     icon: <ThumbsUp className="h-4 w-4" />,
     label: "Like",
-    color: "text-blue-600",
+    color: "text-blue-primary",
+    activeClass: "bg-blue-primary hover:bg-blue-hover text-white",
   },
   [ReactionType.HELPFUL]: {
     icon: <CheckCircle className="h-4 w-4" />,
     label: "Helpful",
     color: "text-green-600",
+    activeClass: "bg-green-600 hover:bg-green-700 text-white",
   },
   [ReactionType.THANKS]: {
     icon: <Heart className="h-4 w-4" />,
     label: "Thanks",
-    color: "text-red-600",
+    color: "text-pink-primary",
+    activeClass: "bg-pink-primary hover:bg-pink-hover text-white",
   },
   [ReactionType.INFORMATIVE]: {
     icon: <Lightbulb className="h-4 w-4" />,
     label: "Informative",
-    color: "text-yellow-600",
+    color: "text-yellow-500",
+    activeClass: "bg-yellow-500 hover:bg-yellow-600 text-white",
   },
   [ReactionType.FUNNY]: {
     icon: <Smile className="h-4 w-4" />,
     label: "Funny",
-    color: "text-orange-600",
+    color: "text-orange-primary",
+    activeClass: "bg-orange-primary hover:bg-orange-hover text-white",
   },
   [ReactionType.AGREE]: {
     icon: <ThumbsUp className="h-4 w-4" />,
     label: "Agree",
-    color: "text-teal-600",
+    color: "text-blue-primary",
+    activeClass: "bg-blue-primary hover:bg-blue-hover text-white",
   },
   [ReactionType.DISAGREE]: {
     icon: <ThumbsDown className="h-4 w-4" />,
     label: "Disagree",
-    color: "text-gray-600",
+    color: "text-main-secondary",
+    activeClass: "bg-main-secondary hover:bg-main-primary text-white",
   },
 };
 
@@ -118,7 +125,7 @@ export function ReactionButtons({ postId, reactions = [], currentUserId }: React
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      {Object.entries(reactionIcons).map(([type, { icon, label, color }]) => {
+      {Object.entries(reactionIcons).map(([type, { icon, label, color, activeClass }]) => {
         const count = reactionCounts?.[type as ReactionType] || 0;
         const hasReacted = userReactions?.some((r) => r.type === type);
 
@@ -130,14 +137,14 @@ export function ReactionButtons({ postId, reactions = [], currentUserId }: React
             onClick={() => handleReaction(type as ReactionType)}
             disabled={loading}
             className={cn(
-              "gap-1 h-8",
-              hasReacted && color
+              "gap-1.5 h-8 transition-all duration-200 font-medium",
+              hasReacted ? activeClass : `hover:bg-gray-50 ${color} border-gray-200`
             )}
           >
             {icon}
             <span className="text-xs">{label}</span>
             {count > 0 && (
-              <span className="ml-1 font-semibold text-xs">
+              <span className={cn("ml-1 font-bold text-xs", hasReacted ? "text-white" : color)}>
                 {count}
               </span>
             )}

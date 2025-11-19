@@ -48,9 +48,9 @@ export function ForumSearch() {
           Search Forum
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white/95 backdrop-blur-md border-none shadow-2xl">
         <DialogHeader>
-          <DialogTitle>Search Forum</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-main-primary">Search Forum</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSearch} className="flex gap-2">
@@ -58,9 +58,9 @@ export function ForumSearch() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search threads and posts..."
-            className="flex-1"
+            className="flex-1 text-base font-medium text-main-primary border-gray-200 focus:border-blue-primary focus:ring-blue-primary/20"
           />
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading} className="bg-blue-primary hover:bg-blue-hover text-white">
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
@@ -74,7 +74,7 @@ export function ForumSearch() {
             {/* Threads */}
             {results.threads.length > 0 && (
               <div>
-                <h3 className="font-semibold text-lg mb-3">
+                <h3 className="font-bold text-xl mb-3 text-main-primary">
                   Threads ({results.threads.length})
                 </h3>
                 <div className="space-y-2">
@@ -84,15 +84,15 @@ export function ForumSearch() {
                       href={`/forum/thread/${thread.slug}`}
                       onClick={() => setOpen(false)}
                     >
-                      <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
-                        <h4 className="font-semibold text-blue-600 hover:underline mb-1">
+                      <Card className="p-4 hover:shadow-md transition-all cursor-pointer border-transparent hover:border-blue-100 hover:bg-blue-50/30">
+                        <h4 className="font-bold text-blue-primary hover:underline mb-1">
                           {thread.title}
                         </h4>
-                        <p className="text-sm text-gray-600 line-clamp-2">
+                        <p className="text-sm text-main-secondary line-clamp-2 font-medium">
                           {thread.content}
                         </p>
-                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                          <span>{thread.category.name}</span>
+                        <div className="flex items-center gap-2 mt-2 text-xs text-main-secondary font-medium">
+                          <span className="text-orange-primary">{thread.category.name}</span>
                           <span>•</span>
                           <span>by {thread.author.name}</span>
                         </div>
@@ -106,7 +106,7 @@ export function ForumSearch() {
             {/* Posts */}
             {results.posts.length > 0 && (
               <div>
-                <h3 className="font-semibold text-lg mb-3">
+                <h3 className="font-bold text-xl mb-3 text-main-primary">
                   Posts ({results.posts.length})
                 </h3>
                 <div className="space-y-2">
@@ -116,14 +116,14 @@ export function ForumSearch() {
                       href={`/forum/thread/${post.thread.slug}`}
                       onClick={() => setOpen(false)}
                     >
-                      <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
-                        <p className="text-sm text-blue-600 hover:underline mb-2">
+                      <Card className="p-4 hover:shadow-md transition-all cursor-pointer border-transparent hover:border-blue-100 hover:bg-blue-50/30">
+                        <p className="text-sm text-blue-primary hover:underline mb-2 font-bold">
                           in: {post.thread.title}
                         </p>
-                        <p className="text-sm text-gray-800 line-clamp-3">
+                        <p className="text-sm text-main-primary line-clamp-3 font-medium">
                           {post.content}
                         </p>
-                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                        <div className="flex items-center gap-2 mt-2 text-xs text-main-secondary font-medium">
                           <span>by {post.author.name}</span>
                         </div>
                       </Card>
@@ -134,7 +134,7 @@ export function ForumSearch() {
             )}
 
             {results.threads.length === 0 && results.posts.length === 0 && (
-              <div className="text-center py-8 text-gray-600">
+              <div className="text-center py-8 text-main-secondary font-medium">
                 No results found for "{query}"
               </div>
             )}

@@ -86,15 +86,15 @@ export function CreateThreadForm({ categories }: CreateThreadFormProps) {
   };
 
   return (
-    <Card>
+    <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm">
       <CardHeader>
-        <CardTitle>Create New Thread</CardTitle>
+        <CardTitle className="text-2xl font-bold text-main-primary">Create New Thread</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="title">Thread Title *</Label>
+            <Label htmlFor="title" className="text-main-primary font-bold">Thread Title *</Label>
             <Input
               id="title"
               value={title}
@@ -102,17 +102,18 @@ export function CreateThreadForm({ categories }: CreateThreadFormProps) {
               placeholder="Enter a descriptive title for your thread"
               required
               maxLength={200}
+              className="text-base font-medium text-main-primary border-gray-200 focus:border-blue-primary focus:ring-blue-primary/20"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-main-secondary font-medium">
               {title.length}/200 characters
             </p>
           </div>
 
           {/* Category */}
           <div className="space-y-2">
-            <Label htmlFor="category">Category *</Label>
+            <Label htmlFor="category" className="text-main-primary font-bold">Category *</Label>
             <Select value={categoryId} onValueChange={setCategoryId}>
-              <SelectTrigger>
+              <SelectTrigger className="text-base font-medium text-main-primary border-gray-200 focus:border-blue-primary focus:ring-blue-primary/20">
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
@@ -128,9 +129,9 @@ export function CreateThreadForm({ categories }: CreateThreadFormProps) {
           {/* Subforum */}
           {selectedCategory && selectedCategory.subforums.length > 0 && (
             <div className="space-y-2">
-              <Label htmlFor="subforum">Subforum (Optional)</Label>
+              <Label htmlFor="subforum" className="text-main-primary font-bold">Subforum (Optional)</Label>
               <Select value={subforumId} onValueChange={setSubforumId}>
-                <SelectTrigger>
+                <SelectTrigger className="text-base font-medium text-main-primary border-gray-200 focus:border-blue-primary focus:ring-blue-primary/20">
                   <SelectValue placeholder="Select a subforum (optional)" />
                 </SelectTrigger>
                 <SelectContent>
@@ -146,7 +147,7 @@ export function CreateThreadForm({ categories }: CreateThreadFormProps) {
 
           {/* Content */}
           <div className="space-y-2">
-            <Label htmlFor="content">Content *</Label>
+            <Label htmlFor="content" className="text-main-primary font-bold">Content *</Label>
             <Textarea
               id="content"
               value={content}
@@ -154,9 +155,9 @@ export function CreateThreadForm({ categories }: CreateThreadFormProps) {
               placeholder="Describe your question or topic in detail..."
               rows={12}
               required
-              className="font-mono text-sm"
+              className="text-base font-medium text-main-primary border-gray-200 focus:border-blue-primary focus:ring-blue-primary/20"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-main-secondary font-medium">
               Be as detailed as possible. Include relevant information like car
               model, year, part numbers, etc.
             </p>
@@ -164,7 +165,7 @@ export function CreateThreadForm({ categories }: CreateThreadFormProps) {
 
           {/* Tags */}
           <div className="space-y-2">
-            <Label htmlFor="tags">Tags (Optional)</Label>
+            <Label htmlFor="tags" className="text-main-primary font-bold">Tags (Optional)</Label>
             <div className="flex gap-2">
               <Input
                 id="tags"
@@ -177,20 +178,21 @@ export function CreateThreadForm({ categories }: CreateThreadFormProps) {
                     handleAddTag();
                   }
                 }}
+                className="text-base font-medium text-main-primary border-gray-200 focus:border-blue-primary focus:ring-blue-primary/20"
               />
-              <Button type="button" onClick={handleAddTag} variant="outline">
+              <Button type="button" onClick={handleAddTag} variant="outline" className="hover:bg-blue-50 hover:text-blue-primary hover:border-blue-200">
                 Add
               </Button>
             </div>
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
                 {tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="gap-1">
+                  <Badge key={tag} variant="secondary" className="gap-1 bg-blue-50 text-blue-primary hover:bg-blue-100 border-none">
                     {tag}
                     <button
                       type="button"
                       onClick={() => handleRemoveTag(tag)}
-                      className="hover:text-red-600"
+                      className="hover:text-red-600 transition-colors"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -201,14 +203,19 @@ export function CreateThreadForm({ categories }: CreateThreadFormProps) {
           </div>
 
           {/* Submit */}
-          <div className="flex gap-3">
-            <Button type="submit" disabled={loading || !title || !content || !categoryId}>
+          <div className="flex gap-3 pt-4">
+            <Button 
+              type="submit" 
+              disabled={loading || !title || !content || !categoryId}
+              className="bg-blue-primary hover:bg-blue-hover text-white font-bold px-8"
+            >
               {loading ? "Creating..." : "Create Thread"}
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => router.back()}
+              className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
             >
               Cancel
             </Button>

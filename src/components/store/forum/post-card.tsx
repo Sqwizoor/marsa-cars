@@ -115,20 +115,20 @@ export function PostCard({
 
             {/* Stats */}
             {post.author.forumStats && (
-              <div className="text-xs text-gray-600 space-y-1">
+              <div className="text-xs text-main-secondary space-y-1">
                 <div>
-                  <span className="font-medium">
+                  <span className="font-medium text-main-primary">
                     {post.author.forumStats.postCount}
                   </span>{" "}
                   posts
                 </div>
                 <div>
-                  <span className="font-medium text-orange-600">
+                  <span className="font-medium text-orange-primary">
                     {post.author.forumStats.reputation}
                   </span>{" "}
                   rep
                 </div>
-                <div className="text-gray-500">Member {memberSince}</div>
+                <div className="text-main-secondary">Member {memberSince}</div>
               </div>
             )}
           </div>
@@ -137,14 +137,14 @@ export function PostCard({
           <div className="flex-1 min-w-0">
             {/* Header */}
             <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-main-secondary">
                 <span>
                   {formatDistanceToNow(new Date(post.createdAt), {
                     addSuffix: true,
                   })}
                 </span>
                 {post.isEdited && post.editedAt && (
-                  <span className="text-gray-500">
+                  <span className="text-main-secondary">
                     (edited{" "}
                     {formatDistanceToNow(new Date(post.editedAt), {
                       addSuffix: true,
@@ -153,7 +153,7 @@ export function PostCard({
                   </span>
                 )}
                 {post.isAcceptedAnswer && (
-                  <Badge className="bg-green-500">
+                  <Badge className="bg-green-500 hover:bg-green-600">
                     <CheckCircle className="h-3 w-3 mr-1" />
                     Accepted Answer
                   </Badge>
@@ -164,7 +164,7 @@ export function PostCard({
               {isAuthor && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" className="hover:bg-orange-background/10 hover:text-orange-primary">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -175,7 +175,7 @@ export function PostCard({
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => onDelete?.(post.id)}
-                      className="text-red-600"
+                      className="text-red-600 focus:text-red-600 focus:bg-red-50"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete
@@ -192,10 +192,10 @@ export function PostCard({
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                   rows={6}
-                  className="w-full"
+                  className="w-full text-base font-medium text-main-primary"
                 />
                 <div className="flex gap-2">
-                  <Button onClick={handleSaveEdit} size="sm">
+                  <Button onClick={handleSaveEdit} size="sm" className="bg-orange-primary hover:bg-orange-hover text-white">
                     Save
                   </Button>
                   <Button
@@ -211,10 +211,8 @@ export function PostCard({
                 </div>
               </div>
             ) : (
-              <div className="prose prose-sm max-w-none mb-4">
-                <p className="whitespace-pre-wrap text-gray-800">
-                  {post.content}
-                </p>
+              <div className="prose prose-base max-w-none mb-4 text-main-primary font-medium leading-relaxed">
+                <p className="whitespace-pre-wrap">{post.content}</p>
               </div>
             )}
 

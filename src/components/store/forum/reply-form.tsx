@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,6 +25,7 @@ export function ReplyForm({
   onSuccess,
   onCancel,
 }: ReplyFormProps) {
+  const router = useRouter();
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -46,7 +48,7 @@ export function ReplyForm({
       if (response.ok) {
         setContent("");
         onSuccess?.();
-        window.location.reload(); // Refresh to show new post
+        router.refresh();
       } else {
         const error = await response.json();
         alert(error.error || "Failed to post reply");
@@ -60,11 +62,11 @@ export function ReplyForm({
   };
 
   return (
-    <Card>
-      <CardContent className="pt-6">
+    <Card className="border-none shadow-none bg-transparent">
+      <CardContent className="p-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-4">
-            <Avatar className="h-10 w-10 flex-shrink-0">
+            <Avatar className="h-10 w-10 flex-shrink-0 ring-2 ring-white shadow-sm">
               <AvatarImage src={user.picture} alt={user.name} />
               <AvatarFallback>{user.name[0]}</AvatarFallback>
             </Avatar>
@@ -79,14 +81,18 @@ export function ReplyForm({
                 }
                 rows={6}
                 required
-                className="w-full"
+                className="w-full text-base font-medium text-main-primary bg-white/50 backdrop-blur-sm focus:bg-white transition-all border-gray-200 focus:border-blue-primary focus:ring-blue-primary/20"
               />
               <div className="flex gap-2 mt-3">
-                <Button type="submit" disabled={loading || !content.trim()}>
-                  {loading ? "Posting..." : parentPostId ? "Post Reply" : "Post"}
+                <Button 
+                  type="submit" 
+                  disabled={loading || !content.trim()}
+                  className="bg-blue-primary hover:bg-blue-hover text-white font-bold"
+                >
+                  {loading ? "Posting..." : parentPostId ? "Post Reply" : "Post Reply"}
                 </Button>
                 {onCancel && (
-                  <Button type="button" variant="outline" onClick={onCancel}>
+                  <Button type="button" variant="outline" onClick={onCancel} className="hover:bg-red-50 hover:text-red-600 hover:border-red-200">
                     Cancel
                   </Button>
                 )}
