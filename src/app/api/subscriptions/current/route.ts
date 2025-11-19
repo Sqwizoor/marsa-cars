@@ -2,15 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 
-// Defensive helper: ensures Prisma client has Subscription model
-function getSubscriptionModel() {
-  const client: any = db as any;
-  if (!client.subscription) {
-    console.error("Prisma client missing 'subscription' model. Run 'npx prisma generate'.");
-    return null;
-  }
-  return client.subscription as any;
-}
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
@@ -20,13 +12,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ subscription: null });
     }
 
-    const subscriptionModel = getSubscriptionModel();
-    if (!subscriptionModel) {
-      return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
-    }
-
     // Get latest active or trialing subscription
-    const subscription = await subscriptionModel.findFirst({
+    const subscription = await db.subscription.findFirst({
       where: {
         userId,
         status: {
@@ -50,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     // Check if subscription has expired
     if (expiresAt && now > new Date(expiresAt)) {
-      await subscriptionModel.update({
+      await db.subscription.update({
         where: { id: subscription.id },
         data: {
           status: "EXPIRED",

@@ -13,16 +13,16 @@ export async function activateSellerTrial(userId: string) {
   const storeData = application.data as any;
 
   await db.$transaction(async (tx) => {
-    // Check if subscription already exists to avoid duplicates
+    // Check if subscription already exists
     const existingSub = await tx.subscription.findFirst({
       where: { userId },
+      orderBy: { createdAt: "desc" },
     });
 
-    if (!existingSub) {
-      // Set trial end date to 30 days from now
-      const trialEndsAt = new Date();
-      trialEndsAt.setDate(trialEndsAt.getDate() + 30);
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(trialEndsAt.getDate() + 30);
 
+    if (!existingSub) {
       await tx.subscription.create({
         data: {
           userId,
@@ -36,6 +36,21 @@ export async function activateSellerTrial(userId: string) {
           adsUsed: 0,
         },
       });
+    } else {
+      // If subscription exists but is not active/trialing, reactivate it as a trial
+      // Or if they are paying for a new trial, we should probably reset it
+      if (existingSub.status !== "ACTIVE" && existingSub.status !== "TRIALING") {
+        await tx.subscription.update({
+          where: { id: existingSub.id },
+          data: {
+            status: "TRIALING",
+            isTrial: true,
+            trialEndsAt,
+            adLimit: 10,
+            adsUsed: 0,
+          },
+        });
+      }
     }
 
     // Check if store already exists
