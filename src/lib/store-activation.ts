@@ -19,12 +19,17 @@ export async function activateSellerTrial(userId: string) {
     });
 
     if (!existingSub) {
+      // Set trial end date to 30 days from now
+      const trialEndsAt = new Date();
+      trialEndsAt.setDate(trialEndsAt.getDate() + 30);
+
       await tx.subscription.create({
         data: {
           userId,
           tier: "BRONZE",
           status: "TRIALING",
           isTrial: true,
+          trialEndsAt,
           amount: 10,
           currency: "ZAR",
           adLimit: 10,

@@ -1,12 +1,9 @@
 import { SubscriptionStatus } from "@prisma/client";
 import { db } from "./db";
 
-// Temporary fallback: Prisma client types may not include TRIALING until generate runs.
-const TRIALING_STATUS = "TRIALING" as unknown as SubscriptionStatus;
-
 const SELLER_ALLOWED_STATUSES: SubscriptionStatus[] = [
   SubscriptionStatus.ACTIVE,
-  TRIALING_STATUS,
+  SubscriptionStatus.TRIALING,
 ];
 
 /**
@@ -33,13 +30,11 @@ export async function ensureSellerSubscription(userId: string) {
   }
 
   const now = new Date();
-  const subscriptionWithTrial = subscription as typeof subscription & {
-    trialEndsAt?: Date | null;
-  };
-
+  
+  // Check expiration if dates are present
   const expiresAt =
-    subscription.status === TRIALING_STATUS
-      ? subscriptionWithTrial.trialEndsAt
+    subscription.status === SubscriptionStatus.TRIALING
+      ? subscription.trialEndsAt
       : subscription.endDate;
 
   if (expiresAt && now > expiresAt) {
