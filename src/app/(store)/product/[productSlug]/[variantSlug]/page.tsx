@@ -3,7 +3,6 @@ import ProductPageContainer from "@/components/store/product-page/container";
 import ProductDescription from "@/components/store/product-page/product-description";
 import ProductQuestions from "@/components/store/product-page/product-questions";
 import ProductSpecs from "@/components/store/product-page/product-specs";
-import RelatedProducts from "@/components/store/product-page/related-product";
 import ProductReviews from "@/components/store/product-page/reviews/product-reviews";
 import StoreProducts from "@/components/store/product-page/store-products";
 import { Separator } from "@/components/ui/separator";
@@ -63,24 +62,10 @@ export default async function ProductVariantPage({
     reviews,
   } = productData;
 
-  const relatedProducts = await getProducts(
-    { category: category.url },
-    "",
-    1,
-    12
-  );
-
   return (
     <div>
       <div className="md:max-w-[1650px] mx-auto p-4 md:p-8 overflow-x-hidden min-h-screen">
         <ProductPageContainer productData={productData} sizeId={sizeId}>
-          {relatedProducts.products && (
-            <>
-              <Separator />
-              {/* Related products */}
-              <RelatedProducts products={relatedProducts.products} />
-            </>
-          )}
           <Separator className="mt-6" />
           {/* Product reviews */}
           <ProductReviews
