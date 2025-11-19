@@ -78,7 +78,7 @@ const ProductReviews: FC<Props> = ({
       </div>
       {/* Statistics */}
       <div className="w-full">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <RatingCard rating={rating} />
           <RatingStatisticsCard statistics={ratingStatistics} />
         </div>
@@ -95,7 +95,7 @@ const ProductReviews: FC<Props> = ({
             <ReviewsSort sort={sort} setSort={setSort} />
           </div>
           {/* Reviews */}
-          <div className="mt-6  grid grid-cols-2 gap-4">
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             {data.length > 0 ? (
               <>
                 <div className="flex flex-col gap-3">

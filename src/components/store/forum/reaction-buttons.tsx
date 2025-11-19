@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { ReactionType } from "@prisma/client";
 import { ThumbsUp, Lightbulb, Heart, Smile, CheckCircle, ThumbsDown } from "lucide-react";
@@ -53,6 +54,9 @@ const reactionIcons: Record<ReactionType, { icon: React.ReactNode; label: string
 
 export function ReactionButtons({ postId, reactions = [], currentUserId }: ReactionButtonsProps) {
   const router = useRouter();
+  const { userId: clerkUserId } = useAuth();
+  const activeUserId = currentUserId || clerkUserId;
+
   const [loading, setLoading] = useState(false);
   const [localReactions, setLocalReactions] = useState(reactions);
 
@@ -63,11 +67,11 @@ export function ReactionButtons({ postId, reactions = [], currentUserId }: React
   }, {} as Record<ReactionType, number>);
 
   const userReactions = localReactions?.filter(
-    (r) => currentUserId && r.user.id === currentUserId
+    (r) => activeUserId && r.user.id === activeUserId
   );
 
   const handleReaction = async (type: ReactionType) => {
-    if (!currentUserId) {
+    if (!activeUserId) {
       alert("Please sign in to react to posts");
       return;
     }
@@ -79,12 +83,12 @@ export function ReactionButtons({ postId, reactions = [], currentUserId }: React
     
     if (hasReacted) {
       // Remove reaction
-      setLocalReactions(localReactions.filter(r => !(r.user.id === currentUserId && r.type === type)));
+      setLocalReactions(localReactions.filter(r => !(r.user.id === activeUserId && r.type === type)));
     } else {
       // Add reaction
       setLocalReactions([...localReactions, { 
         type, 
-        user: { id: currentUserId, name: '', picture: '' },
+        user: { id: activeUserId, name: '', picture: '' },
         id: 'temp-' + Date.now()
       }]);
     }

@@ -40,22 +40,22 @@ const SpecTable = ({
 }) => {
   return (
     <ul
-      className={cn("border w-full", {
-        "border-t-0": noTopBorder,
+      className={cn("border w-full rounded-md overflow-hidden", {
+        "border-t-0 rounded-t-none": noTopBorder,
       })}
     >
       {data.map((spec, i) => (
         <li
           key={i}
-          className={cn("border-t", {
+          className={cn("border-t first:border-t-0", {
             "border-t-0": i === 0,
           })}
         >
-          <div className="flex w-full">
-            <div className="p-4 bg-[#f5f5f5] text-main-primary min-w-[200px] w-1/3">
+          <div className="flex flex-col sm:flex-row w-full">
+            <div className="p-3 sm:p-4 bg-gray-50 text-main-primary sm:w-1/3 sm:min-w-[200px] font-medium">
               <span className="leading-5">{spec.name}</span>
             </div>
-            <div className="p-4 text-[#151515] flex-1">
+            <div className="p-3 sm:p-4 text-gray-800 flex-1 bg-white">
               <span className="leading-5">{spec.value}</span>
             </div>
           </div>

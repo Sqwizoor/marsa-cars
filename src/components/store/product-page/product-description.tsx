@@ -15,8 +15,8 @@ export default function ProductDescription({
         <h2 className="text-main-primary text-2xl font-bold">Description</h2>
       </div>
       {/* Display both descriptions */}
-      <div dangerouslySetInnerHTML={{ __html: sanitizedDescription1 }} />
-      <div dangerouslySetInnerHTML={{ __html: sanitizedDescription2 }} />
+      <div className="prose prose-sm sm:prose-base max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg" dangerouslySetInnerHTML={{ __html: sanitizedDescription1 }} />
+      <div className="prose prose-sm sm:prose-base max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg mt-4" dangerouslySetInnerHTML={{ __html: sanitizedDescription2 }} />
     </div>
   );
 }

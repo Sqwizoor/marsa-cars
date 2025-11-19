@@ -9,26 +9,51 @@ export default function ProductCardDeal({
 }) {
   return (
     <Link href={`/product/${product.slug}/${product.variantSlug}`} className="block group h-full">
-      <div className="relative w-full h-full aspect-[3/4] rounded-xl overflow-hidden bg-slate-800 border border-white/5 group-hover:border-pink-500/50 transition-all duration-300 shadow-lg">
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60 z-10" />
-        
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          className="object-cover group-hover:scale-110 transition-transform duration-500"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
-        
-        <div className="absolute bottom-0 left-0 right-0 p-3 z-20">
-          <div className="flex items-center justify-between">
-            <div className="bg-white/90 backdrop-blur-sm text-slate-900 font-bold text-sm px-2 py-1 rounded-lg shadow-lg">
-              R{product.price?.toFixed(2)}
+      <div className="relative h-full bg-zinc-900 border border-zinc-800 hover:border-yellow-400 transition-colors duration-300 flex flex-col">
+        {/* Image Container with Tech Grid Background */}
+        <div className="relative w-full aspect-square bg-zinc-950 overflow-hidden border-b border-zinc-800">
+          {/* Subtle grid pattern overlay */}
+          <div className="absolute inset-0 opacity-[0.03]" 
+               style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '10px 10px' }} 
+          />
+          
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-contain p-4 group-hover:scale-110 transition-transform duration-500 ease-out"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+          
+          {/* Flash Badge - Sharp corners */}
+          <div className="absolute top-0 right-0 bg-yellow-400 text-black text-[10px] font-black px-3 py-1 uppercase tracking-wider">
+            Flash Deal
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-4 flex flex-col flex-grow justify-between bg-zinc-900">
+          <div>
+            <h3 className="text-zinc-100 font-bold text-sm uppercase tracking-tight line-clamp-2 mb-2 group-hover:text-yellow-400 transition-colors">
+              {product.name}
+            </h3>
+          </div>
+          
+          <div className="mt-3 pt-3 border-t border-zinc-800 flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Current Price</span>
+              <span className="text-xl font-mono font-bold text-white">
+                R{product.price?.toFixed(0)}
+              </span>
+            </div>
+            {/* Square button */}
+            <div className="w-10 h-10 bg-zinc-800 flex items-center justify-center text-yellow-400 group-hover:bg-yellow-400 group-hover:text-black transition-all duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter">
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
             </div>
           </div>
-          <h3 className="text-slate-200 text-xs font-medium truncate mt-2 group-hover:text-white transition-colors drop-shadow-md">
-            {product.name}
-          </h3>
         </div>
       </div>
     </Link>
