@@ -36,7 +36,7 @@ export default function ProductCardModern({
             src={variant.images[0].url} 
             alt={product.name}
             fill
-            className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
             quality={75}
           />

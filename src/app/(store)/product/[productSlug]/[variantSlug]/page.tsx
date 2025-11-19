@@ -66,15 +66,6 @@ export default async function ProductVariantPage({
     <div>
       <div className="md:max-w-[1650px] mx-auto p-4 md:p-8 overflow-x-hidden min-h-screen">
         <ProductPageContainer productData={productData} sizeId={sizeId}>
-          <Separator className="mt-6" />
-          {/* Product reviews */}
-          <ProductReviews
-            productId={productData.productId}
-            rating={productData.rating}
-            statistics={reviewsStatistics}
-            reviews={reviews}
-            variantsInfo={variantInfo}
-          />
           <>
             <Separator className="mt-6" />
             {/* Product description */}
@@ -102,6 +93,17 @@ export default async function ProductVariantPage({
           <Separator className="my-6" />
           {/* Store card */}
           <StoreCard store={productData.store} />
+          
+          <Separator className="mt-6" />
+          {/* Product reviews */}
+          <ProductReviews
+            productId={productData.productId}
+            rating={productData.rating}
+            statistics={reviewsStatistics}
+            reviews={reviews}
+            variantsInfo={variantInfo}
+          />
+
           {/* Store products */}
           <StoreProducts
             storeUrl={store.url}
