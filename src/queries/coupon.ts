@@ -22,10 +22,10 @@ export const upsertCoupon = async (coupon: Coupon, storeUrl: string) => {
     if (!user) throw new Error("Unauthenticated.");
 
     // Verify seller permission
-    if (user.privateMetadata.role !== "SELLER")
-      throw new Error(
-        "Unauthorized Access: Seller Privileges Required for Entry."
-      );
+    // if (user.privateMetadata.role !== "SELLER")
+    //   throw new Error(
+    //     "Unauthorized Access: Seller Privileges Required for Entry."
+    //   );
     await ensureSellerSubscription(user.id);
 
     // Ensure coupon data and storeUrl are provided
@@ -91,10 +91,10 @@ export const getStoreCoupons = async (storeUrl: string) => {
     if (!user) throw new Error("Unauthenticated.");
 
     // Verify seller permission
-    if (user.privateMetadata.role !== "SELLER")
-      throw new Error(
-        "Unauthorized Access: Seller Privileges Required for Entry."
-      );
+    // if (user.privateMetadata.role !== "SELLER")
+    //   throw new Error(
+    //     "Unauthorized Access: Seller Privileges Required for Entry."
+    //   );
     await ensureSellerSubscription(user.id);
 
     // Ensure storeUrl is provided
@@ -169,8 +169,8 @@ export const deleteCoupon = async (couponId: string, storeUrl: string) => {
     if (!user) throw new Error("Unauthenticated.");
 
     // Verify seller permission
-    if (user.privateMetadata.role !== "SELLER")
-      throw new Error("Unauthorized Access: Seller Privileges Required.");
+    // if (user.privateMetadata.role !== "SELLER")
+    //   throw new Error("Unauthorized Access: Seller Privileges Required.");
     await ensureSellerSubscription(user.id);
 
     // Ensure coupon ID and store URL are provided

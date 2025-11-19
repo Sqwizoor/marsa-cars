@@ -76,10 +76,10 @@ export const updateOrderGroupStatus = async (
   if (!user) throw new Error("Unauthenticated.");
 
   // Verify seller permission
-  if (user.privateMetadata.role !== "SELLER")
-    throw new Error(
-      "Unauthorized Access: Seller Privileges Required for Entry."
-    );
+  // if (user.privateMetadata.role !== "SELLER")
+  //   throw new Error(
+  //     "Unauthorized Access: Seller Privileges Required for Entry."
+  //   );
 
   await ensureSellerSubscription(user.id);
 
@@ -131,10 +131,10 @@ export const updateOrderItemStatus = async (
   if (!user) throw new Error("Unauthenticated.");
 
   // Verify seller permission
-  if (user.privateMetadata.role !== "SELLER")
-    throw new Error(
-      "Unauthorized Access: Seller Privileges Required for Entry."
-    );
+  // if (user.privateMetadata.role !== "SELLER")
+  //   throw new Error(
+  //     "Unauthorized Access: Seller Privileges Required for Entry."
+  //   );
 
   await ensureSellerSubscription(user.id);
 

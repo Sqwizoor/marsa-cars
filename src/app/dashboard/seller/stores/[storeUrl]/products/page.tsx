@@ -21,6 +21,11 @@ export default async function SellerProductsPage({
     getAllOfferTags(),
   ]);
 
+  // Serialize data to avoid "Date object" error in Client Components
+  const plainProducts = JSON.parse(JSON.stringify(products));
+  const plainCategories = JSON.parse(JSON.stringify(categories));
+  const plainOfferTags = JSON.parse(JSON.stringify(offerTags));
+
   return (
     <DataTable
       actionButtonText={
@@ -31,15 +36,15 @@ export default async function SellerProductsPage({
       }
       modalChildren={
         <ProductDetails
-          categories={categories}
-          offerTags={offerTags}
+          categories={plainCategories}
+          offerTags={plainOfferTags}
           storeUrl={storeUrl}
           countries={[]}
         />
       }
       newTabLink={`/dashboard/seller/stores/${storeUrl}/products/new`}
       filterValue="name"
-      data={products}
+      data={plainProducts}
       columns={columns}
       searchPlaceholder="Search product name..."
     />

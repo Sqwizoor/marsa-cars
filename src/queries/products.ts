@@ -48,12 +48,12 @@ export const upsertProduct = async (
     if (!user) throw new Error("Unauthenticated.");
 
     // Ensure user has seller privileges
-    if (user.privateMetadata.role !== "SELLER")
-      throw new Error(
-        "Unauthorized Access: Seller Privileges Required for Entry."
-      );
+    // if (user.privateMetadata.role !== "SELLER")
+    //   throw new Error(
+    //     "Unauthorized Access: Seller Privileges Required for Entry."
+    //   );
 
-    await ensureSellerSubscription(user.id);
+    // await ensureSellerSubscription(user.id);
 
     // Ensure product data is provided
     if (!product) throw new Error("Please provide product data.");
@@ -412,10 +412,10 @@ export const deleteProduct = async (productId: string) => {
   if (!user) throw new Error("Unauthenticated.");
 
   // Ensure user has seller privileges
-  if (user.privateMetadata.role !== "SELLER")
-    throw new Error(
-      "Unauthorized Access: Seller Privileges Required for Entry."
-    );
+  // if (user.privateMetadata.role !== "SELLER")
+  //   throw new Error(
+  //     "Unauthorized Access: Seller Privileges Required for Entry."
+  //   );
 
   await ensureSellerSubscription(user.id);
 
