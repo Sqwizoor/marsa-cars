@@ -10,10 +10,11 @@ import ProductCard from "../cards/product/product-card";
 import { Navigation, Pagination } from "swiper/modules";
 import ProductCardSimple from "../cards/product/simple-card";
 import ProductCardClean from "../cards/product/clean-card";
+import ProductCardDeal from "../cards/product/deal-card";
 interface Props {
   children?: ReactNode;
   products: SimpleProduct[] | ProductType[];
-  type: "main" | "curved" | "simple";
+  type: "main" | "curved" | "simple" | "deal";
   slidesPerView?: number;
   breakpoints?: SwiperProps["breakpoints"];
   spaceBetween?: number;
@@ -53,6 +54,8 @@ const MainSwiper: FC<Props> = ({
             <SwiperSlide key={key}>
               {type === "simple" ? (
                 <ProductCardSimple product={product as SimpleProduct} />
+              ) : type === "deal" ? (
+                <ProductCardDeal product={product as SimpleProduct} />
               ) : type === "curved" ? (
                 <ProductCardClean product={product as ProductType} />
               ) : (

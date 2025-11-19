@@ -220,7 +220,11 @@ export function PostCard({
 
             {/* Actions */}
             <div className="flex items-center gap-4 pt-3 border-t">
-              <ReactionButtons postId={post.id} reactions={post.reactions} />
+              <ReactionButtons 
+                postId={post.id} 
+                reactions={post.reactions} 
+                currentUserId={currentUserId}
+              />
               
               {onReply && (
                 <Button

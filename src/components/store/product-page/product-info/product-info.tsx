@@ -148,36 +148,41 @@ const ProductInfo: FC<Props> = ({
       {/* Product live watchers count */}
       <ProductWatch productId={variantId} />
       <Separator className="mt-2" />
-      {/* Color wheel - variant switcher */}
-      <div className="mt-4 space-y-2">
-        <div className="relative flex items-center justify-between text-main-primary font-bold">
-          <span className="flex items-center gap-x-2">
-            {colors.length > 1 ? "Colors" : "Color"}
-            <ColorWheel colors={colors} size={25} />
-          </span>
+      
+      <div className="flex flex-col md:flex-row md:gap-8">
+        {/* Color wheel - variant switcher */}
+        <div className="mt-4 space-y-2 flex-1">
+          <div className="relative flex items-center justify-between text-main-primary font-bold">
+            <span className="flex items-center gap-x-2">
+              {colors.length > 1 ? "Colors" : "Color"}
+              <ColorWheel colors={colors} size={25} />
+            </span>
+          </div>
+          <div className="mt-4">
+            {variantInfo.length > 0 && (
+              <ProductVariantSelector
+                variants={variantInfo}
+                slug={productData.variantSlug}
+                setVariantImages={setVariantImages}
+                setActiveImage={setActiveImage}
+              />
+            )}
+          </div>
         </div>
-        <div className="mt-4">
-          {variantInfo.length > 0 && (
-            <ProductVariantSelector
-              variants={variantInfo}
-              slug={productData.variantSlug}
-              setVariantImages={setVariantImages}
-              setActiveImage={setActiveImage}
-            />
-          )}
+        
+        {/* Size selector */}
+        <div className="space-y-2 pb-2 mt-4 flex-1">
+          <div>
+            <h1 className="text-main-primary font-bold">Size </h1>
+          </div>
+          <SizeSelector
+            sizes={sizes}
+            sizeId={sizeId}
+            handleChange={handleChange}
+          />
         </div>
       </div>
-      {/* Size selector */}
-      <div className="space-y-2 pb-2 mt-4">
-        <div>
-          <h1 className="text-main-primary font-bold">Size </h1>
-        </div>
-        <SizeSelector
-          sizes={sizes}
-          sizeId={sizeId}
-          handleChange={handleChange}
-        />
-      </div>
+
       {/* Product assurance */}
       <Separator className="mt-2" />
       <ProductAssurancePolicy />
