@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Button } from "../../../ui/button"
 import UserCardProducts from "./products"
 import SubscriptionBadge from "./subscription-badge"
+import { db } from "@/lib/db"
 
 export default async function HomeUserCard({
   products,
@@ -12,7 +13,28 @@ export default async function HomeUserCard({
   products: SimpleProduct[]
 }) {
   const user = await currentUser()
-  const role = user?.privateMetadata.role
+  let role = user?.privateMetadata.role
+  let hasActiveSubscription = false
+
+  if (user) {
+    const dbUser = await db.user.findUnique({
+      where: { id: user.id },
+      select: { 
+        role: true,
+        subscriptions: {
+          where: {
+            status: {
+              in: ["ACTIVE", "TRIALING"]
+            }
+          }
+        }
+      },
+    })
+    if (dbUser) {
+      role = dbUser.role
+      hasActiveSubscription = dbUser.subscriptions.length > 0
+    }
+  }
 
   return (
     <div className="h-full hidden min-[1170px]:block relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
@@ -83,7 +105,7 @@ export default async function HomeUserCard({
                     Switch to Admin Dashboard
                   </Link>
                 </Button>
-              ) : role === "SELLER" ? (
+              ) : role === "SELLER" || hasActiveSubscription ? (
                 <Button
                   variant="orange-gradient"
                   className="rounded-md w-full shadow-sm hover:shadow transition-all duration-300"
