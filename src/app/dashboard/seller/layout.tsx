@@ -17,14 +17,21 @@ export default async function SellerDashboardLayout({
   // Check role in DB to be sure (Clerk metadata might be stale)
   const dbUser = await db.user.findUnique({
     where: { id: user.id },
-    select: { role: true },
+    select: { 
+      role: true,
+      subscriptions: {
+        where: {
+          status: { in: ["ACTIVE", "TRIALING"] }
+        }
+      }
+    },
   });
 
-  if (!dbUser || dbUser.role !== "SELLER") {
-    // Fallback to metadata if DB check fails (unlikely but safe)
-    if (user.privateMetadata.role !== "SELLER") {
-      redirect("/");
-    }
+  const hasActiveSubscription = dbUser?.subscriptions && dbUser.subscriptions.length > 0;
+  const isSeller = dbUser?.role === "SELLER" || user.privateMetadata.role === "SELLER";
+
+  if (!isSeller && !hasActiveSubscription) {
+    redirect("/");
   }
 
   try {
