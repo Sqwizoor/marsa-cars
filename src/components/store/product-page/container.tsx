@@ -218,53 +218,57 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     return searchProduct.stock - searchProduct.quantity;
   }, [cartItems, productId, variantId, sizeId, stock]);
 
-  const ActionButtons = () => (
-    <div className="mt-5 bg-white bottom-0 pb-4 space-y-3 sticky">
-      {/* Qty selector */}
-      {sizeId && productToBeAddedToCart && (
-        <div className="w-full flex justify-end mt-4">
-          <QuantitySelector
-            productId={productToBeAddedToCart.productId}
-            variantId={productToBeAddedToCart.variantId}
-            sizeId={productToBeAddedToCart.sizeId}
-            quantity={productToBeAddedToCart.quantity}
-            stock={productToBeAddedToCart.stock}
-            handleChange={handleChange}
-          />
-        </div>
-      )}
-      {/* Action buttons */}
-      <button
-        disabled={!isProductValid}
-        className={cn(
-          "relative w-full py-2.5 min-w-20 bg-orange-background hover:bg-orange-hover text-white h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none",
-          {
-            "cursor-not-allowed opacity-50": !isProductValid || maxQty <= 0,
-          }
+  const ActionButtons = () => {
+    if (!productData) return null;
+
+    return (
+      <div className="mt-5 bg-white bottom-0 pb-4 space-y-3 sticky">
+        {/* Qty selector */}
+        {sizeId && productToBeAddedToCart && (
+          <div className="w-full flex justify-end mt-4">
+            <QuantitySelector
+              productId={productToBeAddedToCart.productId}
+              variantId={productToBeAddedToCart.variantId}
+              sizeId={productToBeAddedToCart.sizeId}
+              quantity={productToBeAddedToCart.quantity}
+              stock={productToBeAddedToCart.stock}
+              handleChange={handleChange}
+            />
+          </div>
         )}
-        onClick={() => handleBuyNow()}
-      >
-        <span>Buy now</span>
-      </button>
-      <button
-        disabled={!isProductValid}
-        className={cn(
-          "relative w-full py-2.5 min-w-20 bg-orange-border hover:bg-[#e4cdce] text-orange-hover h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none",
-          {
-            "cursor-not-allowed": !isProductValid || maxQty <= 0,
-          }
-        )}
-        onClick={() => handleAddToCart()}
-      >
-        <span>Add to cart</span>
-      </button>
-      {/* Share to socials */}
-      <SocialShare
-        url={`/product/${productData.productSlug}/${productData.variantSlug}`}
-        quote={`${productData.name} · ${productData.variantName}`}
-      />
-    </div>
-  );
+        {/* Action buttons */}
+        <button
+          disabled={!isProductValid}
+          className={cn(
+            "relative w-full py-2.5 min-w-20 bg-orange-background hover:bg-orange-hover text-white h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none",
+            {
+              "cursor-not-allowed opacity-50": !isProductValid || maxQty <= 0,
+            }
+          )}
+          onClick={() => handleBuyNow()}
+        >
+          <span>Buy now</span>
+        </button>
+        <button
+          disabled={!isProductValid}
+          className={cn(
+            "relative w-full py-2.5 min-w-20 bg-orange-border hover:bg-[#e4cdce] text-orange-hover h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none",
+            {
+              "cursor-not-allowed": !isProductValid || maxQty <= 0,
+            }
+          )}
+          onClick={() => handleAddToCart()}
+        >
+          <span>Add to cart</span>
+        </button>
+        {/* Share to socials */}
+        <SocialShare
+          url={`/product/${productData.productSlug}/${productData.variantSlug}`}
+          quote={`${productData.name} · ${productData.variantName}`}
+        />
+      </div>
+    );
+  };
 
   if (!productData || !shippingDetails) {
     return null;

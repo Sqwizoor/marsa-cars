@@ -35,8 +35,10 @@ export default async function HomePage() {
   return (
     <>
       <div className="relative w-full">
-        <Sideline />
-        <div className="relative w-[calc(100%-40px)] h-full bg-[#e3e3e3]">
+        <div className="hidden md:block">
+          <Sideline />
+        </div>
+        <div className="relative w-full md:w-[calc(100%-40px)] h-full bg-[#e3e3e3]">
           <div className="max-w-[1600px] mx-auto min-h-screen p-4">
             {/* Main */}
             <div className="w-full grid gap-2 min-[1170px]:grid-cols-[1fr_350px] min-[1465px]:grid-cols-[200px_1fr_350px]">

@@ -33,15 +33,20 @@ export default function ProductCardImageSwiper({
         swiperRef.current?.swiper?.slideTo(0);
       }}
     >
-      <Swiper ref={swiperRef} modules={[Autoplay]} autoplay={{ delay: 500 }}>
+      <Swiper
+        ref={swiperRef}
+        modules={[Autoplay]}
+        autoplay={{ delay: 500 }}
+        className="h-full w-full"
+      >
         {images.map((img) => (
-          <SwiperSlide key={img.id}>
+          <SwiperSlide key={img.id} className="!h-full !w-full">
             <Image
               src={img.url}
               alt=""
-              width={200}
-              height={200}
-              className="block object-cover h-[200px] w-48 sm:w-52"
+              width={400}
+              height={400}
+              className="block object-cover h-full w-full"
               loading="lazy"
               quality={75}
               priority={false}
