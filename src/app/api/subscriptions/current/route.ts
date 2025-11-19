@@ -106,33 +106,6 @@ export async function GET(req: NextRequest) {
         expiresAt: expiresAt ?? null,
       },
     });
-
-    // Check if subscription has expired
-    if (expiresAt && now > new Date(expiresAt)) {
-      await db.subscription.update({
-        where: { id: subscription.id },
-        data: {
-          status: "EXPIRED",
-        },
-      });
-
-      return NextResponse.json({ subscription: null });
-    }
-
-    // Get remaining ads
-    const remaining =
-      subscription.adLimit === -1
-        ? -1
-        : subscription.adLimit - subscription.adsUsed;
-
-    return NextResponse.json({
-      subscription: {
-        ...subscription,
-        remainingAds: remaining,
-        phase: subscription.status === "TRIALING" ? "TRIAL" : "PAID",
-        expiresAt: expiresAt ?? null,
-      },
-    });
   } catch (error) {
     console.error("Error fetching subscription:", error);
     return NextResponse.json(
