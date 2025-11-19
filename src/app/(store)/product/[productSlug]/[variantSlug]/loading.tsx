@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProductVariantLoading() {
   return (
-    <div className="md:max-w-[1650px] mx-auto p-4 md:p-8 overflow-x-hidden">
+    <div className="md:max-w-[1650px] mx-auto p-4 md:p-8 overflow-x-hidden min-h-screen">
       <div className="w-full xl:flex xl:gap-4">
         {/* Gallery skeleton */}
         <div className="w-full xl:w-[calc(100%-950px)]">

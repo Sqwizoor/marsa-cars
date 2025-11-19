@@ -56,7 +56,7 @@ export default function ProductCardModern({
                   <div
                     key={i}
                     className={`w-6 h-6 rounded-full overflow-hidden border-2 cursor-pointer ${
-                      variant.variantId === product.variants[i].id 
+                      variant.variantId === product.variants[i].variantId 
                         ? "border-blue-primary" 
                         : "border-transparent hover:border-gray-300"
                     }`}
