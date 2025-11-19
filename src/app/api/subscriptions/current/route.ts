@@ -84,6 +84,62 @@ export async function GET(req: NextRequest) {
        }
     }
 
+    // 3. SELLER GUARANTEE: If still no subscription found, but user is a SELLER, force create/restore one
+    if (!subscription) {
+       const dbUser = await db.user.findUnique({
+          where: { id: userId },
+          select: { role: true }
+       });
+
+       if (dbUser?.role === 'SELLER') {
+          // Try to find ANY subscription to restore
+          const anySub = await db.subscription.findFirst({
+             where: { userId },
+             orderBy: { createdAt: "desc" }
+          });
+
+          const newTrialEnd = new Date();
+          newTrialEnd.setDate(newTrialEnd.getDate() + 30);
+
+          if (anySub) {
+             // Restore the latest one found
+             await db.subscription.update({
+                where: { id: anySub.id },
+                data: { 
+                   status: "TRIALING", 
+                   trialEndsAt: newTrialEnd,
+                   isTrial: true,
+                   tier: "BRONZE", // Ensure it has a valid tier
+                   adLimit: 10     // Ensure it has limits
+                }
+             });
+             subscription = {
+                ...anySub,
+                status: "TRIALING",
+                trialEndsAt: newTrialEnd,
+                isTrial: true,
+                tier: "BRONZE",
+                adLimit: 10
+             } as any;
+          } else {
+             // Create a brand new one if absolutely nothing exists
+             subscription = await db.subscription.create({
+                data: {
+                   userId,
+                   tier: "BRONZE",
+                   status: "TRIALING",
+                   isTrial: true,
+                   trialEndsAt: newTrialEnd,
+                   amount: 10,
+                   currency: "ZAR",
+                   adLimit: 10,
+                   adsUsed: 0,
+                }
+             });
+          }
+       }
+    }
+
     if (!subscription) {
       return NextResponse.json({ subscription: null });
     }
