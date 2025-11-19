@@ -23,49 +23,64 @@ export async function GET(req: NextRequest) {
 
     // 2. If not found, check if we have a recently expired or pending one that we can fix
     if (!subscription) {
-       const recentSub = await db.subscription.findFirst({
+       // Fetch ALL subscriptions for this user, not just the latest one
+       const recentSubs = await db.subscription.findMany({
           where: { userId },
-          orderBy: { createdAt: "desc" }
+          orderBy: { createdAt: "desc" },
+          take: 5 // Check the last 5 attempts
        });
 
-       if (recentSub) {
-          const sevenDaysAgo = new Date();
-          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+       const sevenDaysAgo = new Date();
+       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-          // Case A: Subscription is EXPIRED but created recently (likely premature expiration)
-          // Case B: Subscription is PENDING but created recently and is a Trial (likely ITN failure)
-          // Case C: Subscription is TRIALING but missing trialEndsAt (data integrity)
-          
-          let shouldFix = false;
-          
-          if (recentSub.createdAt > sevenDaysAgo) {
-             if (recentSub.status === "EXPIRED") shouldFix = true;
-             if (recentSub.status === "PENDING" && recentSub.isTrial) shouldFix = true;
-          }
-          
-          if (recentSub.status === "TRIALING" && !recentSub.trialEndsAt) shouldFix = true;
+       // Find the best candidate to restore
+       let candidateToRestore = null;
 
-          if (shouldFix) {
-             const newTrialEnd = new Date();
-             newTrialEnd.setDate(newTrialEnd.getDate() + 30); // Give them 30 days from NOW
+       for (const sub of recentSubs) {
+          let isCandidate = false;
 
-             await db.subscription.update({
-               where: { id: recentSub.id },
-               data: { 
-                 status: "TRIALING", 
-                 trialEndsAt: newTrialEnd,
-                 isTrial: true
-               }
-             });
+          // Check if it's recent enough
+          if (sub.createdAt > sevenDaysAgo) {
+             // Restore if it was working but expired prematurely
+             if (sub.status === "EXPIRED") isCandidate = true;
              
-             // Use this fixed subscription
-             subscription = {
-                ...recentSub,
-                status: "TRIALING",
-                trialEndsAt: newTrialEnd,
-                isTrial: true
-             } as any;
+             // Restore if it was a trial attempt that got stuck in PENDING
+             if (sub.status === "PENDING" && sub.isTrial) isCandidate = true;
+             
+             // Restore if it was a trial attempt that got stuck in PENDING (even if isTrial is false, if it's the only one)
+             // Sometimes isTrial might not be set correctly on older migrations
+             if (sub.status === "PENDING" && sub.amount === 10) isCandidate = true; 
           }
+          
+          // Restore if it's TRIALING but broken (missing date)
+          if (sub.status === "TRIALING" && !sub.trialEndsAt) isCandidate = true;
+
+          if (isCandidate) {
+             candidateToRestore = sub;
+             break; // Found one, stop looking
+          }
+       }
+
+       if (candidateToRestore) {
+          const newTrialEnd = new Date();
+          newTrialEnd.setDate(newTrialEnd.getDate() + 30); // Give them 30 days from NOW
+
+          await db.subscription.update({
+            where: { id: candidateToRestore.id },
+            data: { 
+              status: "TRIALING", 
+              trialEndsAt: newTrialEnd,
+              isTrial: true
+            }
+          });
+          
+          // Use this fixed subscription
+          subscription = {
+             ...candidateToRestore,
+             status: "TRIALING",
+             trialEndsAt: newTrialEnd,
+             isTrial: true
+          } as any;
        }
     }
 
