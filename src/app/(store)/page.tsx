@@ -10,6 +10,8 @@ import { getProducts } from "@/queries/product";
 import Image from "next/image";
 import FeaturedCategories from "@/components/store/home/featured-categories";
 import ProductCard from "@/components/store/cards/product/product-card";
+import { ArrowRight, Flame, Star } from "lucide-react";
+import Link from "next/link";
 
 export default async function HomePage() {
   const productsData = await getProducts({}, "", 1, 100);
@@ -81,43 +83,112 @@ export default async function HomePage() {
                 )}
               />
             </div>
-            <div className="mt-10 space-y-10">
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div className="bg-gradient-to-r from-red-600 to-orange-500 p-4 text-white">
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="mt-10 space-y-6">
+              {/* Super Deals Section */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-red-600 to-orange-500 p-6 text-white relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
+                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl"></div>
+                  
+                  <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider">Limited Time Offer</span>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-white/20 shadow-sm">Limited Time Offer</span>
                       </div>
-                      <h2 className="text-2xl md:text-3xl font-black italic uppercase tracking-tight">Super Deals</h2>
-                      <p className="text-white/90 text-sm font-medium mt-1">Save up to 90% on premium auto parts</p>
+                      <h2 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter drop-shadow-sm">Super Deals</h2>
+                      <p className="text-white/90 text-base font-medium mt-2 max-w-md">Save up to 90% on premium auto parts. Don't miss out on these exclusive offers.</p>
                     </div>
-                    <div className="hidden md:block">
-                      <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-lg p-2 border border-white/20">
-                        <div className="text-center px-2">
-                          <div className="text-lg font-bold leading-none">02</div>
-                          <div className="text-[10px] uppercase opacity-80">Hrs</div>
+                    
+                    <div className="flex flex-col items-start lg:items-end gap-2">
+                      <span className="text-xs font-bold uppercase tracking-widest opacity-80">Ends in:</span>
+                      <div className="flex items-center gap-2 bg-black/20 backdrop-blur-md rounded-xl p-3 border border-white/10 shadow-inner">
+                        <div className="text-center min-w-[50px]">
+                          <div className="text-2xl font-bold leading-none font-mono">41</div>
+                          <div className="text-[10px] uppercase opacity-70 mt-1 font-medium">Days</div>
                         </div>
-                        <div className="text-xl font-bold">:</div>
-                        <div className="text-center px-2">
-                          <div className="text-lg font-bold leading-none">45</div>
-                          <div className="text-[10px] uppercase opacity-80">Min</div>
+                        <div className="text-xl font-bold opacity-50 pb-4">:</div>
+                        <div className="text-center min-w-[50px]">
+                          <div className="text-2xl font-bold leading-none font-mono">15</div>
+                          <div className="text-[10px] uppercase opacity-70 mt-1 font-medium">Hrs</div>
                         </div>
-                        <div className="text-xl font-bold">:</div>
-                        <div className="text-center px-2">
-                          <div className="text-lg font-bold leading-none">12</div>
-                          <div className="text-[10px] uppercase opacity-80">Sec</div>
+                        <div className="text-xl font-bold opacity-50 pb-4">:</div>
+                        <div className="text-center min-w-[50px]">
+                          <div className="text-2xl font-bold leading-none font-mono">24</div>
+                          <div className="text-[10px] uppercase opacity-70 mt-1 font-medium">Min</div>
+                        </div>
+                        <div className="text-xl font-bold opacity-50 pb-4">:</div>
+                        <div className="text-center min-w-[50px]">
+                          <div className="text-2xl font-bold leading-none font-mono text-yellow-300">04</div>
+                          <div className="text-[10px] uppercase opacity-70 mt-1 font-medium">Sec</div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="p-4">
+                <div className="p-6 bg-gray-50/50">
                   <MainSwiper products={products_super_deals} type="curved">
                     <div className="hidden"></div>
                   </MainSwiper>
                 </div>
               </div>
+
+              {/* Promo Banners Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Top Sellers Card */}
+                <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl group-hover:bg-blue-500/30 transition-all duration-500"></div>
+                  
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="p-2 bg-orange-500/20 rounded-lg">
+                        <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
+                      </div>
+                      <span className="text-sm font-bold text-orange-400 uppercase tracking-wider">Top Sellers</span>
+                    </div>
+                    
+                    <h3 className="text-3xl font-bold mb-2">HOT</h3>
+                    <h4 className="text-xl font-semibold text-white/90 mb-4">Top Sellers</h4>
+                    <p className="text-slate-400 mb-8 max-w-[200px]">Most popular items this week</p>
+                    
+                    <Link href="/browse?sort=best-selling" className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider hover:gap-3 transition-all text-white border-b-2 border-white/20 pb-1 hover:border-white">
+                      Shop Now <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                  
+                  {/* Decorative Image/Icon */}
+                  <div className="absolute bottom-0 right-0 w-32 h-32 opacity-10 group-hover:opacity-20 transition-opacity duration-500 transform translate-x-4 translate-y-4">
+                    <Flame className="w-full h-full" />
+                  </div>
+                </div>
+
+                {/* Top Rated Card */}
+                <div className="group relative overflow-hidden rounded-2xl bg-white border border-gray-100 p-8 shadow-sm hover:shadow-xl transition-all duration-300">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl group-hover:bg-yellow-500/20 transition-all duration-500"></div>
+                  
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="p-2 bg-yellow-100 rounded-lg">
+                        <Star className="w-6 h-6 text-yellow-500 fill-yellow-500" />
+                      </div>
+                      <span className="text-sm font-bold text-yellow-600 uppercase tracking-wider">Top Rated</span>
+                    </div>
+                    
+                    <h3 className="text-3xl font-bold mb-2 text-slate-900">★</h3>
+                    <h4 className="text-xl font-semibold text-slate-800 mb-4">Top Rated</h4>
+                    <p className="text-slate-500 mb-8 max-w-[200px]">Curated by our experts</p>
+                    
+                    <Link href="/browse?sort=rating-desc" className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider hover:gap-3 transition-all text-slate-900 border-b-2 border-slate-200 pb-1 hover:border-slate-900">
+                      View Collection <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+
+                  {/* Decorative Image/Icon */}
+                  <div className="absolute bottom-0 right-0 w-32 h-32 opacity-5 group-hover:opacity-10 transition-opacity duration-500 transform translate-x-4 translate-y-4">
+                    <Star className="w-full h-full" />
+                  </div>
+                </div>
+              </div>
+
               <FeaturedCategories categories={featuredCategories} />
               <div>
                 {/* Header */}

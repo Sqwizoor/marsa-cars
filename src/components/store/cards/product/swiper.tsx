@@ -46,7 +46,7 @@ export default function ProductCardImageSwiper({
               alt=""
               width={400}
               height={400}
-              className="block object-cover h-full w-full"
+              className="block object-cover h-full w-full scale-110"
               loading="lazy"
               quality={75}
               priority={false}
