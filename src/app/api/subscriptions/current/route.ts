@@ -84,14 +84,14 @@ export async function GET(req: NextRequest) {
        }
     }
 
-    // 3. SELLER GUARANTEE: If still no subscription found, but user is a SELLER, force create/restore one
+    // 3. SELLER/ADVERTISER GUARANTEE: If still no subscription found, but user is a SELLER or ADVERTISER, force create/restore one
     if (!subscription) {
        const dbUser = await db.user.findUnique({
           where: { id: userId },
           select: { role: true }
        });
 
-       if (dbUser?.role === 'SELLER') {
+       if (dbUser?.role === 'SELLER' || dbUser?.role === 'ADVERTISER') {
           // Try to find ANY subscription to restore
           const anySub = await db.subscription.findFirst({
              where: { userId },

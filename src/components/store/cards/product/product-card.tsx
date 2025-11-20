@@ -38,7 +38,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
           }
         )}
       >
-        <div className="relative w-full flex flex-col">
+        <div className="relative w-full flex flex-col min-w-0">
           <Link
             href={`/product/${slug}/${variantSlug}`}
             className="block w-full relative overflow-hidden"
@@ -46,7 +46,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
             {/* Images Swiper */}
             <ProductCardImageSwiper images={images} />
             {/* Title */}
-            <div className="text-sm font-medium text-main-primary truncate mt-2 w-full max-w-full">
+            <div className="text-sm font-medium text-main-primary truncate mt-2 w-full">
               {name} · {variantName}
             </div>
             {/* Rating - Sales */}

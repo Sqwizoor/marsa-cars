@@ -111,13 +111,13 @@ async function tryRecoverSubscription(userId: string) {
     return updated;
   }
 
-  // 2. SELLER GUARANTEE: If still no subscription found, but user is a SELLER, force create/restore one
+  // 2. SELLER/ADVERTISER GUARANTEE: If still no subscription found, but user is a SELLER or ADVERTISER, force create/restore one
   const dbUser = await db.user.findUnique({
     where: { id: userId },
     select: { role: true }
   });
 
-  if (dbUser?.role === 'SELLER') {
+  if (dbUser?.role === 'SELLER' || dbUser?.role === 'ADVERTISER') {
     // Try to find ANY subscription to restore
     const anySub = await db.subscription.findFirst({
       where: { userId },

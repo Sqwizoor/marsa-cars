@@ -30,7 +30,10 @@ export default async function SellerDashboardLayout({
   const hasActiveSubscription = dbUser?.subscriptions && dbUser.subscriptions.length > 0;
   const isSeller = dbUser?.role === "SELLER" || user.privateMetadata.role === "SELLER";
 
-  if (!isSeller && !hasActiveSubscription) {
+  if (!isSeller) {
+    if (dbUser?.role === "ADVERTISER") {
+      redirect("/dashboard/advertiser");
+    }
     redirect("/");
   }
 

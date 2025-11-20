@@ -105,13 +105,22 @@ export default async function HomeUserCard({
                     Switch to Admin Dashboard
                   </Link>
                 </Button>
-              ) : role === "SELLER" || hasActiveSubscription ? (
+              ) : role === "SELLER" ? (
                 <Button
                   variant="orange-gradient"
                   className="rounded-md w-full shadow-sm hover:shadow transition-all duration-300"
                 >
                   <Link href={"/dashboard/seller"} className="w-full">
                     Switch to Seller Dashboard
+                  </Link>
+                </Button>
+              ) : role === "ADVERTISER" ? (
+                <Button
+                  variant="orange-gradient"
+                  className="rounded-md w-full shadow-sm hover:shadow transition-all duration-300"
+                >
+                  <Link href={"/dashboard/advertiser"} className="w-full">
+                    Switch to Advertiser Dashboard
                   </Link>
                 </Button>
               ) : (
