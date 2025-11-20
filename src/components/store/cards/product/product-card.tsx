@@ -32,7 +32,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
     <div className="w-full overflow-hidden">
       <div
         className={cn(
-          "group w-full relative transition-all duration-300 bg-white ease-in-out rounded-3xl border border-gray-200 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 flex flex-col h-full overflow-hidden",
+          "group w-full relative transition-all duration-300 bg-white ease-in-out p-3 rounded-3xl border border-gray-200 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 flex flex-col h-full overflow-hidden",
           {
             "": true,
           }
@@ -46,7 +46,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
             {/* Images Swiper */}
             <ProductCardImageSwiper images={images} />
             
-            <div className="px-4 pb-2">
+            <div className="pb-2">
               {/* Title */}
               <div className="text-sm font-medium text-main-primary truncate mt-2 w-full">
                 {name} · {variantName}
@@ -70,7 +70,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
             </div>
           </Link>
           
-          <div className="px-4 pb-4 mt-auto">
+          <div className="mt-auto">
             {/* Variant switcher - Always visible */}
             <div className="mt-2 pt-2 border-t border-gray-100">
               <VariantSwitcher

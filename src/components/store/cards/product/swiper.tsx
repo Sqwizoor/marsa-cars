@@ -26,7 +26,7 @@ export default function ProductCardImageSwiper({
   }, []);
   return (
     <div
-      className="relative w-full aspect-square contrast-[90%] overflow-hidden"
+      className="relative w-full aspect-square contrast-[90%] overflow-hidden rounded-2xl"
       onMouseEnter={() => swiperRef.current?.swiper?.autoplay?.start()}
       onMouseLeave={() => {
         swiperRef.current?.swiper?.autoplay?.stop();
