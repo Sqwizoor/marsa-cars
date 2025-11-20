@@ -82,17 +82,41 @@ export default async function HomePage() {
               />
             </div>
             <div className="mt-10 space-y-10">
-              <div className="bg-white rounded-md">
-                <MainSwiper products={products_super_deals} type="curved">
-                  <div className="mb-4 pl-4 flex items-center justify-between">
-                    <Image
-                      src="/assets/images/ads/super-deals.avif"
-                      alt="Super deals"
-                      width={200}
-                      height={50}
-                    />
+              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div className="bg-gradient-to-r from-red-600 to-orange-500 p-4 text-white">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider">Limited Time Offer</span>
+                      </div>
+                      <h2 className="text-2xl md:text-3xl font-black italic uppercase tracking-tight">Super Deals</h2>
+                      <p className="text-white/90 text-sm font-medium mt-1">Save up to 90% on premium auto parts</p>
+                    </div>
+                    <div className="hidden md:block">
+                      <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-lg p-2 border border-white/20">
+                        <div className="text-center px-2">
+                          <div className="text-lg font-bold leading-none">02</div>
+                          <div className="text-[10px] uppercase opacity-80">Hrs</div>
+                        </div>
+                        <div className="text-xl font-bold">:</div>
+                        <div className="text-center px-2">
+                          <div className="text-lg font-bold leading-none">45</div>
+                          <div className="text-[10px] uppercase opacity-80">Min</div>
+                        </div>
+                        <div className="text-xl font-bold">:</div>
+                        <div className="text-center px-2">
+                          <div className="text-lg font-bold leading-none">12</div>
+                          <div className="text-[10px] uppercase opacity-80">Sec</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </MainSwiper>
+                </div>
+                <div className="p-4">
+                  <MainSwiper products={products_super_deals} type="curved">
+                    <div className="hidden"></div>
+                  </MainSwiper>
+                </div>
               </div>
               <FeaturedCategories categories={featuredCategories} />
               <div>

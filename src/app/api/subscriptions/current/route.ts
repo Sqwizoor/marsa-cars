@@ -88,10 +88,22 @@ export async function GET(req: NextRequest) {
     if (!subscription) {
        const dbUser = await db.user.findUnique({
           where: { id: userId },
-          select: { role: true }
+          select: { role: true, stores: { take: 1 } }
        });
 
-       if (dbUser?.role === 'SELLER' || dbUser?.role === 'ADVERTISER') {
+       // Check if user should be a SELLER (has a store) but role is wrong
+       const hasStore = dbUser?.stores && dbUser.stores.length > 0;
+       const isSellerOrAdvertiser = dbUser?.role === 'SELLER' || dbUser?.role === 'ADVERTISER';
+
+       if (isSellerOrAdvertiser || hasStore) {
+          // Fix role if needed
+          if (hasStore && dbUser?.role !== 'SELLER') {
+             await db.user.update({
+                where: { id: userId },
+                data: { role: 'SELLER' }
+             });
+          }
+
           // Try to find ANY subscription to restore
           const anySub = await db.subscription.findFirst({
              where: { userId },

@@ -56,12 +56,12 @@ export default function Search() {
     <div className="relative lg:w-full flex-1">
       <form
         onSubmit={handleSubmit}
-        className="h-10 rounded-3xl bg-white relative border-none flex"
+        className="h-10 rounded-3xl bg-white relative border border-gray-200 flex items-center overflow-hidden"
       >
         <input
           type="text"
           placeholder="Search..."
-          className="bg-white text-black flex-1 border-none pl-2.5 m-2.5 outline-none"
+          className="bg-white text-black flex-1 border-none pl-4 outline-none h-full"
           value={searchQuery}
           onChange={handleInputChange}
         />
@@ -70,9 +70,9 @@ export default function Search() {
         )}
         <button
           type="submit"
-          className="border-[1px] rounded-[20px] w-[56px] h-8 mt-1 mr-1 mb-0 ml-0 bg-gradient-to-r from-slate-500 to bg-slate-600 grid place-items-center cursor-pointer"
+          className="h-full w-14 bg-pink-500 text-white grid place-items-center cursor-pointer hover:bg-pink-600 transition-colors"
         >
-          <SearchIcon />
+          <SearchIcon className="w-5 h-5" />
         </button>
       </form>
     </div>

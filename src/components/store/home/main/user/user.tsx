@@ -21,6 +21,7 @@ export default async function HomeUserCard({
       where: { id: user.id },
       select: { 
         role: true,
+        stores: { take: 1 },
         subscriptions: {
           where: {
             status: {
@@ -33,6 +34,11 @@ export default async function HomeUserCard({
     if (dbUser) {
       role = dbUser.role
       hasActiveSubscription = dbUser.subscriptions.length > 0
+      
+      // If user has a store but role is USER, treat as SELLER
+      if (role === 'USER' && dbUser.stores.length > 0) {
+        role = 'SELLER';
+      }
     }
   }
 
