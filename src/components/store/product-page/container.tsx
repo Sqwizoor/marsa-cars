@@ -30,7 +30,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     [productData?.images]
   );
   const shippingDetails =
-    productData && typeof productData.shippingDetails !== "boolean"
+    productData && productData.shippingDetails
       ? productData.shippingDetails
       : null;
 
@@ -45,7 +45,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
 
   // useState hook to manage the product's state in the cart
   const baseCartProduct = useMemo(() => {
-    if (!productData || !shippingDetails) {
+    if (!productData) {
       return null;
     }
 
@@ -64,13 +64,13 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
       size: "",
       stock: 1,
       weight: productData.weight,
-      shippingMethod: shippingDetails.shippingFeeMethod,
-      shippingService: shippingDetails.shippingService,
-      shippingFee: shippingDetails.shippingFee,
-      extraShippingFee: shippingDetails.extraShippingFee,
-      deliveryTimeMin: shippingDetails.deliveryTimeMin,
-      deliveryTimeMax: shippingDetails.deliveryTimeMax,
-      isFreeShipping: shippingDetails.isFreeShipping,
+      shippingMethod: shippingDetails?.shippingFeeMethod || "FIXED",
+      shippingService: shippingDetails?.shippingService || "Standard Shipping",
+      shippingFee: shippingDetails?.shippingFee || 0,
+      extraShippingFee: shippingDetails?.extraShippingFee || 0,
+      deliveryTimeMin: shippingDetails?.deliveryTimeMin || 3,
+      deliveryTimeMax: shippingDetails?.deliveryTimeMax || 7,
+      isFreeShipping: shippingDetails?.isFreeShipping || false,
       id: undefined,
     } satisfies CartProductType;
   }, [normalizedImages, productData, shippingDetails, sizeId]);
@@ -270,7 +270,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     );
   };
 
-  if (!productData || !shippingDetails) {
+  if (!productData) {
     return null;
   }
 
@@ -301,7 +301,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
           <div className="md:w-[390px]">
             <div className="z-20">
               <div className="bg-white border rounded-md overflow-hidden overflow-y-auto p-4 pb-0">
-                {typeof shippingDetails !== "boolean" && (
+                {shippingDetails && (
                   <>
                     <ShipTo
                       countryCode={shippingDetails.countryCode}
@@ -330,7 +330,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
           </div>
         </div>
       </div>
-      <div className="w-[calc(100%-390px)] mt-6 pb-16">{children}</div>
+      <div className="w-full xl:w-[calc(100%-406px)] mt-6 pb-16">{children}</div>
     </div>
   );
 };

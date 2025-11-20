@@ -144,8 +144,21 @@ export default function AdvertiserManagePage() {
                     </div>
 
                     {isTrial && (
-                      <div className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
-                        Free trial ends on {expirationLabel}. Complete your paid subscription to keep your seller tools active.
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 dark:from-pink-950/30 dark:via-rose-950/30 dark:to-purple-950/30 border-2 border-pink-200 dark:border-pink-800 p-4 shadow-lg">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-400/20 to-rose-500/20 rounded-full blur-2xl -mt-8 -mr-8"></div>
+                        <div className="relative flex items-start gap-3">
+                          <div className="p-2.5 bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600 rounded-xl shadow-md">
+                            <Calendar className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-bold bg-gradient-to-r from-pink-600 via-rose-600 to-purple-600 bg-clip-text text-transparent mb-1.5">
+                              🎉 Trial Period Active
+                            </p>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                              Your free trial ends on <span className="font-bold text-pink-600 dark:text-pink-400">{expirationLabel}</span>. Complete your paid subscription to keep your seller tools active.
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     )}
 

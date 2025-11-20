@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import MainSwiper from "../shared/swiper";
 import Countdown from "../shared/countdown";
+import { ArrowRight, Zap } from "lucide-react";
 
 export default function AnimatedDeals({
   products,
@@ -13,92 +14,86 @@ export default function AnimatedDeals({
   products: SimpleProduct[];
 }) {
   return (
-    <div className="relative w-full py-12 px-4 md:px-8 rounded-3xl overflow-hidden bg-pink-primary shadow-2xl">
-      {/* Background Effects */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2" />
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-8">
-          <div className="text-center md:text-left">
-            <div className="inline-block px-4 py-1 rounded-full bg-white/20 border border-white/30 text-white text-sm font-medium mb-4">
-              Limited Time Offer
+    <div className="w-full mt-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col lg:flex-row">
+        {/* Left Banner Section */}
+        <div className="lg:w-[320px] bg-gray-50 p-6 flex flex-col justify-between relative shrink-0">
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="bg-pink-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
+                Limited Offer
+              </span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">
-              Super <span className="text-white">Deals</span>
+            <h2 className="text-3xl font-black text-gray-900 leading-tight mb-2">
+              Super <span className="text-pink-500">Deals</span>
             </h2>
-            <p className="text-white/90 text-lg">Save up to 90% on premium auto parts</p>
+            <p className="text-gray-500 text-sm mb-6 font-medium">
+              Up to 90% off on premium parts
+            </p>
+            
+            <div className="mb-8">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Ends in:</p>
+              <Countdown targetDate="2025-12-31T23:59:59.999Z" />
+            </div>
+          </div>
+
+          {/* Featured Images with Pink Background */}
+          <div className="grid grid-cols-2 gap-3 relative z-10">
+            <Link href="/browse" className="group">
+              <div className="bg-pink-500 rounded-xl p-3 h-24 flex items-center justify-center relative overflow-hidden transition-transform hover:-translate-y-1 duration-300">
+                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Image 
+                  src={TopSellerImg} 
+                  alt="Top Seller" 
+                  className="object-contain w-full h-full drop-shadow-md group-hover:scale-110 transition-transform duration-500" 
+                />
+                <div className="absolute bottom-1 left-0 right-0 text-center">
+                   <span className="text-[9px] font-bold text-white/90 uppercase tracking-wider bg-black/20 px-2 py-0.5 rounded-full backdrop-blur-sm">Top Seller</span>
+                </div>
+              </div>
+            </Link>
+            <Link href="/browse" className="group">
+              <div className="bg-pink-500 rounded-xl p-3 h-24 flex items-center justify-center relative overflow-hidden transition-transform hover:-translate-y-1 duration-300">
+                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Image 
+                  src={TopRatedImg} 
+                  alt="Top Rated" 
+                  className="object-contain w-full h-full drop-shadow-md group-hover:scale-110 transition-transform duration-500" 
+                />
+                <div className="absolute bottom-1 left-0 right-0 text-center">
+                   <span className="text-[9px] font-bold text-white/90 uppercase tracking-wider bg-black/20 px-2 py-0.5 rounded-full backdrop-blur-sm">Top Rated</span>
+                </div>
+              </div>
+            </Link>
           </div>
           
-          <div className="flex items-center gap-6 bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5">
-            <Countdown targetDate="2025-12-31T23:59:59.999Z" home_style />
+          {/* Decorative Background Elements */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+        </div>
+
+        {/* Right Swiper Section */}
+        <div className="flex-1 p-4 lg:p-6 min-w-0 bg-white flex flex-col justify-center">
+          <div className="flex items-center justify-between mb-4">
+             <h3 className="font-bold text-gray-800 flex items-center gap-2">
+               <Zap className="w-4 h-4 text-pink-500 fill-pink-500" />
+               Flash Sale Items
+             </h3>
+             <Link href="/browse" className="text-xs font-bold text-pink-500 hover:text-pink-600 flex items-center gap-1 transition-colors">
+               View All <ArrowRight className="w-3 h-3" />
+             </Link>
           </div>
-        </div>
-
-        {/* Featured Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {/* Top Sellers Card */}
-          <Link href="/browse" className="group relative h-[240px] rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10 border border-white/5 hover:border-orange-primary/30 transition-all duration-500">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="absolute right-0 top-0 w-2/3 h-full">
-               <Image
-                src={TopSellerImg}
-                alt="Top Sellers"
-                fill
-                className="object-contain object-right p-4 group-hover:scale-110 transition-transform duration-700"
-              />
-            </div>
-            <div className="relative h-full flex flex-col justify-center p-8 z-10">
-              <div className="w-10 h-10 rounded-full bg-orange-primary flex items-center justify-center text-white font-bold text-xs mb-4 shadow-lg shadow-orange-primary/20">
-                HOT
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Top Sellers</h3>
-              <p className="text-main-secondary text-sm mb-4">Most popular items this week</p>
-              <span className="inline-flex items-center text-orange-primary font-medium group-hover:translate-x-2 transition-transform duration-300">
-                Shop Now <span className="ml-2">→</span>
-              </span>
-            </div>
-          </Link>
-
-          {/* Top Rated Card */}
-          <Link href="/browse" className="group relative h-[240px] rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10 border border-white/5 hover:border-blue-primary/30 transition-all duration-500">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="absolute right-0 top-0 w-2/3 h-full">
-               <Image
-                src={TopRatedImg}
-                alt="Top Rated"
-                fill
-                className="object-contain object-right p-4 group-hover:scale-110 transition-transform duration-700"
-              />
-            </div>
-            <div className="relative h-full flex flex-col justify-center p-8 z-10">
-              <div className="w-10 h-10 rounded-full bg-blue-primary flex items-center justify-center text-white mb-4 shadow-lg shadow-blue-primary/20">
-                ★
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Top Rated</h3>
-              <p className="text-main-secondary text-sm mb-4">Curated by our experts</p>
-              <span className="inline-flex items-center text-blue-primary font-medium group-hover:translate-x-2 transition-transform duration-300">
-                View Collection <span className="ml-2">→</span>
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        {/* Products Swiper Section */}
-        <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
           <MainSwiper
             products={products}
             type="deal"
-            spaceBetween={20}
+            spaceBetween={16}
             slidesPerView={2}
             breakpoints={{
-              640: { slidesPerView: 3, spaceBetween: 20 },
-              768: { slidesPerView: 4, spaceBetween: 24 },
-              1024: { slidesPerView: 5, spaceBetween: 24 },
-              1280: { slidesPerView: 6, spaceBetween: 24 },
+              640: { slidesPerView: 3, spaceBetween: 16 },
+              768: { slidesPerView: 3, spaceBetween: 20 },
+              1024: { slidesPerView: 3, spaceBetween: 20 },
+              1280: { slidesPerView: 4, spaceBetween: 20 },
+              1536: { slidesPerView: 5, spaceBetween: 20 },
             }}
           />
         </div>

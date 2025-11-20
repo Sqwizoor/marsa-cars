@@ -63,7 +63,7 @@ export default async function Header() {
           <div className="hidden items-center gap-2 lg:flex">
             <Link
               href="/forum"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-pink-primary hover:bg-pink-dark transition-all duration-200 text-white font-medium"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-pink-500 hover:bg-pink-600 transition-all duration-200 text-white font-medium"
             >
               <MessageSquare className="h-4 w-4" />
               <span>Forum</span>

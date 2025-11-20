@@ -149,7 +149,7 @@ const ProductInfo: FC<Props> = ({
       <ProductWatch productId={variantId} />
       <Separator className="mt-2" />
       
-      <div className="flex flex-col md:flex-row md:gap-8">
+      <div className="flex flex-row gap-4 md:gap-8">
         {/* Color wheel - variant switcher */}
         <div className="mt-4 space-y-2 flex-1">
           <div className="relative flex items-center justify-between text-main-primary font-bold">
