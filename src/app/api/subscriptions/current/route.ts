@@ -88,19 +88,25 @@ export async function GET(req: NextRequest) {
     if (!subscription) {
        const dbUser = await db.user.findUnique({
           where: { id: userId },
-          select: { role: true, stores: { take: 1 } }
+          select: { role: true, stores: { take: 1 }, ads: { take: 1 } }
        });
 
-       // Check if user should be a SELLER (has a store) but role is wrong
+       // Check if user should be a SELLER (has a store) or ADVERTISER (has ads) but role is wrong
        const hasStore = dbUser?.stores && dbUser.stores.length > 0;
+       const hasAds = dbUser?.ads && dbUser.ads.length > 0;
        const isSellerOrAdvertiser = dbUser?.role === 'SELLER' || dbUser?.role === 'ADVERTISER';
 
-       if (isSellerOrAdvertiser || hasStore) {
+       if (isSellerOrAdvertiser || hasStore || hasAds) {
           // Fix role if needed
           if (hasStore && dbUser?.role !== 'SELLER') {
              await db.user.update({
                 where: { id: userId },
                 data: { role: 'SELLER' }
+             });
+          } else if (hasAds && dbUser?.role !== 'ADVERTISER' && !hasStore) {
+             await db.user.update({
+                where: { id: userId },
+                data: { role: 'ADVERTISER' }
              });
           }
 
