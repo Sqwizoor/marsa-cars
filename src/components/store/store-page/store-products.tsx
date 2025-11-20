@@ -34,7 +34,7 @@ export default function StoreProducts({
     getFilteredProducts();
   }, [category, offer, search, size, sort, store, subCategory]);
   return (
-    <div className=" bg-white justify-center md:justify-start flex flex-wrap p-2 pb-16 rounded-md">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 bg-white p-2 pb-16 rounded-md">
       {data.map((product) => (
         <ProductCard key={product.slug} product={product} />
       ))}

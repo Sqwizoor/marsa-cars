@@ -36,7 +36,7 @@ const ProductList: FC<Props> = ({ products, title, link, arrow }) => {
       {products.length > 0 ? (
         <div
           className={cn(
-            "flex flex-wrap -translate-x-5 gap-x-5 w-[cacl(100%+3rem)] sm:w-full",
+            "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4",
             {
               "mt-2": title,
             }

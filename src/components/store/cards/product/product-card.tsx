@@ -29,7 +29,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
   };
 
   return (
-    <div className="w-full max-w-[280px] mx-auto overflow-hidden">
+    <div className="w-full overflow-hidden">
       <div
         className={cn(
           "group w-full relative transition-all duration-300 bg-white ease-in-out p-4 rounded-3xl border border-gray-200 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 flex flex-col h-full overflow-hidden",

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { ensureSellerSubscription } from "@/lib/subscription-guard";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,40 +22,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check for active or trialing subscription
-    const subscription = await db.subscription.findFirst({
-      where: {
-        userId: userId,
-        status: {
-          in: ["ACTIVE", "TRIALING"],
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    if (!subscription) {
+    // Check for active or trialing subscription using the guard (handles recovery)
+    let subscription;
+    try {
+      subscription = await ensureSellerSubscription(userId);
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "You need an active subscription to create ads" },
-        { status: 403 }
-      );
-    }
-
-    const expiresAt =
-      subscription.status === "TRIALING"
-        ? subscription.trialEndsAt
-        : subscription.endDate;
-
-    // Check if subscription has expired
-    if (expiresAt && new Date() > expiresAt) {
-      await db.subscription.update({
-        where: { id: subscription.id },
-        data: { status: "EXPIRED" },
-      });
-
-      return NextResponse.json(
-        { error: "Your subscription period has ended" },
+        { error: error.message || "You need an active subscription to create ads" },
         { status: 403 }
       );
     }
