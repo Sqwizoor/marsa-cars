@@ -26,9 +26,13 @@ export default function ProductCardImageSwiper({
   }, []);
   return (
     <div
-      className="relative mb-2 w-full aspect-square contrast-[90%] rounded-2xl overflow-hidden"
+      className="relative w-full aspect-square contrast-[90%] overflow-hidden"
       onMouseEnter={() => swiperRef.current?.swiper?.autoplay?.start()}
       onMouseLeave={() => {
+        swiperRef.current?.swiper?.autoplay?.stop();
+        swiperRef.current?.swiper?.slideTo(0);
+      }}
+    >
         swiperRef.current?.swiper?.autoplay?.stop();
         swiperRef.current?.swiper?.slideTo(0);
       }}

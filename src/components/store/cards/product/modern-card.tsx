@@ -31,7 +31,7 @@ export default function ProductCardModern({
     <Link href={`/product/${product.slug}/${variant.variantSlug}`} className="block h-full group">
       <div className="relative h-full bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg hover:border-blue-primary/30 transition-all duration-300 flex flex-col">
         {/* Image Container */}
-        <div className="relative w-full aspect-[4/3] bg-gray-50 overflow-hidden">
+        <div className="relative w-full h-[200px] bg-gray-50 overflow-hidden">
           <Image 
             src={variant.images[0].url} 
             alt={product.name}

@@ -32,64 +32,69 @@ export default function ProductCard({ product }: { product: ProductType }) {
     <div className="w-full overflow-hidden">
       <div
         className={cn(
-          "group w-full relative transition-all duration-300 bg-white ease-in-out p-4 rounded-3xl border border-gray-200 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 flex flex-col h-full overflow-hidden",
+          "group w-full relative transition-all duration-300 bg-white ease-in-out rounded-3xl border border-gray-200 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 flex flex-col h-full overflow-hidden",
           {
             "": true,
           }
         )}
       >
-        <div className="relative w-full flex flex-col min-w-0">
+        <div className="relative w-full flex flex-col min-w-0 h-full">
           <Link
             href={`/product/${slug}/${variantSlug}`}
-            className="block w-full relative overflow-hidden"
+            className="block w-full relative overflow-hidden flex-1"
           >
             {/* Images Swiper */}
             <ProductCardImageSwiper images={images} />
-            {/* Title */}
-            <div className="text-sm font-medium text-main-primary truncate mt-2 w-full">
-              {name} · {variantName}
-            </div>
-            {/* Rating - Sales */}
-            {rating > 0 && sales > 0 && (
-              <div className="flex items-center gap-x-1 mt-1">
-                <StarRatings
-                  rating={rating}
-                  starRatedColor="#ffb400"
-                  starEmptyColor="#e2dfdf"
-                  numberOfStars={5}
-                  starDimension="15px"
-                  starSpacing="1px"
-                />
-                <div className="pl-2 text-xs text-main-secondary">{sales} sold</div>
+            
+            <div className="px-4 pb-2">
+              {/* Title */}
+              <div className="text-sm font-medium text-main-primary truncate mt-2 w-full">
+                {name} · {variantName}
               </div>
-            )}
-            {/* Price */}
-            <ProductPrice sizes={sizes} isCard handleChange={() => {}} />
+              {/* Rating - Sales */}
+              {rating > 0 && sales > 0 && (
+                <div className="flex items-center gap-x-1 mt-1">
+                  <StarRatings
+                    rating={rating}
+                    starRatedColor="#ffb400"
+                    starEmptyColor="#e2dfdf"
+                    numberOfStars={5}
+                    starDimension="15px"
+                    starSpacing="1px"
+                  />
+                  <div className="pl-2 text-xs text-main-secondary">{sales} sold</div>
+                </div>
+              )}
+              {/* Price */}
+              <ProductPrice sizes={sizes} isCard handleChange={() => {}} />
+            </div>
           </Link>
           
-          {/* Variant switcher - Always visible */}
-          <div className="mt-2 pt-2 border-t border-gray-100">
-            <VariantSwitcher
-              images={variantImages}
-              variants={variants as VariantSimplified[]}
-              setVariant={setVariant}
-              selectedVariant={variant}
-            />
-          </div>
-          
-          {/* Action buttons - Always visible */}
-          <div className="flex items-center gap-2 mt-2">
-            <Button className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg">
-              <Link href={`/product/${slug}/${variantSlug}`} className="w-full">Add to cart</Link>
-            </Button>
-            <Button
-              variant="black"
-              size="icon"
-              onClick={() => handleaddToWishlist()}
-              className="bg-gradient-to-br from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white rounded-xl transition-all duration-300 hover:shadow-lg"
-            >
-              <Heart className="w-5" />
-            </Button>
+          <div className="px-4 pb-4 mt-auto">
+            {/* Variant switcher - Always visible */}
+            <div className="mt-2 pt-2 border-t border-gray-100">
+              <VariantSwitcher
+                images={variantImages}
+                variants={variants as VariantSimplified[]}
+                setVariant={setVariant}
+                selectedVariant={variant}
+              />
+            </div>
+            
+            {/* Action buttons - Always visible */}
+            <div className="flex items-center gap-2 mt-2">
+              <Button className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg">
+                <Link href={`/product/${slug}/${variantSlug}`} className="w-full">Add to cart</Link>
+              </Button>
+              <Button
+                variant="black"
+                size="icon"
+                onClick={() => handleaddToWishlist()}
+                className="bg-gradient-to-br from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white rounded-xl transition-all duration-300 hover:shadow-lg"
+              >
+                <Heart className="w-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
