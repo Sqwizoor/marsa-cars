@@ -33,10 +33,6 @@ export default function ProductCardImageSwiper({
         swiperRef.current?.swiper?.slideTo(0);
       }}
     >
-        swiperRef.current?.swiper?.autoplay?.stop();
-        swiperRef.current?.swiper?.slideTo(0);
-      }}
-    >
       <Swiper
         ref={swiperRef}
         modules={[Autoplay]}
