@@ -36,7 +36,7 @@ export default function SubscriptionBadge() {
         href="/subscriptions"
         className="block text-center rounded-md bg-yellow-50 text-yellow-700 px-3 py-2 text-xs font-semibold hover:bg-yellow-100 transition mb-2"
       >
-        No Ads Plan
+        No Active Plan
       </Link>
     );
   }
