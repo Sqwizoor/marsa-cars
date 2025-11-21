@@ -69,12 +69,7 @@ export default async function ProductVariantPage({
           <>
             <Separator className="mt-6" />
             {/* Product description */}
-            <ProductDescription
-              text={[
-                productData.description,
-                productData.variantDescription || "",
-              ]}
-            />
+            <ProductDescription text={productData.description} />
           </>
           {(specs.product.length > 0 || specs.variant.length > 0) && (
             <>
