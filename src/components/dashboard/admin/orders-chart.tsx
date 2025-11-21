@@ -2,15 +2,24 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
+  Bar,
+  BarChart,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
+  XAxis,
 } from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+
+const chartConfig = {
+  orders: {
+    label: "Orders",
+    color: "hsl(var(--chart-2))",
+  },
+} satisfies ChartConfig;
 
 interface OrdersChartProps {
   data: Array<{ date: string; orders: number }>;
@@ -20,7 +29,7 @@ export default function OrdersChart({ data }: OrdersChartProps) {
   // Format data for display
   const formattedData = data.map((item) => ({
     ...item,
-    date: new Date(item.date).toLocaleDateString("en-US", {
+    formattedDate: new Date(item.date).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     }),
@@ -32,41 +41,23 @@ export default function OrdersChart({ data }: OrdersChartProps) {
         <CardTitle className="text-lg font-semibold dark:text-white">Orders Trend (Last 30 Days)</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={formattedData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="stroke-gray-200 dark:stroke-gray-700" />
+        <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">
+          <BarChart accessibilityLayer data={formattedData}>
+            <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="date"
-              tick={{ fontSize: 12, fill: 'currentColor' }}
-              className="fill-gray-600 dark:fill-gray-400"
-              stroke="currentColor"
+              dataKey="formattedDate"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              minTickGap={32}
             />
-            <YAxis
-              tick={{ fontSize: 12, fill: 'currentColor' }}
-              className="fill-gray-600 dark:fill-gray-400"
-              stroke="currentColor"
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "var(--background)",
-                border: "1px solid var(--border)",
-                borderRadius: "8px",
-                color: "var(--foreground)",
-              }}
-              formatter={(value: number) => [value, "Orders"]}
-            />
-            <Legend wrapperStyle={{ color: 'var(--foreground)' }} />
-            <Line
-              type="monotone"
-              dataKey="orders"
-              stroke="#FF1744"
-              strokeWidth={3}
-              dot={{ fill: "#FF1744", r: 4 }}
-              activeDot={{ r: 6 }}
-              name="Orders"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+            <Bar dataKey="orders" fill="var(--color-orders)" radius={8} />
+          </BarChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

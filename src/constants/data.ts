@@ -7,6 +7,11 @@ export const adminDashboardSidebarOptions: DashboardSidebarMenuInterface[] = [
     link: "/dashboard/admin",
   },
   {
+    label: "Analytics",
+    icon: "chart",
+    link: "/dashboard/admin/analytics",
+  },
+  {
     label: "Stores",
     icon: "store",
     link: "/dashboard/admin/stores",
@@ -43,6 +48,11 @@ export const SellerDashboardSidebarOptions: DashboardSidebarMenuInterface[] = [
     label: "Dashboard",
     icon: "dashboard",
     link: "",
+  },
+  {
+    label: "Analytics",
+    icon: "chart",
+    link: "analytics",
   },
   {
     label: "Products",

@@ -9,10 +9,8 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Package, ShoppingCart, DollarSign } from "lucide-react";
-import { OverviewChart } from "@/components/dashboard/seller/overview-chart";
+import { DollarSign, Package, ShoppingCart } from "lucide-react";
 
 export default async function SellerStorePage({
   params,
@@ -65,16 +63,8 @@ export default async function SellerStorePage({
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Overview</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <OverviewChart data={stats.graphData} />
-          </CardContent>
-        </Card>
-        <Card className="col-span-3">
+      <div className="grid gap-4 md:grid-cols-1">
+        <Card>
           <CardHeader>
             <CardTitle>Recent Orders</CardTitle>
           </CardHeader>
@@ -83,6 +73,7 @@ export default async function SellerStorePage({
               <TableHeader>
                 <TableRow>
                   <TableHead>Customer</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                 </TableRow>
               </TableHeader>
@@ -101,6 +92,9 @@ export default async function SellerStorePage({
                         </div>
                       </div>
                     </TableCell>
+                    <TableCell>
+                      <span className="capitalize text-sm text-muted-foreground">{order.order.paymentStatus.toLowerCase()}</span>
+                    </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrencyZAR(order.total)}
                     </TableCell>
@@ -108,7 +102,7 @@ export default async function SellerStorePage({
                 ))}
                 {stats.recentOrders.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={2} className="text-center text-muted-foreground h-24">
+                    <TableCell colSpan={3} className="text-center text-muted-foreground h-24">
                       No orders found
                     </TableCell>
                   </TableRow>

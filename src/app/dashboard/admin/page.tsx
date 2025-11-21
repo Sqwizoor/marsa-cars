@@ -1,14 +1,10 @@
 import React from "react";
 import {
   getAdminDashboardStats,
-  getRevenueChartData,
-  getOrdersChartData,
   getTopProducts,
   getTopStores,
 } from "@/queries/admin";
 import StatCard from "@/components/dashboard/admin/stat-card";
-import RevenueChart from "@/components/dashboard/admin/revenue-chart";
-import OrdersChart from "@/components/dashboard/admin/orders-chart";
 import TopProductsList from "@/components/dashboard/admin/top-products-list";
 import TopStoresList from "@/components/dashboard/admin/top-stores-list";
 import {
@@ -25,11 +21,9 @@ import {
 
 export default async function AdminDashboardPage() {
   // Fetch all data in parallel
-  const [stats, revenueData, ordersData, topProducts, topStores] =
+  const [stats, topProducts, topStores] =
     await Promise.all([
       getAdminDashboardStats(),
-      getRevenueChartData(),
-      getOrdersChartData(),
       getTopProducts(5),
       getTopStores(5),
     ]);
@@ -112,12 +106,6 @@ export default async function AdminDashboardPage() {
             prefix="R"
             description="Real-time earnings"
           />
-        </div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <RevenueChart data={revenueData} />
-          <OrdersChart data={ordersData} />
         </div>
 
         {/* Top Lists Section */}

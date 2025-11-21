@@ -796,11 +796,14 @@ export const getStoreDashboardStats = async (storeUrl: string) => {
     });
 
     // Aggregate by date
-    const graphDataMap = new Map<string, number>();
+    const graphDataMap = new Map<string, { total: number; orders: number }>();
     last30DaysOrders.forEach((order) => {
       const date = order.createdAt.toISOString().split("T")[0];
-      const current = graphDataMap.get(date) || 0;
-      graphDataMap.set(date, current + order.total);
+      const current = graphDataMap.get(date) || { total: 0, orders: 0 };
+      graphDataMap.set(date, { 
+        total: current.total + order.total,
+        orders: current.orders + 1
+      });
     });
 
     // Fill in missing days
@@ -809,9 +812,11 @@ export const getStoreDashboardStats = async (storeUrl: string) => {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split("T")[0];
+      const data = graphDataMap.get(dateStr) || { total: 0, orders: 0 };
       graphData.push({
         date: dateStr,
-        total: graphDataMap.get(dateStr) || 0,
+        total: data.total,
+        orders: data.orders,
       });
     }
 

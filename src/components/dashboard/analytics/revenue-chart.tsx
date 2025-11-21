@@ -1,12 +1,15 @@
-"use client";
+"use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import * as React from "react"
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+
 import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-} from "recharts";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import {
   ChartConfig,
   ChartContainer,
@@ -14,36 +17,51 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
+} from "@/components/ui/chart"
+import { formatCurrencyZAR } from "@/lib/utils"
 
 const chartConfig = {
   revenue: {
     label: "Revenue",
     color: "hsl(var(--chart-1))",
   },
-} satisfies ChartConfig;
+} satisfies ChartConfig
 
 interface RevenueChartProps {
-  data: Array<{ date: string; revenue: number }>;
+  data: {
+    date: string
+    total: number
+    orders: number
+  }[]
 }
 
-export default function RevenueChart({ data }: RevenueChartProps) {
-  // Format data for display
-  const formattedData = data.map((item) => ({
-    ...item,
-    formattedDate: new Date(item.date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    }),
-  }));
+export function RevenueChart({ data }: RevenueChartProps) {
+  // Format data for the chart
+  const formattedData = React.useMemo(() => {
+    return data.map(item => ({
+      ...item,
+      formattedDate: new Date(item.date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+    }))
+  }, [data])
 
   return (
-    <Card className="col-span-1 lg:col-span-2 border-gray-200 dark:border-gray-700">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold dark:text-white">Revenue Trend (Last 30 Days)</CardTitle>
+    <Card>
+      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+        <div className="grid flex-1 gap-1 text-center sm:text-left">
+          <CardTitle>Revenue Over Time</CardTitle>
+          <CardDescription>
+            Showing total revenue for the last 30 days
+          </CardDescription>
+        </div>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">
+      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[250px] w-full"
+        >
           <AreaChart data={formattedData}>
             <defs>
               <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -73,12 +91,12 @@ export default function RevenueChart({ data }: RevenueChartProps) {
                 <ChartTooltipContent
                   labelKey="formattedDate"
                   indicator="dot"
-                  formatter={(value) => `R${Number(value).toLocaleString()}`}
+                  formatter={(value) => formatCurrencyZAR(Number(value))}
                 />
               }
             />
             <Area
-              dataKey="revenue"
+              dataKey="total"
               type="natural"
               fill="url(#fillRevenue)"
               fillOpacity={0.4}
@@ -90,5 +108,5 @@ export default function RevenueChart({ data }: RevenueChartProps) {
         </ChartContainer>
       </CardContent>
     </Card>
-  );
+  )
 }

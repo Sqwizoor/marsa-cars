@@ -11,12 +11,18 @@ import {
   ShippingIcon,
   StoreIcon,
 } from "@/components/dashboard/icons";
+import { BarChart3 } from "lucide-react";
 
 export const icons = [
   {
     label: "Dashboard",
     value: "dashboard",
     path: DashboardIcon,
+  },
+  {
+    label: "Analytics",
+    value: "chart",
+    path: BarChart3,
   },
   {
     label: "Categories",
