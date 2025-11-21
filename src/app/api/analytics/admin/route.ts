@@ -34,11 +34,7 @@ export async function GET(request: NextRequest) {
           },
         },
         include: {
-          items: {
-            include: {
-              product: true,
-            },
-          },
+          items: true,
           order: {
             select: {
               paymentStatus: true,
@@ -78,7 +74,7 @@ export async function GET(request: NextRequest) {
 
       // Product sales
       orderGroup.items.forEach((item) => {
-        const existing = productSales.get(item.productId) || { name: item.product.title, quantity: 0, revenue: 0 }
+        const existing = productSales.get(item.productId) || { name: item.name, quantity: 0, revenue: 0 }
         existing.quantity += item.quantity
         existing.revenue += item.totalPrice
         productSales.set(item.productId, existing)

@@ -49,11 +49,7 @@ export default async function AdminAnalyticsPage({
         },
       },
       include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
+        items: true,
         order: {
           select: {
             paymentStatus: true,
@@ -93,7 +89,7 @@ export default async function AdminAnalyticsPage({
 
     // Product sales
     orderGroup.items.forEach((item) => {
-      const existing = productSales.get(item.productId) || { name: item.product.title, quantity: 0, revenue: 0 }
+      const existing = productSales.get(item.productId) || { name: item.name, quantity: 0, revenue: 0 }
       existing.quantity += item.quantity
       existing.revenue += item.totalPrice
       productSales.set(item.productId, existing)
