@@ -51,7 +51,7 @@ export default async function Header() {
 
           {/* Middle: Search + Offer Tags */}
           <div className="hidden flex-1 items-center gap-3 lg:flex">
-            <div className="w-full max-w-2xl rounded-xl border border-white/10 bg-white/5 p-1 shadow-sm ring-1 ring-inset ring-white/10">
+            <div className="w-full max-w-2xl rounded-xl">
               <Search />
             </div>
             <div className="flex-shrink-0">
@@ -77,7 +77,7 @@ export default async function Header() {
 
         {/* Secondary row: Search on mobile */}
         <div className="pb-0.5 lg:hidden pr-3 sm:pr-4">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-1 shadow-sm ring-1 ring-inset ring-white/10">
+          <div className="rounded-xl ">
             <Search />
           </div>
         </div>

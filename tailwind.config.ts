@@ -55,22 +55,45 @@ const config = {
         blue: {
           primary: "#0D6EFD",
         },
+        // 60-30-10 Color System
+        // Main colors (60% usage - backgrounds, large areas)
+        main: {
+          white: "#FFFFFF",
+          lightGrey: "#F5F5F5",
+          background: "#FAFAFA",
+        },
+        // Secondary colors (30% usage - cards, sections)
+        secondary: {
+          charcoal: "#2C2C2C",
+          darkGrey: "#424242",
+          mediumGrey: "#757575",
+          lightGrey: "#E0E0E0",
+        },
+        // Accent color (10% usage - CTAs, highlights, important elements)
         pink: {
-          primary: "#FF1744",
+          primary: "#FF1744", // Main accent
           light: "#FF4569",
           dark: "#E01038",
           background: "#FFE8ED",
         },
+        // Complementary colors for specific uses
+        navy: {
+          primary: "#1A237E",
+          light: "#3949AB",
+          dark: "#0D1B5E",
+        },
+        gold: {
+          primary: "#FFB300",
+          light: "#FFC107",
+          dark: "#FF8F00",
+        },
+        // Keep orange for backward compatibility
         orange: {
           background: "#FF1744",
           hover: "#E01038",
           primary: "#FF1744",
           seconadry: "#E01038",
           border: "#FFE8ED",
-        },
-        main: {
-          primary: "#191919",
-          secondary: "#757575",
         },
       },
       borderRadius: {

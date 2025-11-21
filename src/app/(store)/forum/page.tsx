@@ -19,57 +19,57 @@ async function ForumStats() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-      <Card>
+      <Card className="border-secondary-lightGrey">
         <CardContent className="pt-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <MessageSquare className="h-6 w-6 text-blue-600" />
+            <div className="p-3 bg-pink-background rounded-lg">
+              <MessageSquare className="h-6 w-6 text-pink-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats.totalThreads.toLocaleString()}</p>
-              <p className="text-sm text-gray-600">Threads</p>
+              <p className="text-2xl font-bold text-secondary-charcoal">{stats.totalThreads.toLocaleString()}</p>
+              <p className="text-sm text-secondary-mediumGrey">Threads</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-secondary-lightGrey">
         <CardContent className="pt-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <FileText className="h-6 w-6 text-green-600" />
+            <div className="p-3 bg-navy-primary/10 rounded-lg">
+              <FileText className="h-6 w-6 text-navy-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats.totalPosts.toLocaleString()}</p>
-              <p className="text-sm text-gray-600">Posts</p>
+              <p className="text-2xl font-bold text-secondary-charcoal">{stats.totalPosts.toLocaleString()}</p>
+              <p className="text-sm text-secondary-mediumGrey">Posts</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-secondary-lightGrey">
         <CardContent className="pt-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <Users className="h-6 w-6 text-purple-600" />
+            <div className="p-3 bg-secondary-charcoal/10 rounded-lg">
+              <Users className="h-6 w-6 text-secondary-charcoal" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</p>
-              <p className="text-sm text-gray-600">Members</p>
+              <p className="text-2xl font-bold text-secondary-charcoal">{stats.totalUsers.toLocaleString()}</p>
+              <p className="text-sm text-secondary-mediumGrey">Members</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-secondary-lightGrey">
         <CardContent className="pt-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-orange-100 rounded-lg">
-              <TrendingUp className="h-6 w-6 text-orange-600" />
+            <div className="p-3 bg-gold-primary/10 rounded-lg">
+              <TrendingUp className="h-6 w-6 text-gold-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">Active</p>
-              <p className="text-sm text-gray-600">Community</p>
+              <p className="text-2xl font-bold text-secondary-charcoal">Active</p>
+              <p className="text-sm text-secondary-mediumGrey">Community</p>
             </div>
           </div>
         </CardContent>
@@ -84,10 +84,10 @@ async function TrendingThreads() {
   if (threads.length === 0) return null;
 
   return (
-    <Card className="mb-8">
+    <Card className="mb-8 border-secondary-lightGrey">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-orange-500" />
+        <CardTitle className="flex items-center gap-2 text-secondary-charcoal">
+          <TrendingUp className="h-5 w-5 text-pink-primary" />
           Trending This Week
         </CardTitle>
       </CardHeader>
@@ -106,13 +106,13 @@ async function ForumCategories() {
   const categories = await getForumCategories();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <h2 className="text-2xl font-bold">Forum Categories</h2>
+        <h2 className="text-xl font-bold text-secondary-charcoal">Forum Categories</h2>
         <div className="flex items-center gap-3">
           <ForumSearch />
           <Link href="/forum/new">
-            <Button>
+            <Button className="bg-pink-primary hover:bg-pink-light">
               <MessageSquare className="h-4 w-4 mr-2" />
               New Thread
             </Button>
@@ -120,7 +120,7 @@ async function ForumCategories() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {categories.map((category) => (
           <CategoryCard key={category.id} category={category as any} />
         ))}
@@ -131,11 +131,11 @@ async function ForumCategories() {
 
 export default function ForumPage() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="container mx-auto px-4 py-8 max-w-7xl font-[var(--font-inter)]">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-3">Car Parts Forum</h1>
-        <p className="text-lg text-gray-600">
+        <h1 className="text-4xl font-bold mb-3 text-secondary-charcoal">Car Parts Forum</h1>
+        <p className="text-lg text-secondary-mediumGrey">
           Welcome to our community! Ask questions, share knowledge, and connect
           with fellow car enthusiasts and experts.
         </p>
@@ -191,11 +191,11 @@ export default function ForumPage() {
       </Suspense>
 
       {/* Forum Rules/Info */}
-      <Card className="mt-8 bg-blue-50 border-blue-200">
+      <Card className="mt-8 bg-pink-background border-pink-primary/20">
         <CardHeader>
-          <CardTitle className="text-blue-900">Forum Guidelines</CardTitle>
+          <CardTitle className="text-pink-primary">Forum Guidelines</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm text-blue-800 space-y-2">
+        <CardContent className="text-sm text-secondary-charcoal space-y-2">
           <ul className="list-disc list-inside space-y-1">
             <li>Be respectful and courteous to all members</li>
             <li>Stay on topic and post in the appropriate category</li>

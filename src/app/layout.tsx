@@ -1,6 +1,6 @@
 // Next.js
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Barlow } from "next/font/google";
+import { Geist, Geist_Mono, Barlow, Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import type { ReactNode } from "react";
 // Global CSS
@@ -24,6 +24,12 @@ const barlow = Barlow({
   weight: ["400", "700"], // Adjust weights as needed
 });
 
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -40,7 +46,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <html lang="en" suppressHydrationWarning>
         <head />
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${barlow.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} ${barlow.variable} ${inter.variable} antialiased`}
         >
           <ThemeProvider
             attribute="class"
