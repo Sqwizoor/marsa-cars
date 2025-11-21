@@ -44,6 +44,16 @@ export default function SubscriptionBadge() {
   const isTrial = subscription.phase === "TRIAL";
   const remaining = subscription.remainingAds === -1 ? "∞" : subscription.remainingAds;
 
+  let infoText = `${remaining} ads left`;
+
+  if (isTrial && subscription.expiresAt) {
+    const expiresAt = new Date(subscription.expiresAt);
+    const now = new Date();
+    const diffTime = expiresAt.getTime() - now.getTime();
+    const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    infoText = `${diffDays} days left`;
+  }
+
   return (
     <Link
       href="/dashboard/advertiser/manage"
@@ -52,7 +62,7 @@ export default function SubscriptionBadge() {
       <div className="flex items-center justify-center gap-2">
         <span>{isTrial ? "Trial" : subscription.tier}</span>
         <span className="rounded bg-white/20 px-2 py-0.5">
-          {remaining} left
+          {infoText}
         </span>
       </div>
     </Link>
