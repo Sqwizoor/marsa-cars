@@ -9,11 +9,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const dbUser = await db.user.findUnique({
-      where: { id: user.id },
-    })
-
-    if (dbUser?.role !== "ADMIN") {
+    // Check admin role from Clerk metadata
+    if (user.privateMetadata.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 

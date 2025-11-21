@@ -11,14 +11,7 @@ export default async function AdminAnalyticsPage({
   const user = await currentUser()
   if (!user) redirect("/sign-in")
 
-  const dbUser = await db.user.findUnique({
-    where: { id: user.id },
-  })
-
-  if (dbUser?.role !== "ADMIN") {
-    redirect("/")
-  }
-
+  // Admin access is already checked in the layout
   const { range } = await searchParams
   
   const getDaysFromRange = (range?: string): number => {
