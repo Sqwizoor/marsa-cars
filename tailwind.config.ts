@@ -31,6 +31,11 @@ const config = {
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
+          // 60-30-10 Color System - Secondary colors (30% usage)
+          charcoal: "#2C2C2C",
+          darkGrey: "#424242",
+          mediumGrey: "#757575",
+          lightGrey: "#E0E0E0",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -61,13 +66,6 @@ const config = {
           white: "#FFFFFF",
           lightGrey: "#F5F5F5",
           background: "#FAFAFA",
-        },
-        // Secondary colors (30% usage - cards, sections)
-        secondary: {
-          charcoal: "#2C2C2C",
-          darkGrey: "#424242",
-          mediumGrey: "#757575",
-          lightGrey: "#E0E0E0",
         },
         // Accent color (10% usage - CTAs, highlights, important elements)
         pink: {
