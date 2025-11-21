@@ -38,7 +38,10 @@ export default async function HomeUserCard({
       
       // If user has a store but role is USER, treat as SELLER
       if (role === 'USER') {
-        if (dbUser.stores.length > 0) {
+        // Check if Clerk metadata has a higher role (e.g. ADMIN) that hasn't synced yet
+        if (user.privateMetadata.role === 'ADMIN') {
+          role = 'ADMIN';
+        } else if (dbUser.stores.length > 0) {
           role = 'SELLER';
         } else if (dbUser.ads.length > 0) {
           role = 'ADVERTISER';
