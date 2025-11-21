@@ -12,7 +12,7 @@ export default async function AdminAnalyticsPage({
   if (!user) redirect("/sign-in")
 
   const dbUser = await db.user.findUnique({
-    where: { clerkId: user.id },
+    where: { id: user.id },
   })
 
   if (dbUser?.role !== "ADMIN") {
