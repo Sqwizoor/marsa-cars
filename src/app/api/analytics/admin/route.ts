@@ -34,13 +34,14 @@ export async function GET(request: NextRequest) {
           },
         },
         include: {
-          orders: {
+          items: {
             include: {
-              items: {
-                include: {
-                  product: true,
-                },
-              },
+              product: true,
+            },
+          },
+          order: {
+            select: {
+              paymentStatus: true,
             },
           },
         },
@@ -59,30 +60,28 @@ export async function GET(request: NextRequest) {
     const productSales = new Map<string, { name: string; quantity: number; revenue: number }>()
 
     orderGroups.forEach((orderGroup) => {
-      orderGroup.orders.forEach((order) => {
-        const dateKey = order.createdAt.toISOString().split("T")[0]
-        const orderRevenue = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      const dateKey = orderGroup.createdAt.toISOString().split("T")[0]
+      const orderRevenue = orderGroup.total
 
-        // Revenue by date
-        revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + orderRevenue)
-        
-        // Orders by date
-        ordersByDate.set(dateKey, (ordersByDate.get(dateKey) || 0) + 1)
+      // Revenue by date
+      revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + orderRevenue)
+      
+      // Orders by date
+      ordersByDate.set(dateKey, (ordersByDate.get(dateKey) || 0) + 1)
 
-        // Total revenue
-        totalRevenue += orderRevenue
-        totalOrders++
+      // Total revenue
+      totalRevenue += orderRevenue
+      totalOrders++
 
-        // Orders by status
-        ordersByStatus.set(order.status, (ordersByStatus.get(order.status) || 0) + 1)
+      // Orders by status
+      ordersByStatus.set(orderGroup.status, (ordersByStatus.get(orderGroup.status) || 0) + 1)
 
-        // Product sales
-        order.items.forEach((item) => {
-          const existing = productSales.get(item.productId) || { name: item.product.title, quantity: 0, revenue: 0 }
-          existing.quantity += item.quantity
-          existing.revenue += item.price * item.quantity
-          productSales.set(item.productId, existing)
-        })
+      // Product sales
+      orderGroup.items.forEach((item) => {
+        const existing = productSales.get(item.productId) || { name: item.product.title, quantity: 0, revenue: 0 }
+        existing.quantity += item.quantity
+        existing.revenue += item.totalPrice
+        productSales.set(item.productId, existing)
       })
     })
 
@@ -96,20 +95,11 @@ export async function GET(request: NextRequest) {
           lt: startDate,
         },
       },
-      include: {
-        orders: {
-          include: {
-            items: true,
-          },
-        },
-      },
     })
 
     let previousRevenue = 0
     previousOrderGroups.forEach((orderGroup) => {
-      orderGroup.orders.forEach((order) => {
-        previousRevenue += order.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      })
+      previousRevenue += orderGroup.total
     })
 
     const revenueGrowth = previousRevenue > 0 
