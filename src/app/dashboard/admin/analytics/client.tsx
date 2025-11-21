@@ -1,42 +1,34 @@
-import { getStoreAnalytics } from "@/queries/analytics"
-import { getStoreDashboardStats } from "@/queries/store"
-import SellerAnalyticsClient from "./client"
+"use client"
 
-export default async function SellerAnalyticsPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ storeUrl: string }>
-  searchParams: Promise<{ range?: string }>
-}) {
-  const { storeUrl } = await params
-  const { range } = await searchParams
-  
-  const getDaysFromRange = (range?: string): number => {
-    switch (range) {
-      case "7d": return 7
-      case "30d": return 30
-      case "90d": return 90
-      case "6m": return 180
-      case "1y": return 365
-      case "all": return 999999
-      default: return 30
-    }
-  }
+import * as React from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { DollarSign, ShoppingCart, Package, TrendingUp, TrendingDown, Users, Store } from "lucide-react"
+import { DateRangeSelector, DateRange } from "@/components/dashboard/analytics/date-range-selector"
+import { RevenueLineChart } from "@/components/dashboard/analytics/revenue-line-chart"
+import { OrdersBarChart } from "@/components/dashboard/analytics/orders-bar-chart"
+import { OrderStatusPieChart } from "@/components/dashboard/analytics/order-status-pie-chart"
+import { TopProductsChart } from "@/components/dashboard/analytics/top-products-chart"
+import RevenueChart from "@/components/dashboard/admin/revenue-chart"
+import { formatCurrencyZAR } from "@/lib/utils"
 
-  const days = getDaysFromRange(range)
-  const [analytics, stats] = await Promise.all([
-    getStoreAnalytics(storeUrl, days),
-    getStoreDashboardStats(storeUrl, days)
-  ])
-
-  const initialData = {
-    ...analytics,
-    ...stats,
-  }
-
-  return <SellerAnalyticsClient storeUrl={storeUrl} initialData={initialData} />
+interface AdminAnalyticsClientProps {
+  initialData: any
 }
+
+const getDaysFromRange = (range: DateRange): number => {
+  switch (range) {
+    case "7d": return 7
+    case "30d": return 30
+    case "90d": return 90
+    case "6m": return 180
+    case "1y": return 365
+    case "all": return 999999
+    default: return 30
+  }
+}
+
+export default function AdminAnalyticsClient({ initialData }: AdminAnalyticsClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [dateRange, setDateRange] = React.useState<DateRange>((searchParams.get("range") as DateRange) || "30d")
@@ -48,7 +40,7 @@ export default async function SellerAnalyticsPage({
       setLoading(true)
       try {
         const days = getDaysFromRange(dateRange)
-        const response = await fetch(`/api/analytics/seller/${storeUrl}?days=${days}`)
+        const response = await fetch(`/api/analytics/admin?days=${days}`)
         const newData = await response.json()
         setData(newData)
       } catch (error) {
@@ -60,7 +52,7 @@ export default async function SellerAnalyticsPage({
 
     fetchData()
     router.push(`?range=${dateRange}`, { scroll: false })
-  }, [dateRange, storeUrl, router])
+  }, [dateRange, router])
 
   const revenueGrowthPercent = data.revenueGrowth || 0
   const isPositiveGrowth = revenueGrowthPercent >= 0
@@ -68,7 +60,7 @@ export default async function SellerAnalyticsPage({
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Platform Analytics</h1>
         <DateRangeSelector value={dateRange} onChange={setDateRange} />
       </div>
 
@@ -106,7 +98,7 @@ export default async function SellerAnalyticsPage({
           <CardContent>
             <div className="text-2xl font-bold">{data.totalOrders || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              In selected period
+              Platform-wide orders
             </p>
           </CardContent>
         </Card>
@@ -124,13 +116,41 @@ export default async function SellerAnalyticsPage({
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Products</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{data.totalUsers || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Registered users
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Secondary Metrics */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Stores</CardTitle>
+            <Store className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{data.totalStores || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Seller stores
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.totalProducts || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Active products
+              Products listed
             </p>
           </CardContent>
         </Card>
@@ -157,4 +177,3 @@ export default async function SellerAnalyticsPage({
     </div>
   )
 }
-

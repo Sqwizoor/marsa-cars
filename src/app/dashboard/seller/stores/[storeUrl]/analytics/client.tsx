@@ -1,42 +1,35 @@
-import { getStoreAnalytics } from "@/queries/analytics"
-import { getStoreDashboardStats } from "@/queries/store"
-import SellerAnalyticsClient from "./client"
+"use client"
 
-export default async function SellerAnalyticsPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ storeUrl: string }>
-  searchParams: Promise<{ range?: string }>
-}) {
-  const { storeUrl } = await params
-  const { range } = await searchParams
-  
-  const getDaysFromRange = (range?: string): number => {
-    switch (range) {
-      case "7d": return 7
-      case "30d": return 30
-      case "90d": return 90
-      case "6m": return 180
-      case "1y": return 365
-      case "all": return 999999
-      default: return 30
-    }
-  }
+import * as React from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { DollarSign, ShoppingCart, Package, TrendingUp, TrendingDown } from "lucide-react"
+import { DateRangeSelector, DateRange } from "@/components/dashboard/analytics/date-range-selector"
+import { RevenueLineChart } from "@/components/dashboard/analytics/revenue-line-chart"
+import { OrdersBarChart } from "@/components/dashboard/analytics/orders-bar-chart"
+import { OrderStatusPieChart } from "@/components/dashboard/analytics/order-status-pie-chart"
+import { TopProductsChart } from "@/components/dashboard/analytics/top-products-chart"
+import { RevenueChart } from "@/components/dashboard/analytics/revenue-chart"
+import { formatCurrencyZAR } from "@/lib/utils"
 
-  const days = getDaysFromRange(range)
-  const [analytics, stats] = await Promise.all([
-    getStoreAnalytics(storeUrl, days),
-    getStoreDashboardStats(storeUrl, days)
-  ])
-
-  const initialData = {
-    ...analytics,
-    ...stats,
-  }
-
-  return <SellerAnalyticsClient storeUrl={storeUrl} initialData={initialData} />
+interface SellerAnalyticsClientProps {
+  storeUrl: string
+  initialData: any
 }
+
+const getDaysFromRange = (range: DateRange): number => {
+  switch (range) {
+    case "7d": return 7
+    case "30d": return 30
+    case "90d": return 90
+    case "6m": return 180
+    case "1y": return 365
+    case "all": return 999999
+    default: return 30
+  }
+}
+
+export default function SellerAnalyticsClient({ storeUrl, initialData }: SellerAnalyticsClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [dateRange, setDateRange] = React.useState<DateRange>((searchParams.get("range") as DateRange) || "30d")
@@ -157,4 +150,3 @@ export default async function SellerAnalyticsPage({
     </div>
   )
 }
-

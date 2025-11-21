@@ -714,7 +714,7 @@ export const getStorePageDetails = async (storeUrl: string) => {
   return store;
 };
 
-export const getStoreDashboardStats = async (storeUrl: string) => {
+export const getStoreDashboardStats = async (storeUrl: string, days: number = 30) => {
   try {
     const user = await currentUser();
     if (!user) throw new Error("Unauthenticated.");
@@ -779,14 +779,14 @@ export const getStoreDashboardStats = async (storeUrl: string) => {
       take: 5,
     });
 
-    // 5. Graph Data (Last 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    // 5. Graph Data (configurable days)
+    const daysAgo = new Date();
+    daysAgo.setDate(daysAgo.getDate() - days);
 
-    const last30DaysOrders = await db.orderGroup.findMany({
+    const ordersInRange = await db.orderGroup.findMany({
       where: {
         storeId: store.id,
-        createdAt: { gte: thirtyDaysAgo },
+        createdAt: { gte: daysAgo },
         order: { paymentStatus: "Paid" },
       },
       select: {
@@ -797,7 +797,7 @@ export const getStoreDashboardStats = async (storeUrl: string) => {
 
     // Aggregate by date
     const graphDataMap = new Map<string, { total: number; orders: number }>();
-    last30DaysOrders.forEach((order) => {
+    ordersInRange.forEach((order) => {
       const date = order.createdAt.toISOString().split("T")[0];
       const current = graphDataMap.get(date) || { total: 0, orders: 0 };
       graphDataMap.set(date, { 
@@ -808,7 +808,7 @@ export const getStoreDashboardStats = async (storeUrl: string) => {
 
     // Fill in missing days
     const graphData = [];
-    for (let i = 29; i >= 0; i--) {
+    for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split("T")[0];
@@ -820,12 +820,46 @@ export const getStoreDashboardStats = async (storeUrl: string) => {
       });
     }
 
+    // 6. Additional Analytics
+    const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+    
+    // Order status breakdown
+    const ordersByStatus = await db.orderGroup.groupBy({
+      by: ['status'],
+      where: {
+        storeId: store.id,
+      },
+      _count: true,
+    });
+
+    // Revenue growth comparison (current vs previous period)
+    const previousPeriodStart = new Date();
+    previousPeriodStart.setDate(previousPeriodStart.getDate() - (days * 2));
+    const previousPeriodEnd = new Date();
+    previousPeriodEnd.setDate(previousPeriodEnd.getDate() - days);
+
+    const previousRevenue = await db.orderGroup.aggregate({
+      where: {
+        storeId: store.id,
+        createdAt: { gte: previousPeriodStart, lt: previousPeriodEnd },
+        order: { paymentStatus: "Paid" },
+      },
+      _sum: { total: true },
+    });
+
+    const revenueGrowth = previousRevenue._sum.total && previousRevenue._sum.total > 0
+      ? ((totalRevenue - (previousRevenue._sum.total || 0)) / (previousRevenue._sum.total || 1)) * 100
+      : 0;
+
     return {
       totalRevenue,
       totalOrders,
       totalProducts,
       recentOrders,
       graphData,
+      avgOrderValue,
+      ordersByStatus: ordersByStatus.map(s => ({ status: s.status, count: s._count })),
+      revenueGrowth,
     };
   } catch (error) {
     console.error("Error fetching store dashboard stats:", error);
