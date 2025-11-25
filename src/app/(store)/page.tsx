@@ -4,7 +4,7 @@ import HomeMainSwiper from "@/components/store/home/main/home-swiper";
 import HomeUserCard from "@/components/store/home/main/user/user";
 import Sideline from "@/components/store/home/sideline/sideline";
 import MainSwiper from "@/components/store/shared/swiper";
-import { SimpleProduct } from "@/lib/types";
+import { ProductType, SimpleProduct } from "@/lib/types";
 import { getHomeDataDynamic, getHomeFeaturedCategories } from "@/queries/home";
 import { getProducts } from "@/queries/product";
 import Image from "next/image";
@@ -23,7 +23,7 @@ export default async function HomePage() {
     products_user_card,
     products_featured,
   } = await getHomeDataDynamic([
-    { property: "offer", value: "best-deals", type: "simple" },
+    { property: "offer", value: "best-deals", type: "full" },
     { property: "offer", value: "super-deals", type: "full" },
     { property: "offer", value: "user-card", type: "simple" },
     { property: "offer", value: "featured", type: "simple" },
@@ -76,12 +76,7 @@ export default async function HomePage() {
             </div>
             {/* Animated deals */}
             <div className="mt-2 hidden min-[915px]:block">
-              <AnimatedDeals
-                products={products_best_deals.filter(
-                  (product): product is SimpleProduct =>
-                    "variantSlug" in product
-                )}
-              />
+              <AnimatedDeals />
             </div>
             <div className="mt-10 space-y-6">
               {/* Super Deals Section */}
@@ -126,7 +121,12 @@ export default async function HomePage() {
                   </div>
                 </div>
                 <div className="p-6 bg-gray-50/50">
-                  <MainSwiper products={products_super_deals} type="curved">
+                  <MainSwiper 
+                    products={products_best_deals.filter(
+                      (product): product is ProductType => "variants" in product
+                    )} 
+                    type="curved"
+                  >
                     <div className="hidden"></div>
                   </MainSwiper>
                 </div>

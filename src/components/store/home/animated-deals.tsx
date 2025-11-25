@@ -8,39 +8,36 @@ import MainSwiper from "../shared/swiper";
 import Countdown from "../shared/countdown";
 import { ArrowRight, Zap } from "lucide-react";
 
-export default function AnimatedDeals({
-  products,
-}: {
-  products: SimpleProduct[];
-}) {
+export default function AnimatedDeals() {
   return (
     <div className="w-full mt-6">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col lg:flex-row">
-        {/* Left Banner Section */}
-        <div className="lg:w-[320px] bg-gray-50 p-6 flex flex-col justify-between relative shrink-0">
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="bg-pink-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
-                Limited Offer
-              </span>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-gray-50 p-6 flex flex-col md:flex-row items-center justify-between relative overflow-hidden">
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="bg-pink-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
+                  Limited Offer
+                </span>
+              </div>
+              <h2 className="text-3xl font-black text-gray-900 leading-tight mb-2">
+                Super <span className="text-pink-500">Deals</span>
+              </h2>
+              <p className="text-gray-500 text-sm font-medium">
+                Up to 90% off on premium parts
+              </p>
             </div>
-            <h2 className="text-3xl font-black text-gray-900 leading-tight mb-2">
-              Super <span className="text-pink-500">Deals</span>
-            </h2>
-            <p className="text-gray-500 text-sm mb-6 font-medium">
-              Up to 90% off on premium parts
-            </p>
             
-            <div className="mb-8">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Ends in:</p>
+            <div className="bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-gray-100">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 text-center">Ends in:</p>
               <Countdown targetDate="2025-12-31T23:59:59.999Z" />
             </div>
           </div>
 
           {/* Featured Images with Pink Background */}
-          <div className="grid grid-cols-2 gap-3 relative z-10">
+          <div className="flex gap-4 relative z-10 mt-6 md:mt-0">
             <Link href="/browse" className="group">
-              <div className="bg-pink-500 rounded-xl p-3 h-24 flex items-center justify-center relative overflow-hidden transition-transform hover:-translate-y-1 duration-300">
+              <div className="bg-pink-500 rounded-xl p-3 w-32 h-24 flex items-center justify-center relative overflow-hidden transition-transform hover:-translate-y-1 duration-300">
                 <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <Image 
                   src={TopSellerImg} 
@@ -53,7 +50,7 @@ export default function AnimatedDeals({
               </div>
             </Link>
             <Link href="/browse" className="group">
-              <div className="bg-pink-500 rounded-xl p-3 h-24 flex items-center justify-center relative overflow-hidden transition-transform hover:-translate-y-1 duration-300">
+              <div className="bg-pink-500 rounded-xl p-3 w-32 h-24 flex items-center justify-center relative overflow-hidden transition-transform hover:-translate-y-1 duration-300">
                 <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <Image 
                   src={TopRatedImg} 
@@ -68,34 +65,8 @@ export default function AnimatedDeals({
           </div>
           
           {/* Decorative Background Elements */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-        </div>
-
-        {/* Right Swiper Section */}
-        <div className="flex-1 p-4 lg:p-6 min-w-0 bg-white flex flex-col justify-center">
-          <div className="flex items-center justify-between mb-4">
-             <h3 className="font-bold text-gray-800 flex items-center gap-2">
-               <Zap className="w-4 h-4 text-pink-500 fill-pink-500" />
-               Flash Sale Items
-             </h3>
-             <Link href="/browse" className="text-xs font-bold text-pink-500 hover:text-pink-600 flex items-center gap-1 transition-colors">
-               View All <ArrowRight className="w-3 h-3" />
-             </Link>
-          </div>
-          <MainSwiper
-            products={products}
-            type="deal"
-            spaceBetween={16}
-            slidesPerView={2}
-            breakpoints={{
-              640: { slidesPerView: 3, spaceBetween: 16 },
-              768: { slidesPerView: 3, spaceBetween: 20 },
-              1024: { slidesPerView: 3, spaceBetween: 20 },
-              1280: { slidesPerView: 4, spaceBetween: 20 },
-              1536: { slidesPerView: 5, spaceBetween: 20 },
-            }}
-          />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
         </div>
       </div>
     </div>
