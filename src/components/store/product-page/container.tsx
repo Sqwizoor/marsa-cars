@@ -222,7 +222,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     if (!productData) return null;
 
     return (
-      <div className="mt-5 bg-white bottom-0 pb-4 space-y-3 sticky">
+      <div className="mt-5 bg-white bottom-0 pb-4 space-y-3 sticky z-10">
         {/* Qty selector */}
         {sizeId && productToBeAddedToCart && (
           <div className="w-full flex justify-end mt-4">
@@ -299,7 +299,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
 
           {/* Shipping details - buy actions buttons */}
           <div className="md:w-[390px]">
-            <div className="relative z-20">
+            <div className="relative z-[60]">
               <div className="bg-white border rounded-md overflow-hidden overflow-y-auto p-4 pb-0">
                 {shippingDetails && (
                   <>

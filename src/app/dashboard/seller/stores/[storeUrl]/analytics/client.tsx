@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DollarSign, ShoppingCart, Package, TrendingUp, TrendingDown } from "lucide-react"
 import { DateRangeSelector, DateRange } from "@/components/dashboard/analytics/date-range-selector"
-import { RevenueLineChart } from "@/components/dashboard/analytics/revenue-line-chart"
-import { OrdersBarChart } from "@/components/dashboard/analytics/orders-bar-chart"
+import { OrdersLineChart } from "@/components/dashboard/analytics/orders-line-chart"
+import { AOVLineChart } from "@/components/dashboard/analytics/aov-line-chart"
 import { OrderStatusPieChart } from "@/components/dashboard/analytics/order-status-pie-chart"
 import { TopProductsChart } from "@/components/dashboard/analytics/top-products-chart"
 import { RevenueChart } from "@/components/dashboard/analytics/revenue-chart"
@@ -130,21 +130,21 @@ export default function SellerAnalyticsClient({ storeUrl, initialData }: SellerA
         </Card>
       </div>
 
-      {/* Charts - Row 1 */}
+      {/* Charts - Row 1: Revenue & Orders (Line Charts) */}
       <div className="grid gap-4 md:grid-cols-2">
         <RevenueChart data={data.graphData || []} />
-        <RevenueLineChart data={data.graphData || []} />
+        <OrdersLineChart data={data.graphData || []} />
       </div>
 
-      {/* Charts - Row 2 */}
+      {/* Charts - Row 2: AOV & Status */}
       <div className="grid gap-4 md:grid-cols-2">
-        <OrdersBarChart data={data.graphData || []} />
+        <AOVLineChart data={data.graphData || []} />
         {data.ordersByStatus && data.ordersByStatus.length > 0 && (
           <OrderStatusPieChart data={data.ordersByStatus} />
         )}
       </div>
 
-      {/* Charts - Row 3 */}
+      {/* Charts - Row 3: Products & Categories */}
       <div className="grid gap-4 md:grid-cols-2">
         {data.topProducts && data.topProducts.length > 0 && (
             <TopProductsChart data={data.topProducts} />

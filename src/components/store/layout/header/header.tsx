@@ -33,7 +33,7 @@ export default async function Header() {
   const offerTags = await getAllOfferTags();
 
   return (
-    <div className="sticky top-0 z-50 w-full bg-gradient-to-r from-slate-700/80 to-slate-900/70 backdrop-blur-md supports-[backdrop-filter]:bg-slate-900/60">
+    <div className="sticky top-0 z-[100] w-full bg-gradient-to-r from-slate-700/80 to-slate-900/70 backdrop-blur-md supports-[backdrop-filter]:bg-slate-900/60">
       <div className="mx-auto h-full w-full max-w-7xl text-white">
         <div className="flex items-center gap-3 py-0.5 sm:py-1 pr-3 sm:pr-4 lg:pr-6">
           {/* Left: Logo + mobile actions */}

@@ -509,3 +509,28 @@ export const getUserFollowedStores = async (
     totalPages,
   };
 };
+
+/**
+ * @name getUserSubscription
+ * @description - Retrieves the active subscription for the authenticated user.
+ * @access User
+ * @returns A Promise resolving to the subscription details or null if none found.
+ */
+export const getUserSubscription = async () => {
+  const user = await currentUser();
+  if (!user) return null;
+
+  const subscription = await db.subscription.findFirst({
+    where: {
+      userId: user.id,
+      status: {
+        in: ["ACTIVE", "TRIALING"],
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return subscription;
+};
