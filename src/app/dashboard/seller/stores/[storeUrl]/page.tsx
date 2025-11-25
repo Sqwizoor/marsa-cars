@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DollarSign, Package, ShoppingCart } from "lucide-react";
+import { OrdersLineChart } from "@/components/dashboard/analytics/orders-line-chart";
 
 export default async function SellerStorePage({
   params,
@@ -19,6 +20,9 @@ export default async function SellerStorePage({
 }) {
   const { storeUrl } = await params;
   const stats = await getStoreDashboardStats(storeUrl);
+  
+  // Get last 7 days for the chart
+  const last7DaysData = stats.graphData.slice(-7);
 
   return (
     <div className="flex flex-col gap-8">
@@ -61,6 +65,11 @@ export default async function SellerStorePage({
             </p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Orders Chart */}
+      <div className="grid gap-4 md:grid-cols-1">
+         <OrdersLineChart data={last7DaysData} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-1">

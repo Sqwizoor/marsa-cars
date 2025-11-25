@@ -106,6 +106,40 @@ export async function getStoreAnalytics(storeUrl: string, days: number = 30) {
       take: 5,
     })
 
+    // Get sales by category
+    // Since we can't easily group by relation in Prisma, we fetch items and aggregate manually
+    const itemsWithCategory = await db.orderItem.findMany({
+      where: {
+        orderGroup: {
+          storeId: store.id,
+          createdAt: { gte: daysAgo },
+        },
+      },
+      select: {
+        totalPrice: true,
+        product: {
+          select: {
+            category: {
+              select: {
+                name: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    const categoryMap = new Map<string, number>()
+    itemsWithCategory.forEach(item => {
+      const categoryName = item.product?.category?.name || "Uncategorized"
+      categoryMap.set(categoryName, (categoryMap.get(categoryName) || 0) + item.totalPrice)
+    })
+
+    const salesByCategory = Array.from(categoryMap.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5)
+
     return {
       graphData,
       totalRevenue,
@@ -118,6 +152,7 @@ export async function getStoreAnalytics(storeUrl: string, days: number = 30) {
         quantity: p._sum.quantity || 0,
         revenue: p._sum.totalPrice || 0,
       })),
+      salesByCategory,
     }
   } catch (error) {
     console.error("Error fetching store analytics:", error)

@@ -9,6 +9,7 @@ import Logo from "@/components/shared/logo";
 import { getAllOfferTags } from "@/queries/offer-tag";
 import OfferTagsWrapper from "./offer-tags-wrapper";
 import { MessageSquare } from "lucide-react";
+import MobileMenu from "./mobile-menu";
 
 export default async function Header() {
   // Get cookies from the store
@@ -44,6 +45,7 @@ export default async function Header() {
             </Link>
             {/* Mobile quick actions */}
             <div className="flex items-center gap-1 lg:hidden pr-3 sm:pr-4">
+              <MobileMenu />
               <UserMenu />
               <Cart />
             </div>

@@ -155,7 +155,7 @@ export default async function HomeUserCard({
                   Join
                 </Link>
               </Button>
-              <Button variant="secondary" className="flex-1 shadow-sm hover:shadow transition-all duration-300">
+              <Button variant="gray" className="flex-1 shadow-sm hover:shadow transition-all duration-300">
                 <Link href="/sign-in" className="w-full">
                   Sign in
                 </Link>

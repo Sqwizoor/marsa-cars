@@ -1,8 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-
 import {
   Card,
   CardContent,
@@ -10,20 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart"
 import { formatCurrencyZAR } from "@/lib/utils"
-
-const chartConfig = {
-  revenue: {
-    label: "Revenue",
-    color: "hsl(var(--chart-1))",
-  },
-} satisfies ChartConfig
+import { Progress } from "@/components/ui/progress"
+import { Trophy } from "lucide-react"
 
 interface TopProductsChartProps {
   data: {
@@ -34,59 +21,41 @@ interface TopProductsChartProps {
 }
 
 export function TopProductsChart({ data }: TopProductsChartProps) {
-  // Limit product names for readability
-  const formattedData = data.map(item => ({
-    ...item,
-    shortName: item.name.length > 20 ? item.name.substring(0, 20) + "..." : item.name,
-  }))
+  const maxRevenue = Math.max(...data.map((item) => item.revenue))
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Top Selling Products</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-yellow-500" />
+            Top Selling Products
+        </CardTitle>
         <CardDescription>By revenue in selected period</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <BarChart
-            accessibilityLayer
-            data={formattedData}
-            layout="vertical"
-            margin={{
-              left: 20,
-            }}
-          >
-            <CartesianGrid horizontal={false} />
-            <YAxis
-              dataKey="shortName"
-              type="category"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              width={150}
+      <CardContent className="space-y-6">
+        {data.map((item, index) => (
+          <div key={index} className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2 font-medium">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs text-muted-foreground">
+                  {index + 1}
+                </span>
+                <span className="truncate max-w-[200px] sm:max-w-[300px]" title={item.name}>
+                    {item.name}
+                </span>
+              </div>
+              <div className="text-right">
+                <div className="font-bold">{formatCurrencyZAR(item.revenue)}</div>
+                <div className="text-xs text-muted-foreground">{item.quantity} sold</div>
+              </div>
+            </div>
+            <Progress 
+                value={(item.revenue / maxRevenue) * 100} 
+                className="h-2" 
+                // Add custom color classes based on rank if desired, or stick to primary
             />
-            <XAxis
-              type="number"
-              tickFormatter={(value) => `R${value}`}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  indicator="line"
-                  formatter={(value, name, item) => (
-                    <>
-                      <div className="font-medium">{item.payload.name}</div>
-                      <div>Revenue: {formatCurrencyZAR(Number(value))}</div>
-                      <div>Quantity: {item.payload.quantity}</div>
-                    </>
-                  )}
-                />
-              }
-            />
-            <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
-          </BarChart>
-        </ChartContainer>
+          </div>
+        ))}
       </CardContent>
     </Card>
   )

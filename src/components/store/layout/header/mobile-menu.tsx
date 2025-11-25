@@ -1,0 +1,155 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Menu, User, ShoppingCart, MessageSquare, Home, List, Heart, Package } from "lucide-react";
+import Link from "next/link";
+import { useUser, SignOutButton } from "@clerk/nextjs";
+import Image from "next/image";
+import { Separator } from "@/components/ui/separator";
+import { useState } from "react";
+import Logo from "@/components/shared/logo";
+
+export default function MobileMenu() {
+  const { user, isLoaded } = useUser();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="text-white lg:hidden hover:bg-white/10">
+          <Menu className="h-6 w-6" />
+          <span className="sr-only">Open menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-[300px] sm:w-[350px] overflow-y-auto z-[100]">
+        <SheetHeader>
+          <SheetTitle className="text-left">
+             <div className="w-[100px] h-[77px]">
+                <Logo width="100%" height="100%" />
+              </div>
+          </SheetTitle>
+        </SheetHeader>
+        
+        <div className="flex flex-col gap-6 mt-6">
+            {/* User Section */}
+            <div className="flex flex-col gap-2">
+                {isLoaded && user ? (
+                    <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
+                        <Image 
+                            src={user.imageUrl} 
+                            alt={user.fullName || "User"} 
+                            width={40} 
+                            height={40} 
+                            className="rounded-full"
+                        />
+                        <div className="flex flex-col overflow-hidden">
+                            <span className="font-medium text-sm truncate">{user.fullName}</span>
+                            <span className="text-xs text-gray-500 truncate">{user.primaryEmailAddress?.emailAddress}</span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                        <Button variant="outline" asChild onClick={() => setOpen(false)}>
+                            <Link href="/sign-in">Sign In</Link>
+                        </Button>
+                        <Button asChild onClick={() => setOpen(false)} className="bg-orange-500 hover:bg-orange-600 text-white">
+                            <Link href="/sign-up">Register</Link>
+                        </Button>
+                    </div>
+                )}
+            </div>
+
+            <Separator />
+
+            {/* Main Navigation */}
+            <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-medium text-gray-500 mb-2 px-2">Menu</h3>
+                <Link 
+                    href="/" 
+                    className="flex items-center gap-3 px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors"
+                    onClick={() => setOpen(false)}
+                >
+                    <Home className="h-4 w-4" />
+                    Home
+                </Link>
+                <Link 
+                    href="/forum" 
+                    className="flex items-center gap-3 px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors"
+                    onClick={() => setOpen(false)}
+                >
+                    <MessageSquare className="h-4 w-4" />
+                    Forum
+                </Link>
+                 {/* <Link 
+                    href="/categories" 
+                    className="flex items-center gap-3 px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors"
+                    onClick={() => setOpen(false)}
+                >
+                    <List className="h-4 w-4" />
+                    Categories
+                </Link> */}
+            </div>
+
+            <Separator />
+
+            {/* User Links */}
+            <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-medium text-gray-500 mb-2 px-2">Account</h3>
+                <Link 
+                    href="/cart" 
+                    className="flex items-center gap-3 px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors"
+                    onClick={() => setOpen(false)}
+                >
+                    <ShoppingCart className="h-4 w-4" />
+                    Cart
+                </Link>
+                <Link 
+                    href="/profile/orders" 
+                    className="flex items-center gap-3 px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors"
+                    onClick={() => setOpen(false)}
+                >
+                    <Package className="h-4 w-4" />
+                    My Orders
+                </Link>
+                 <Link 
+                    href="/profile/wishlist" 
+                    className="flex items-center gap-3 px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors"
+                    onClick={() => setOpen(false)}
+                >
+                    <Heart className="h-4 w-4" />
+                    Wishlist
+                </Link>
+                 <Link 
+                    href="/profile" 
+                    className="flex items-center gap-3 px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors"
+                    onClick={() => setOpen(false)}
+                >
+                    <User className="h-4 w-4" />
+                    Profile Settings
+                </Link>
+            </div>
+
+            {isLoaded && user && (
+                <>
+                    <Separator />
+                    <div className="px-2">
+                        <SignOutButton>
+                            <Button variant="destructive" className="w-full justify-start" size="sm">
+                                Sign Out
+                            </Button>
+                        </SignOutButton>
+                    </div>
+                </>
+            )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}

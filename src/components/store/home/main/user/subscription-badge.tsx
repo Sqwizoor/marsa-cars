@@ -23,11 +23,7 @@ export default function SubscriptionBadge() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="text-xs text-gray-500 text-center py-1 animate-pulse">
-        Loading...
-      </div>
-    );
+    return null;
   }
 
   if (!subscription) {

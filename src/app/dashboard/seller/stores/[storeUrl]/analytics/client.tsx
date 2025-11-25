@@ -10,6 +10,7 @@ import { OrdersBarChart } from "@/components/dashboard/analytics/orders-bar-char
 import { OrderStatusPieChart } from "@/components/dashboard/analytics/order-status-pie-chart"
 import { TopProductsChart } from "@/components/dashboard/analytics/top-products-chart"
 import { RevenueChart } from "@/components/dashboard/analytics/revenue-chart"
+import { SalesByCategoryChart } from "@/components/dashboard/analytics/sales-by-category-chart"
 import { formatCurrencyZAR } from "@/lib/utils"
 
 interface SellerAnalyticsClientProps {
@@ -144,9 +145,14 @@ export default function SellerAnalyticsClient({ storeUrl, initialData }: SellerA
       </div>
 
       {/* Charts - Row 3 */}
-      {data.topProducts && data.topProducts.length > 0 && (
-        <TopProductsChart data={data.topProducts} />
-      )}
+      <div className="grid gap-4 md:grid-cols-2">
+        {data.topProducts && data.topProducts.length > 0 && (
+            <TopProductsChart data={data.topProducts} />
+        )}
+        {data.salesByCategory && data.salesByCategory.length > 0 && (
+            <SalesByCategoryChart data={data.salesByCategory} />
+        )}
+      </div>
     </div>
   )
 }
