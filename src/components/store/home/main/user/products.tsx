@@ -8,12 +8,12 @@ export default function UserCardProducts({
   products: SimpleProduct[];
 }) {
   return (
-    <div className=" absolute bottom-0 left-0 w-[345px]">
+    <div className="w-full mt-4">
       <MainSwiper
         products={products}
         type="simple"
         slidesPerView={3}
-        spaceBetween={-5}
+        spaceBetween={10}
       />
     </div>
   );

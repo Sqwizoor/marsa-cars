@@ -122,7 +122,7 @@ export default async function HomePage() {
                 </div>
                 <div className="p-6 bg-gray-50/50">
                   <MainSwiper 
-                    products={products_best_deals.filter(
+                    products={[...products_best_deals, ...products_super_deals].filter(
                       (product): product is ProductType => "variants" in product
                     )} 
                     type="curved"

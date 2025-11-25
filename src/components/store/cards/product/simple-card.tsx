@@ -8,19 +8,20 @@ export default function ProductCardSimple({
   product: SimpleProduct;
 }) {
   return (
-    <Link href={`/product/${product.slug}/${product.variantSlug}`}>
-      <div className="w-[120px] h-[170px] relative flex flex-col  rounded-md items-center justify-between p-2">
-        <Image
-          src={product.image}
-          alt={product.name}
-          width={120}
-          height={95}
-          className="min-h-[95px] max-h-[95px] object-cover rounded-md align-middle shadow-lg"
-          loading="lazy"
-          quality={75}
-        />
-        <div className="absolute bottom-6 mt-2 space-y-2">
-          <div className="py-1.5 px-2 bg-[#ff4747] text-white font-bold text-sm rounded-lg">
+    <Link href={`/product/${product.slug}/${product.variantSlug}`} className="block group h-full py-2">
+      <div className="w-full h-full min-h-[180px] relative flex flex-col bg-white rounded-xl items-center p-3 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1 border border-gray-100">
+        <div className="relative w-full aspect-square mb-3 bg-gray-50 rounded-lg overflow-hidden">
+            <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-contain p-2 mix-blend-multiply"
+            loading="lazy"
+            quality={75}
+            />
+        </div>
+        <div className="mt-auto w-full flex justify-center">
+          <div className="py-1.5 px-3 bg-red-600 text-white font-bold text-sm rounded-full shadow-sm group-hover:bg-red-700 transition-colors">
             R{product.price?.toFixed(2)}
           </div>
         </div>
