@@ -1,8 +1,7 @@
 // Queries
 import DataTable from "@/components/ui/data-table";
 import { columns } from "./columns";
-import { getStoreOrders, getStoreDashboardStats } from "@/queries/store";
-import { OrdersBarChart } from "@/components/dashboard/analytics/orders-bar-chart";
+import { getStoreOrders } from "@/queries/store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart, Clock, CheckCircle2, XCircle } from "lucide-react";
 
@@ -13,11 +12,8 @@ export default async function SellerOrdersPage({
 }) {
   const { storeUrl } = await params;
   
-  // Fetch data in parallel
-  const [orders, stats] = await Promise.all([
-    getStoreOrders(storeUrl),
-    getStoreDashboardStats(storeUrl)
-  ]);
+  // Fetch data
+  const orders = await getStoreOrders(storeUrl);
 
   // Calculate order status counts
   const pendingOrders = orders.filter(o => o.status === 'Pending' || o.status === 'Processing').length;
@@ -66,11 +62,6 @@ export default async function SellerOrdersPage({
             <div className="text-2xl font-bold">{cancelledOrders}</div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Chart */}
-      <div className="grid gap-4 md:grid-cols-1">
-         <OrdersBarChart data={stats.graphData} />
       </div>
 
       <DataTable

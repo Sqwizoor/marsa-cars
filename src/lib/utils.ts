@@ -10,6 +10,7 @@ export function cn(...inputs: ClassValue[]) {
 // Currency formatter for South African Rand (ZAR)
 export const formatCurrencyZAR = (amount: number): string => {
   try {
+    if (isNaN(amount)) return "R 0.00";
     return new Intl.NumberFormat("en-ZA", {
       style: "currency",
       currency: "ZAR",
@@ -20,7 +21,7 @@ export const formatCurrencyZAR = (amount: number): string => {
   } catch {
     // Fallback formatting
     const fixed = Number(amount ?? 0).toFixed(2);
-    return `R ${fixed}`;
+    return `R ${fixed === "NaN" ? "0.00" : fixed}`;
   }
 };
 

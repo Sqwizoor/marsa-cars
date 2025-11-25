@@ -112,8 +112,8 @@ export default async function HomeUserCard({
               <SubscriptionBadge />
               {role === "ADMIN" ? (
                 <Button
-                  variant="orange-gradient"
-                  className="rounded-md w-full shadow-sm hover:shadow transition-all duration-300"
+                 
+                  className="rounded-md bg-pink-200 w-full shadow-sm hover:shadow transition-all duration-300"
                 >
                   <Link href={"/dashboard/admin"} className="w-full">
                     Switch to Admin Dashboard
@@ -121,8 +121,9 @@ export default async function HomeUserCard({
                 </Button>
               ) : role === "SELLER" ? (
                 <Button
-                  variant="orange-gradient"
-                  className="rounded-md w-full shadow-sm hover:shadow transition-all duration-300"
+                 
+                
+                  className="rounded-md bg-pink-200 w-full shadow-sm hover:shadow transition-all duration-300"
                 >
                   <Link href={"/dashboard/seller"} className="w-full">
                     Switch to Seller Dashboard
@@ -166,7 +167,7 @@ export default async function HomeUserCard({
 
         {/* Ad swiper with improved styling and dark overlay for better text visibility */}
         <div className="w-full px-4 mt-4 relative z-10">
-          <div className="w-full h-[370px] rounded-lg overflow-hidden shadow-sm relative">
+          <div className="w-full h-[300px] rounded-lg overflow-hidden shadow-sm relative">
             {/* Background image */}
             <div className="absolute inset-0 z-0">
               <Image

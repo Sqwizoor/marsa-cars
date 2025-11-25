@@ -52,7 +52,7 @@ export default function BasicSwiper() {
               alt={`Slide ${img.id}`}
               fill
               priority={index === 0}
-              className="object-cover w-full"
+              className="object-fill md:object-cover w-full"
               placeholder="blur"
               sizes="100vw"
             />

@@ -16,7 +16,7 @@ export default function Cart() {
         </span>
         <div className="ml-1">
           <div className="min-h-3 min-w-6 -mt-1.5">
-            <span className="inline-block text-xs text-main-primary leading-4 bg-white rounded-lg text-center font-bold min-h-3 px-1 min-w-6">
+            <span className="inline-block text-xs text-black leading-4 bg-white rounded-lg text-center font-bold min-h-3 px-1 min-w-6">
               {totalItems ?? 0}
             </span>
           </div>

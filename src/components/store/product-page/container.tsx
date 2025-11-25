@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 import useFromStore from "@/hooks/useFromStore";
 import { setCookie } from "cookies-next";
 import FastDelivery from "../cards/fast-delivery";
+import { useRouter } from "next/navigation";
 
 interface Props {
   productData: ProductPageDataType;
@@ -23,6 +24,7 @@ interface Props {
 }
 
 const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
+  const router = useRouter();
   // Hooks must be called before any conditional returns
   // State for temporary product images
   const normalizedImages = useMemo(
@@ -193,10 +195,25 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
   };
 
   const handleBuyNow = () => {
-    if (maxQty <= 0 || !productToBeAddedToCart) return;
-    addToCart(productToBeAddedToCart);
+    if (!productToBeAddedToCart) return;
+
+    // If we can add more to cart, do so
+    if (maxQty > 0) {
+      addToCart(productToBeAddedToCart);
+    } else {
+      // If maxQty is 0, check if it's because it's already in cart
+      const inCart = cartItems?.find(
+        (p) =>
+          p.productId === productId &&
+          p.variantId === variantId &&
+          p.sizeId === sizeId
+      );
+      // If not in cart and maxQty <= 0, it means out of stock (or error), so return
+      if (!inCart) return;
+    }
+    
     toast.success("Redirecting to checkout...");
-    window.location.href = "/checkout";
+    router.push("/checkout");
   };
 
   const maxQty = useMemo(() => {
@@ -222,7 +239,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     if (!productData) return null;
 
     return (
-      <div className="mt-5 bg-white bottom-0 pb-4 space-y-3 sticky z-10">
+      <div className="mt-5 bg-white pb-4 space-y-3">
         {/* Qty selector */}
         {sizeId && productToBeAddedToCart && (
           <div className="w-full flex justify-end mt-4">
@@ -242,7 +259,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
           className={cn(
             "relative w-full py-2.5 min-w-20 bg-orange-background hover:bg-orange-hover text-white h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none",
             {
-              "cursor-not-allowed opacity-50": !isProductValid || maxQty <= 0,
+              "cursor-not-allowed opacity-50": !isProductValid || (maxQty <= 0 && !cartItems?.find(p => p.productId === productId && p.variantId === variantId && p.sizeId === sizeId)),
             }
           )}
           onClick={() => handleBuyNow()}
