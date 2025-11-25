@@ -117,21 +117,34 @@ export async function getStoreAnalytics(storeUrl: string, days: number = 30) {
       },
       select: {
         totalPrice: true,
-        product: {
+        productId: true,
+      }
+    })
+
+    // Fetch product categories
+    const productIds = Array.from(new Set(itemsWithCategory.map(item => item.productId)))
+    const products = await db.product.findMany({
+      where: {
+        id: { in: productIds }
+      },
+      select: {
+        id: true,
+        category: {
           select: {
-            category: {
-              select: {
-                name: true
-              }
-            }
+            name: true
           }
         }
       }
     })
 
+    const productCategoryMap = new Map<string, string>()
+    products.forEach(p => {
+      productCategoryMap.set(p.id, p.category.name)
+    })
+
     const categoryMap = new Map<string, number>()
     itemsWithCategory.forEach(item => {
-      const categoryName = item.product?.category?.name || "Uncategorized"
+      const categoryName = productCategoryMap.get(item.productId) || "Uncategorized"
       categoryMap.set(categoryName, (categoryMap.get(categoryName) || 0) + item.totalPrice)
     })
 
