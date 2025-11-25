@@ -299,7 +299,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
 
           {/* Shipping details - buy actions buttons */}
           <div className="md:w-[390px]">
-            <div className="z-20">
+            <div className="relative z-20">
               <div className="bg-white border rounded-md overflow-hidden overflow-y-auto p-4 pb-0">
                 {shippingDetails && (
                   <>

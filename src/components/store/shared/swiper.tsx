@@ -1,17 +1,20 @@
 "use client";
 import { ProductType, SimpleProduct } from "@/lib/types";
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { SwiperProps } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import "swiper/css/scrollbar";
 import ProductCard from "../cards/product/product-card";
-import { Navigation, Pagination } from "swiper/modules";
+import { Navigation, Pagination, Scrollbar } from "swiper/modules";
 import ProductCardSimple from "../cards/product/simple-card";
 import ProductCardModern from "../cards/product/modern-card";
 import ProductCardDeal from "../cards/product/deal-card";
 import ProductCardMini from "../cards/product/mini-card";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 interface Props {
   children?: ReactNode;
   products: SimpleProduct[] | ProductType[];
@@ -19,6 +22,7 @@ interface Props {
   slidesPerView?: number;
   breakpoints?: SwiperProps["breakpoints"];
   spaceBetween?: number;
+  withScrollbar?: boolean;
 }
 
 const MainSwiper: FC<Props> = ({
@@ -34,16 +38,53 @@ const MainSwiper: FC<Props> = ({
   children,
   slidesPerView = 1,
   spaceBetween = 30,
+  withScrollbar = false,
 }) => {
+  const prevRef = useRef<HTMLButtonElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
+
   return (
-    <div className="p-4 rounded-md cursor-pointer">
+    <div className="p-4 rounded-md cursor-pointer relative group">
       <div>{children}</div>
+      
+      {/* Custom Navigation Buttons */}
+      <button 
+        ref={prevRef} 
+        className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 disabled:opacity-0 hover:bg-white hover:scale-110 text-gray-800 border border-gray-100"
+        aria-label="Previous slide"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+      <button 
+        ref={nextRef} 
+        className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 disabled:opacity-0 hover:bg-white hover:scale-110 text-gray-800 border border-gray-100"
+        aria-label="Next slide"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
+
       <Swiper
-        modules={[Navigation, Pagination]}
-        navigation
+        modules={[Navigation, Pagination, Scrollbar]}
+        navigation={{
+          prevEl: prevRef.current,
+          nextEl: nextRef.current,
+        }}
+        onBeforeInit={(swiper) => {
+          // @ts-ignore
+          swiper.params.navigation.prevEl = prevRef.current;
+          // @ts-ignore
+          swiper.params.navigation.nextEl = nextRef.current;
+        }}
+        scrollbar={withScrollbar ? { 
+          draggable: true, 
+          hide: false,
+          el: '.custom-swiper-scrollbar',
+          dragClass: 'custom-swiper-scrollbar-drag'
+        } : false}
         spaceBetween={spaceBetween}
         slidesPerView={slidesPerView}
         breakpoints={breakpoints}
+        className="!pb-8" // Add padding bottom for scrollbar
       >
         {products.map((product) => {
           // Create a unique key for both SimpleProduct and ProductType
@@ -69,6 +110,12 @@ const MainSwiper: FC<Props> = ({
             </SwiperSlide>
           );
         })}
+        
+        {withScrollbar && (
+          <div className="custom-swiper-scrollbar !bg-gray-100 !h-1.5 !rounded-full !w-[calc(100%-32px)] !left-4 !bottom-2">
+            <div className="custom-swiper-scrollbar-drag !bg-gray-300 hover:!bg-gray-400 !rounded-full transition-colors"></div>
+          </div>
+        )}
       </Swiper>
     </div>
   );

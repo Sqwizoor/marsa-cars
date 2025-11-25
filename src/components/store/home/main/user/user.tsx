@@ -51,8 +51,8 @@ export default async function HomeUserCard({
   }
 
   return (
-    <div className="h-full hidden min-[1170px]:block relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
-      <div className="h-full rounded-lg overflow-hidden pb-9 relative">
+    <div className="h-fit hidden min-[1170px]:block relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+      <div className="h-fit rounded-lg overflow-hidden pb-4 relative">
         {/* Header background */}
         <div className="absolute top-0 left-0 w-full h-[101px] z-0">
           <Image
@@ -155,7 +155,7 @@ export default async function HomeUserCard({
                   Join
                 </Link>
               </Button>
-              <Button variant="gray" className="flex-1 shadow-sm hover:shadow transition-all duration-300">
+              <Button variant="secondary" className="flex-1 shadow-sm hover:shadow transition-all duration-300">
                 <Link href="/sign-in" className="w-full">
                   Sign in
                 </Link>
@@ -165,8 +165,8 @@ export default async function HomeUserCard({
         </div>
 
         {/* Ad swiper with improved styling and dark overlay for better text visibility */}
-        <div className="w-full h-full flex-1 px-4 max-h-[420px] pb-[102px] mt-4 relative z-10">
-          <div className="w-full h-full rounded-lg overflow-hidden shadow-sm relative">
+        <div className="w-full px-4 mt-4 relative z-10">
+          <div className="w-full h-[370px] rounded-lg overflow-hidden shadow-sm relative">
             {/* Background image */}
             <div className="absolute inset-0 z-0">
               <Image

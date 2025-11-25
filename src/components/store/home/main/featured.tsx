@@ -80,7 +80,8 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
             products={products}
             type="simple"
             slidesPerView={1}
-            spaceBetween={15}
+            spaceBetween={20}
+            withScrollbar={true}
           />
         </div>
       </div>

@@ -182,10 +182,36 @@ export async function GET(req: NextRequest) {
     }
 
     // Get remaining ads
+    // Calculate actual usage based on products and ads
+    const userStore = await db.store.findFirst({
+      where: { userId },
+      include: {
+        _count: {
+          select: { products: true }
+        }
+      }
+    });
+
+    const userAdsCount = await db.advertisement.count({
+      where: { userId }
+    });
+
+    const productsCount = userStore?._count.products || 0;
+    const totalUsage = productsCount + userAdsCount;
+
+    // Update the subscription with the actual usage
+    if (subscription.adsUsed !== totalUsage) {
+      await db.subscription.update({
+        where: { id: subscription.id },
+        data: { adsUsed: totalUsage }
+      });
+      subscription.adsUsed = totalUsage;
+    }
+
     const remaining =
       subscription.adLimit === -1
         ? -1
-        : subscription.adLimit - subscription.adsUsed;
+        : Math.max(0, subscription.adLimit - totalUsage);
 
     return NextResponse.json({
       subscription: {

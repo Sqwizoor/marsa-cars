@@ -3,9 +3,6 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import Image from "next/image";
 
-// Image zoom
-import ImageZoom from "react-image-zooom";
-
 // Utils
 import { cn } from "@/lib/utils";
 
@@ -72,12 +69,14 @@ export default function ProductSwiper({
         {/* Image view */}
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <div className="relative w-full aspect-square md:aspect-auto md:h-[500px] rounded-xl overflow-hidden border border-gray-100 bg-white cursor-zoom-in">
-              <div className="w-full h-full flex items-center justify-center">
-                 <ImageZoom
+            <div className="relative w-full aspect-square md:aspect-auto md:h-[500px] rounded-xl overflow-hidden border border-gray-100 bg-white cursor-zoom-in group">
+              <div className="w-full h-full flex items-center justify-center relative">
+                 <Image
                   src={activeImage ? activeImage.url : ""}
-                  zoom={200}
-                  className="!w-full !h-full object-contain"
+                  alt="Product image"
+                  fill
+                  className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+                  priority
                 />
               </div>
               {/* Mobile hint or overlay could go here */}
