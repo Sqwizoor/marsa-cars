@@ -11,7 +11,7 @@ export default function UserCardProducts({
     <div className="w-full mt-4">
       <MainSwiper
         products={products}
-        type="simple"
+        type="mini"
         slidesPerView={3}
         spaceBetween={10}
       />

@@ -8,20 +8,21 @@ export default function ProductCardSimple({
   product: SimpleProduct;
 }) {
   return (
-    <Link href={`/product/${product.slug}/${product.variantSlug}`} className="block group h-full py-2">
-      <div className="w-full h-full min-h-[180px] relative flex flex-col bg-white rounded-xl items-center p-3 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1 border border-gray-100">
-        <div className="relative w-full aspect-square mb-3 bg-gray-50 rounded-lg overflow-hidden">
-            <Image
+    <Link href={`/product/${product.slug}/${product.variantSlug}`} className="block group">
+      <div className="w-[130px] h-[180px] relative flex flex-col bg-white rounded-xl items-center justify-between p-2 shadow-sm border border-gray-100 transition-transform hover:-translate-y-1">
+        <div className="p-1 bg-white rounded-lg">
+          <Image
             src={product.image}
             alt={product.name}
-            fill
-            className="object-contain p-2 mix-blend-multiply"
+            width={120}
+            height={95}
+            className="min-h-[95px] max-h-[95px] w-[115px] object-cover rounded-lg shadow-sm"
             loading="lazy"
             quality={75}
-            />
+          />
         </div>
-        <div className="mt-auto w-full flex justify-center">
-          <div className="py-1.5 px-3 bg-red-600 text-white font-bold text-sm rounded-full shadow-sm group-hover:bg-red-700 transition-colors">
+        <div className="w-full flex justify-center mb-2">
+          <div className="py-1 px-3 bg-[#ff4747] text-white font-bold text-sm rounded-full shadow-sm group-hover:bg-red-600 transition-colors">
             R{product.price?.toFixed(2)}
           </div>
         </div>

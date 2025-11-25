@@ -275,7 +275,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
   }
 
   return (
-    <div className="relative">
+    <div className="relative min-h-screen">
       <div className="w-full xl:flex xl:gap-4">
         <ProductSwiper
           images={variantImages.length > 0 ? variantImages : normalizedImages}

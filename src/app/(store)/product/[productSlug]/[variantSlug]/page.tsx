@@ -63,7 +63,7 @@ export default async function ProductVariantPage({
   } = productData;
 
   return (
-    <div>
+    <div className="min-h-screen">
       <div className="md:max-w-[1650px] mx-auto p-4 md:p-8 overflow-x-hidden min-h-screen">
         <ProductPageContainer productData={productData} sizeId={sizeId}>
           <>

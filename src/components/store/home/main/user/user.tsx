@@ -164,20 +164,32 @@ export default async function HomeUserCard({
           )}
         </div>
 
-        {/* Ad swiper with improved styling */}
-        <div className="w-full h-full flex-1 px-4 max-h-[420px] pb-4 mt-4 relative z-10">
-          <div className="w-full h-full rounded-lg overflow-hidden shadow-sm relative bg-white border border-gray-100">
-            
+        {/* Ad swiper with improved styling and dark overlay for better text visibility */}
+        <div className="w-full h-full flex-1 px-4 max-h-[420px] pb-[102px] mt-4 relative z-10">
+          <div className="w-full h-full rounded-lg overflow-hidden shadow-sm relative">
+            {/* Background image */}
+            <div className="absolute inset-0 z-0">
+              <Image
+                src="/assets/images/swiper/here-slider3.png"
+                alt="Featured"
+                fill
+                className="object-cover"
+                sizes="(min-width: 1170px) 100vw, 0vw"
+              />
+              {/* Dark overlay for better text visibility */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/30 z-10"></div>
+            </div>
+
             <Link href="" className="block relative z-20">
-              <div className="p-4">
-                <div className="text-gray-500 leading-[18px] text-[13px] font-medium">Your favorite store</div>
-                <div className="leading-5 font-bold mt-1 text-gray-900 text-lg">
+              <div className="h-24 p-2.5">
+                <div className="mt-2.5 text-white leading-[18px] text-[13px] font-medium">Your favorite store</div>
+                <div className="leading-5 font-bold mt-2.5 text-white text-lg drop-shadow-md">
                   Check out the latest new deals
                 </div>
               </div>
             </Link>
 
-            {/* Products */}
+            {/* Products with relative positioning to appear above the background */}
             <div className="relative z-20 px-2.5 mt-10">
               <UserCardProducts products={products} />
             </div>
