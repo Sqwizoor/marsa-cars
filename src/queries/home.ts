@@ -48,7 +48,7 @@ export const getHomeDataDynamic = async (
   // GetCheapestSize
   const getCheapestSize = (
     sizes: ProductSize[]
-  ): { discountedPrice: number } => {
+  ): { discountedPrice: number } | undefined => {
     const sizesWithDiscount = sizes.map((size) => ({
       ...size,
       discountedPrice: size.price * (1 - size.discount / 100),
@@ -64,19 +64,27 @@ export const getHomeDataDynamic = async (
     type: FormatType
   ): SimpleProduct[] | ProductType[] => {
     if (type === "simple") {
-      return products.map((product) => {
+      const simpleProducts: SimpleProduct[] = [];
+      products.forEach((product) => {
         const variant = product.variants[0];
+        if (!variant) return;
+
         const cheapestSize = getCheapestSize(variant.sizes);
+        if (!cheapestSize) return;
+
         const image = variant.images[0];
-        return {
+        if (!image) return;
+
+        simpleProducts.push({
           name: product.name,
           slug: product.slug,
           variantName: variant.variantName,
           variantSlug: variant.slug,
           price: cheapestSize.discountedPrice,
           image: image.url,
-        } as SimpleProduct;
+        });
       });
+      return simpleProducts;
     } else if (type === "full") {
       return products.map((product) => {
         // Transform the filtered variants into the VariantSimplified structure
