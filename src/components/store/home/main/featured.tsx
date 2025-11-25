@@ -2,34 +2,8 @@
 import Link from "next/link";
 import MainSwiper from "../../shared/swiper";
 import { SimpleProduct } from "@/lib/types";
-import { useEffect, useState } from "react";
-import { useMediaQuery } from "react-responsive";
 
 export default function Featured({ products }: { products: SimpleProduct[] }) {
-  const is1170px = useMediaQuery({ query: "(min-width: 1170px)" });
-  const is1700px = useMediaQuery({ query: "(min-width: 1700px)" });
-
-  // State to store the current width of the screen
-  const [screenWidth, setScreenWidth] = useState<number>(0);
-
-  useEffect(() => {
-    // Initialize screen width on mount
-    setScreenWidth(window.innerWidth);
-
-    // Function to handle resize event and update screen width
-    const handleResize = () => {
-      setScreenWidth(window.innerWidth);
-    };
-
-    // Add the resize event listener when the component mounts
-    window.addEventListener("resize", handleResize);
-
-    // Cleanup the event listener when the component unmounts
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
   return (
     <div className="relative rounded-md overflow-hidden">
       <div
@@ -37,8 +11,8 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
         // style={{ backgroundImage: "url(/assets/images/ads/featured.webp)" }}
       >
         {/* Coupon */}
-        <Link href="/">
-          <div className="w-52 px-3 float-left relative h-[190px]">
+        <Link href="/" className="shrink-0">
+          <div className="w-52 px-3 relative h-[190px]">
             <div className="flex flex-col justify-center items-center h-[103px]">
               <h3 className="leading-5 font-bold my-1 text-white w-full">
                 Wecome Newcomers!
@@ -62,16 +36,7 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
           </div>
         </Link>
         {/* Product swiper */}
-        <div
-          className={is1700px ? "ml-10" : ""}
-          style={{
-            width: !is1170px
-              ? `${screenWidth - 300}px` // Less than 1170px
-              : is1700px
-              ? "750px" // More than 1700px
-              : `calc(500px + 5vw)`, // Between 1170-1700px
-          }}
-        >
+        <div className="flex-1 min-w-0 min-[1700px]:ml-10">
           {/*
             
             1170-1700===>

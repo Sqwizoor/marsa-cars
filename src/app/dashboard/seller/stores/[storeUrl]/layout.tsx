@@ -35,8 +35,8 @@ export default async function SellerStoreDashboardLayout({
     <div className="min-h-screen w-full flex">
       <Sidebar stores={stores} />
       <div className="w-full ml-[300px]">
-        {/* <Header /> */}
-        <div className="w-full p-4">{children}</div>
+        <Header />
+        <div className="w-full p-4 mt-[75px]">{children}</div>
       </div>
     </div>
   );
