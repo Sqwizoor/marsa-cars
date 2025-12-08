@@ -13,6 +13,8 @@ const images: { id: number; url: StaticImageData }[] = [
 
 export default function BasicSwiper() {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [touchStartX, setTouchStartX] = useState<number | null>(null)
+  const [touchEndX, setTouchEndX] = useState<number | null>(null)
 
   // Auto-advance slides
   useEffect(() => {
@@ -36,10 +38,43 @@ export default function BasicSwiper() {
     setCurrentSlide((prev) => (prev === 0 ? images.length - 1 : prev - 1))
   }
 
+  // Touch handlers for mobile swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.touches[0].clientX)
+  }
+
+  const handleTouchEnd = () => {
+    if (touchStartX === null || touchEndX === null) {
+      setTouchStartX(null)
+      setTouchEndX(null)
+      return
+    }
+
+    const diff = touchStartX - touchEndX
+    const threshold = 50 // px
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) goToNextSlide()
+      else goToPrevSlide()
+    }
+
+    setTouchStartX(null)
+    setTouchEndX(null)
+  }
+
   return (
     <div className="relative w-full overflow-hidden rounded-lg shadow-lg">
       {/* Slides */}
-      <div className="relative w-full h-[180px] sm:h-[280px] md:h-[250px] lg:h-[400px]">
+      <div
+        className="relative w-full h-[220px] sm:h-[280px] md:h-[350px] lg:h-[400px]"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ touchAction: "pan-y" }}
+      >
         {images.map((img, index) => (
           <div
             key={img.id}
@@ -52,7 +87,7 @@ export default function BasicSwiper() {
               alt={`Slide ${img.id}`}
               fill
               priority={index === 0}
-              className="object-fill md:object-cover w-full"
+              className="object-cover object-center w-full h-full"
               placeholder="blur"
               sizes="100vw"
             />
@@ -63,14 +98,14 @@ export default function BasicSwiper() {
       {/* Navigation buttons */}
       <button
         onClick={goToPrevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/70 hover:bg-white text-gray-800 p-2 rounded-full"
+        className="hidden sm:block absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/70 hover:bg-white text-gray-800 p-2 rounded-full"
         aria-label="Previous slide"
       >
         ←
       </button>
       <button
         onClick={goToNextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/70 hover:bg-white text-gray-800 p-2 rounded-full"
+        className="hidden sm:block absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/70 hover:bg-white text-gray-800 p-2 rounded-full"
         aria-label="Next slide"
       >
         →
@@ -80,9 +115,9 @@ export default function BasicSwiper() {
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
         {images.map((_, index) => (
           <button
-            key={index}  
+            key={index}
             onClick={() => goToSlide(index)}
-            className={`w-2.5 h-2.5 rounded-full border border-white/70 transition-colors ${
+            className={`w-3 h-3 sm:w-2.5 sm:h-2.5 md:w-3.5 md:h-3.5 rounded-full border border-white/70 transition-colors ${
               index === currentSlide
                 ? "bg-white/90"
                 : "bg-white/40 hover:bg-white/60"
