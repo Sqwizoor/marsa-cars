@@ -90,7 +90,7 @@ export default async function HomePage() {
             <div className="mt-10 space-y-6">
               {/* Super Deals Section */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="bg-pink-200 p-6 text-white relative overflow-hidden">
+                <div className="bg-pink-primary p-6 text-white relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
                   <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl"></div>
                   
