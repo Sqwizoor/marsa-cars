@@ -41,15 +41,15 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
             products={products}
             type="simple"
             slidesPerView={1}
-            spaceBetween={6}
+            spaceBetween={4}
             withScrollbar={false}
             breakpoints={{
-              320: { slidesPerView: 2.2, spaceBetween: 6 },
-              420: { slidesPerView: 2.8, spaceBetween: 6 },
-              520: { slidesPerView: 3.2, spaceBetween: 6 },
-              640: { slidesPerView: 3.5, spaceBetween: 8 },
-              768: { slidesPerView: 4, spaceBetween: 8 },
-              1024: { slidesPerView: 4.5, spaceBetween: 10 },
+              320: { slidesPerView: 2.2, spaceBetween: 4 },
+              420: { slidesPerView: 2.8, spaceBetween: 4 },
+              520: { slidesPerView: 3.2, spaceBetween: 5 },
+              640: { slidesPerView: 3.5, spaceBetween: 6 },
+              768: { slidesPerView: 4, spaceBetween: 6 },
+              1024: { slidesPerView: 4.5, spaceBetween: 8 },
               1280: { slidesPerView: 5, spaceBetween: 10 },
             }}
           />
