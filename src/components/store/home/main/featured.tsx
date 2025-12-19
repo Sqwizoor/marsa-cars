@@ -7,53 +7,50 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
   return (
     <div className="relative rounded-md overflow-hidden">
       <div
-        className="w-full flex flex-col lg:flex-row items-center bg-cover bg-yellow-600 bg-center bg-no-repeat"
+        className="w-full flex flex-col md:flex-row items-stretch md:items-center bg-cover bg-yellow-600 bg-center bg-no-repeat gap-3 md:gap-0"
         // style={{ backgroundImage: "url(/assets/images/ads/featured.webp)" }}
       >
         {/* Coupon */}
-        <Link href="/" className="shrink-0 w-full lg:w-auto px-3 py-3 lg:py-0 lg:px-0">
-          <div className="w-full lg:w-52 relative h-auto lg:h-[190px] flex flex-col justify-center">
-            <div className="flex flex-col justify-center items-center h-auto lg:h-[103px] mb-3 lg:mb-0">
-              <h3 className="leading-5 font-bold my-1 text-white w-full text-center text-sm lg:text-base">
+        <div className="shrink-0 w-full md:w-auto px-3 py-3 md:py-4 md:px-4 lg:px-6">
+          <div className="w-full md:w-48 lg:w-56 relative h-auto flex flex-col justify-center">
+            <div className="flex flex-col justify-center items-center h-auto mb-3 md:mb-0">
+              <h3 className="leading-5 font-bold my-1 text-white w-full text-center text-sm md:text-base">
                 Wecome Newcomers!
               </h3>
-              <p className="text-xs lg:text-sm w-full text-white text-center">
-                Enjoy shopping made easy like nothing before
+              <p className="text-xs md:text-sm w-full text-white text-center">
+                Enjoy shopping made easy
               </p>
             </div>
             <div
-              className="w-full lg:w-[192px] h-[55px] pl-[14px] text-white overflow-hidden pr-[45px]
-              text-left bg-contain bg-no-repeat mx-auto lg:mx-0 lg:absolute lg:bottom-[35px]"
+              className="w-full h-12 md:h-14 pl-3 md:pl-4 text-white overflow-hidden pr-10 md:pr-12
+              text-left bg-contain bg-no-repeat mx-auto md:mx-0 mt-2 md:mt-1"
               style={{ backgroundImage: "url(/assets/images/ads/coupon.gif)" }}
             >
-              <h3 className="text-[20px] leading-6 mt-[11px] mb-1 text-white w-full">
+              <h3 className="text-base md:text-lg font-bold leading-5 md:leading-6 mt-1 md:mt-1.5 text-white w-full whitespace-nowrap">
                 use &apos;SACARS&apos;
               </h3>
-              <p className="overflow-hidden overflow-ellipsis w-full text-xs -translate-y-1">
-                for 17% OFF
+              <p className="text-xs md:text-sm leading-4 text-white font-semibold">
+                17% OFF
               </p>
             </div>
           </div>
-        </Link>
+        </div>
         {/* Product swiper */}
-        <div className="flex-1 min-w-0 w-full lg:w-auto min-[1700px]:ml-10">
-          {/*
-            
-            1170-1700===>
-            */}
+        <div className="flex-1 min-w-0 w-full md:flex-1 px-1 md:px-0 md:pr-4">
           <MainSwiper
             products={products}
             type="simple"
             slidesPerView={1}
-            spaceBetween={12}
+            spaceBetween={6}
             withScrollbar={false}
             breakpoints={{
-              320: { slidesPerView: 1.5 },
-              480: { slidesPerView: 2 },
-              640: { slidesPerView: 2.5 },
-              768: { slidesPerView: 3 },
-              1024: { slidesPerView: 3 },
-              1280: { slidesPerView: 4 },
+              320: { slidesPerView: 2.2, spaceBetween: 6 },
+              420: { slidesPerView: 2.8, spaceBetween: 6 },
+              520: { slidesPerView: 3.2, spaceBetween: 6 },
+              640: { slidesPerView: 3.5, spaceBetween: 8 },
+              768: { slidesPerView: 4, spaceBetween: 8 },
+              1024: { slidesPerView: 4.5, spaceBetween: 10 },
+              1280: { slidesPerView: 5, spaceBetween: 10 },
             }}
           />
         </div>

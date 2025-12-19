@@ -44,7 +44,7 @@ const MainSwiper: FC<Props> = ({
   const nextRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className="p-4 rounded-md cursor-pointer relative group">
+    <div className="p-2 md:p-3 rounded-md cursor-pointer relative group">
       <div>{children}</div>
       
       {/* Custom Navigation Buttons */}
