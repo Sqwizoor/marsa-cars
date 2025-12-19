@@ -41,12 +41,12 @@ export default async function HomePage() {
           <Sideline />
         </div>
         <div className="relative w-full md:w-[calc(100%-40px)] h-full bg-[#e3e3e3]">
-          <div className="max-w-[1600px] mx-auto min-h-screen p-4">
+          <div className="max-w-[1600px] mx-auto min-h-screen p-2 sm:p-3 md:p-4">
             {/* Main */}
-            <div className="w-full grid gap-2 min-[1170px]:grid-cols-[1fr_350px] min-[1465px]:grid-cols-[200px_1fr_350px]">
+            <div className="w-full grid gap-2 grid-cols-1 min-[915px]:grid-cols-[1fr_350px] min-[1465px]:grid-cols-[200px_1fr_350px]">
               {/* Left */}
               <div
-                className="cursor-pointer hidden min-[1465px]:block bg-cover bg-center bg-no-repeat rounded-md h-[600px] w-full"
+                className="cursor-pointer hidden min-[1465px]:block bg-cover bg-center bg-no-repeat rounded-md h-[400px] sm:h-[500px] min-[1465px]:h-[600px] w-full"
                 style={{
                   backgroundImage:
                     "url(/assets/images/ads/image.png)",
@@ -65,7 +65,7 @@ export default async function HomePage() {
                 /> 
               </div>
               {/* Right */}
-              <div className="h-full">
+              <div className="h-full hidden min-[915px]:block">
                 <HomeUserCard
                   products={products_user_card.filter(
                     (product): product is SimpleProduct =>
@@ -73,6 +73,15 @@ export default async function HomePage() {
                   )}
                 />
               </div>
+            </div>
+            {/* Mobile User Card - only show on mobile */}
+            <div className="mt-4 min-[915px]:hidden">
+              <HomeUserCard
+                products={products_user_card.filter(
+                  (product): product is SimpleProduct =>
+                    "variantSlug" in product
+                )}
+              />
             </div>
             {/* Animated deals */}
             <div className="mt-2 hidden min-[915px]:block">

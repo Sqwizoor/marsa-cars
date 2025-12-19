@@ -11,7 +11,7 @@ const images: { id: number; url: StaticImageData }[] = [
   { id: 3, url: Img3 },
 ]
 
-export default function BasicSwiper() {
+export default function HomeMainSwiper() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
   const [touchEndX, setTouchEndX] = useState<number | null>(null)
@@ -69,11 +69,11 @@ export default function BasicSwiper() {
     <div className="relative w-full overflow-hidden rounded-lg shadow-lg">
       {/* Slides */}
       <div
-        className="relative w-full h-[220px] sm:h-[280px] md:h-[350px] lg:h-[400px]"
+        className="relative w-full h-[200px] sm:h-[250px] md:h-[350px] lg:h-[400px]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        style={{ touchAction: "pan-y" }}
+        style={{ touchAction: "pan-y pinch-zoom" }}
       >
         {images.map((img, index) => (
           <div
@@ -98,26 +98,26 @@ export default function BasicSwiper() {
       {/* Navigation buttons */}
       <button
         onClick={goToPrevSlide}
-        className="hidden sm:block absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/70 hover:bg-white text-gray-800 p-2 rounded-full"
+        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 bg-white/70 hover:bg-white text-gray-800 p-1.5 sm:p-2 rounded-full text-sm sm:text-base"
         aria-label="Previous slide"
       >
         ←
       </button>
       <button
         onClick={goToNextSlide}
-        className="hidden sm:block absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/70 hover:bg-white text-gray-800 p-2 rounded-full"
+        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 bg-white/70 hover:bg-white text-gray-800 p-1.5 sm:p-2 rounded-full text-sm sm:text-base"
         aria-label="Next slide"
       >
         →
       </button>
 
       {/* Pagination dots */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+      <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-1 sm:gap-2">
         {images.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-3 h-3 sm:w-2.5 sm:h-2.5 md:w-3.5 md:h-3.5 rounded-full border border-white/70 transition-colors ${
+            className={`w-2 h-2 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 rounded-full border border-white/70 transition-colors ${
               index === currentSlide
                 ? "bg-white/90"
                 : "bg-white/40 hover:bg-white/60"
