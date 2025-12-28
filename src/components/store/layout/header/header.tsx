@@ -45,9 +45,9 @@ export default async function Header() {
             </Link>
             {/* Mobile quick actions */}
             <div className="flex items-center gap-1 lg:hidden pr-3 sm:pr-4">
-              <MobileMenu />
               <UserMenu />
               <Cart />
+              <MobileMenu />
             </div>
           </div>
 

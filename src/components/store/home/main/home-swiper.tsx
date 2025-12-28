@@ -130,15 +130,26 @@ export default function HomeMainSwiper() {
                 <p className="text-gray-200 text-sm sm:text-lg mb-6 max-w-md font-medium drop-shadow-md leading-relaxed">
                   {img.subtitle}
                 </p>
-                <Button 
-                  asChild 
-                  size="lg"
-                  className="rounded-full px-8 py-6 text-base sm:text-lg font-bold bg-white text-black hover:bg-white/90 hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] border-2 border-transparent hover:border-pink-primary"
-                >
-                  <Link href={img.link}>
-                    {img.buttonText}
-                  </Link>
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button 
+                    asChild 
+                    size="lg"
+                    className="rounded-full px-8 py-6 text-base sm:text-lg font-bold bg-white text-black hover:bg-white/90 hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] border-2 border-transparent hover:border-pink-primary"
+                  >
+                    <Link href={img.link}>
+                      {img.buttonText}
+                    </Link>
+                  </Button>
+                  <Button 
+                    asChild 
+                    size="lg"
+                    className="rounded-full px-8 py-6 text-base sm:text-lg font-bold bg-transparent border-2 border-white text-white hover:bg-white/10 hover:scale-105 active:scale-95 transition-all duration-300"
+                  >
+                    <Link href="/seller/apply">
+                      Become A Seller
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
