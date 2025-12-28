@@ -328,24 +328,16 @@ export const getAllAdminOrders = async () => {
   }
 
   const orders = await db.order.findMany({
-    select: {
-      id: true,
-      total: true,
-      paymentStatus: true,
-      createdAt: true,
+    include: {
       user: {
         select: {
           id: true,
-          firstName: true,
-          lastName: true,
-          emailAddresses: true,
+          name: true,
+          email: true,
         },
       },
       groups: {
-        select: {
-          id: true,
-          status: true,
-          total: true,
+        include: {
           store: {
             select: {
               id: true,
@@ -361,7 +353,7 @@ export const getAllAdminOrders = async () => {
         },
       },
       shippingAddress: {
-        select: {
+        include: {
           country: {
             select: {
               name: true,

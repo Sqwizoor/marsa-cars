@@ -30,9 +30,8 @@ export type AdminOrder = {
   createdAt: Date;
   user: {
     id: string;
-    firstName: string | null;
-    lastName: string | null;
-    emailAddresses: { emailAddress: string }[];
+    name: string;
+    email: string;
   };
   groups: {
     id: string;
@@ -82,8 +81,8 @@ export const columns: ColumnDef<AdminOrder>[] = [
     header: "Customer",
     cell: ({ row }) => {
       const user = row.original.user;
-      const name = `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Unknown";
-      const email = user.emailAddresses[0]?.emailAddress || "N/A";
+      const name = user.name || "Unknown";
+      const email = user.email || "N/A";
       return (
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
