@@ -53,11 +53,8 @@ export default function UserMenu() {
               <UserIcon />
             </span>
             <div className="ml-1">
-              <span className="block text-xs text-white leading-3">
-                Welcome
-              </span>
               <b className="font-bold text-xs text-white leading-4">
-                <span>Sign in / Register</span>
+                <span>Sign in</span>
                 <span className="text-white scale-[60%] align-middle inline-block">
                   <ChevronDown />
                 </span>
