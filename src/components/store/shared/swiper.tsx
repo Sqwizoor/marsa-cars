@@ -8,7 +8,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 import ProductCard from "../cards/product/product-card";
-import { Navigation, Pagination, Scrollbar } from "swiper/modules";
+import { Navigation, Pagination, Scrollbar, Autoplay } from "swiper/modules";
 import ProductCardSimple from "../cards/product/simple-card";
 import ProductCardModern from "../cards/product/modern-card";
 import ProductCardDeal from "../cards/product/deal-card";
@@ -23,6 +23,7 @@ interface Props {
   breakpoints?: SwiperProps["breakpoints"];
   spaceBetween?: number;
   withScrollbar?: boolean;
+  autoplay?: boolean | { delay: number; disableOnInteraction: boolean };
 }
 
 const MainSwiper: FC<Props> = ({
@@ -39,6 +40,7 @@ const MainSwiper: FC<Props> = ({
   slidesPerView = 1,
   spaceBetween = 30,
   withScrollbar = false,
+  autoplay = false,
 }) => {
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -64,11 +66,12 @@ const MainSwiper: FC<Props> = ({
       </button>
 
       <Swiper
-        modules={[Navigation, Pagination, Scrollbar]}
+        modules={[Navigation, Pagination, Scrollbar, Autoplay]}
         navigation={{
           prevEl: prevRef.current,
           nextEl: nextRef.current,
         }}
+        autoplay={autoplay}
         onBeforeInit={(swiper) => {
           // @ts-ignore
           swiper.params.navigation.prevEl = prevRef.current;

@@ -143,7 +143,7 @@ export default function HomeMainSwiper() {
                   <Button 
                     asChild 
                     size="lg"
-                    className="rounded-full px-8 py-6 text-base sm:text-lg font-bold bg-transparent border-2 border-white text-white hover:bg-white/10 hover:scale-105 active:scale-95 transition-all duration-300"
+                    className="rounded-full px-8 py-6 text-base sm:text-lg font-bold bg-gradient-to-r from-pink-600 to-rose-600 text-white hover:from-pink-700 hover:to-rose-700 hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(255,23,68,0.4)] border-2 border-transparent"
                   >
                     <Link href="/seller/apply">
                       Become A Seller
@@ -155,22 +155,6 @@ export default function HomeMainSwiper() {
           </div>
         ))}
       </div>
-
-      {/* Navigation buttons */}
-      <button
-        onClick={goToPrevSlide}
-        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 bg-white/70 hover:bg-white text-gray-800 p-1.5 sm:p-2 rounded-full text-sm sm:text-base"
-        aria-label="Previous slide"
-      >
-        ←
-      </button>
-      <button
-        onClick={goToNextSlide}
-        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 bg-white/70 hover:bg-white text-gray-800 p-1.5 sm:p-2 rounded-full text-sm sm:text-base"
-        aria-label="Next slide"
-      >
-        →
-      </button>
 
       {/* Pagination dots */}
       <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-1 sm:gap-2">

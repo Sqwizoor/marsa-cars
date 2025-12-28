@@ -15,7 +15,7 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
           <div className="w-full md:w-48 lg:w-56 relative h-auto flex flex-col justify-center">
             <div className="flex flex-col justify-center items-center h-auto mb-3 md:mb-0">
               <h3 className="leading-5 font-bold my-1 text-white w-full text-center text-sm md:text-base">
-                Wecome Newcomers!
+                Welcome Newcomers!
               </h3>
               <p className="text-xs md:text-sm w-full text-white text-center">
                 Enjoy shopping made easy
@@ -41,16 +41,20 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
             products={products}
             type="simple"
             slidesPerView={1}
-            spaceBetween={4}
+            spaceBetween={2}
             withScrollbar={false}
+            autoplay={{
+              delay: 2000,
+              disableOnInteraction: false,
+            }}
             breakpoints={{
-              320: { slidesPerView: 2, spaceBetween: 4 },
-              420: { slidesPerView: 2.5, spaceBetween: 4 },
-              520: { slidesPerView: 2.8, spaceBetween: 5 },
-              640: { slidesPerView: 3, spaceBetween: 6 },
-              768: { slidesPerView: 3.5, spaceBetween: 6 },
-              1024: { slidesPerView: 4, spaceBetween: 8 },
-              1280: { slidesPerView: 4.5, spaceBetween: 10 },
+              320: { slidesPerView: 2, spaceBetween: 2 },
+              420: { slidesPerView: 2.5, spaceBetween: 2 },
+              520: { slidesPerView: 2.8, spaceBetween: 3 },
+              640: { slidesPerView: 3, spaceBetween: 4 },
+              768: { slidesPerView: 3.5, spaceBetween: 4 },
+              1024: { slidesPerView: 4, spaceBetween: 5 },
+              1280: { slidesPerView: 4.5, spaceBetween: 5 },
             }}
           />
         </div>
