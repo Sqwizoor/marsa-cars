@@ -1,14 +1,37 @@
 "use client"
 import Image, { type StaticImageData } from "next/image"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 import Img1 from "@/public/assets/images/swiper/pink-slider.png"
 import Img2 from "@/public/assets/images/swiper/slider4.png"
 import Img3 from "@/public/assets/images/swiper/slider5.png"
 import { useState, useEffect } from "react"
 
-const images: { id: number; url: StaticImageData }[] = [
-  { id: 1, url: Img1 },
-  { id: 2, url: Img2 },
-  { id: 3, url: Img3 },
+const images = [
+  { 
+    id: 1, 
+    url: Img1,
+    title: "Summer Sale",
+    subtitle: "Up to 50% off on all car parts",
+    buttonText: "Shop Now",
+    link: "/search"
+  },
+  { 
+    id: 2, 
+    url: Img2,
+    title: "New Arrivals",
+    subtitle: "Check out the latest gadgets for your ride",
+    buttonText: "Explore",
+    link: "/search"
+  },
+  { 
+    id: 3, 
+    url: Img3,
+    title: "Premium Wheels",
+    subtitle: "Upgrade your style with our premium selection",
+    buttonText: "View Collection",
+    link: "/search"
+  },
 ]
 
 export default function HomeMainSwiper() {
@@ -66,10 +89,10 @@ export default function HomeMainSwiper() {
   }
 
   return (
-    <div className="relative w-full overflow-hidden rounded-lg shadow-lg">
+    <div className="relative w-full overflow-hidden rounded-lg shadow-lg group">
       {/* Slides */}
       <div
-        className="relative w-full h-[200px] sm:h-[250px] md:h-[350px] lg:h-[400px]"
+        className="relative w-full h-[400px] sm:h-[450px] md:h-[500px]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -78,7 +101,7 @@ export default function HomeMainSwiper() {
         {images.map((img, index) => (
           <div
             key={img.id}
-            className={`absolute top-0 left-0 w-full h-full transition-opacity duration-1000 flex items-center justify-center ${
+            className={`absolute top-0 left-0 w-full h-full transition-opacity duration-1000 ${
               index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
             }`}
           >
@@ -89,8 +112,35 @@ export default function HomeMainSwiper() {
               priority={index === 0}
               className="object-cover object-center w-full h-full"
               placeholder="blur"
-              sizes="100vw"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
             />
+            
+            {/* Modern Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent sm:bg-gradient-to-r sm:from-black/80 sm:via-transparent sm:to-transparent" />
+
+            {/* Content */}
+            <div className="absolute inset-0 flex flex-col justify-end p-6 pb-16 sm:justify-center sm:items-start sm:p-12 md:p-16">
+              <div className={`transform transition-all duration-700 ease-out flex flex-col items-start ${index === currentSlide ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}>
+                <span className="inline-block px-3 py-1 mb-3 text-xs font-bold tracking-wider text-white uppercase bg-pink-primary/90 rounded-full backdrop-blur-sm">
+                  Featured
+                </span>
+                <h2 className="text-white text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter mb-3 drop-shadow-xl leading-none">
+                  {img.title}
+                </h2>
+                <p className="text-gray-200 text-sm sm:text-lg mb-6 max-w-md font-medium drop-shadow-md leading-relaxed">
+                  {img.subtitle}
+                </p>
+                <Button 
+                  asChild 
+                  size="lg"
+                  className="rounded-full px-8 py-6 text-base sm:text-lg font-bold bg-white text-black hover:bg-white/90 hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] border-2 border-transparent hover:border-pink-primary"
+                >
+                  <Link href={img.link}>
+                    {img.buttonText}
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </div>
         ))}
       </div>

@@ -316,3 +316,64 @@ export const getTopStores = async (limit: number = 5) => {
 
   return topStores;
 };
+/**
+ * Get all orders for admin view
+ * @returns All orders with user, store, and item details
+ */
+export const getAllAdminOrders = async () => {
+  const user = await currentUser();
+
+  if (!user || user.privateMetadata.role !== "ADMIN") {
+    throw new Error("Unauthorized: Admin access required");
+  }
+
+  const orders = await db.order.findMany({
+    select: {
+      id: true,
+      total: true,
+      paymentStatus: true,
+      createdAt: true,
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          emailAddresses: true,
+        },
+      },
+      groups: {
+        select: {
+          id: true,
+          status: true,
+          total: true,
+          store: {
+            select: {
+              id: true,
+              name: true,
+              url: true,
+            },
+          },
+          _count: {
+            select: {
+              items: true,
+            },
+          },
+        },
+      },
+      shippingAddress: {
+        select: {
+          country: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return orders;
+};
