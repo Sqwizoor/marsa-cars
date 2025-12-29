@@ -13,7 +13,7 @@ const Logo: FC<logoProps> = ({ width = "auto", height = "auto" }) => {
     <div className="relative" style={{width, height }}>
       <Image 
         src={LogoImg} 
-        alt="Marsa Cars"
+        alt="JouMaSeCars"
         className="w-full h-full object-contain"
         priority
       />

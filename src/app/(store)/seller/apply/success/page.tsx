@@ -67,7 +67,7 @@ export default async function SellerApplySuccessPage() {
                 {store.name}
               </h2>
               <p className="text-xs text-slate-500">
-                {store.url}.marsa.cars
+                {store.url}.joumase.cars
               </p>
               <p className="mt-3 text-sm text-slate-600 line-clamp-3">
                 {store.description}

@@ -33,7 +33,7 @@ export default function DownloadApp() {
             <div className="flex">
               <div className="mx-3">
                 <h3 className="font-bold text-[20px] text-main-primary m-0 max-w-40 mx-auto">
-                  Download the MarsaCars app
+                  Download the JouMaSeCars app
                 </h3>
                 <div className="mt-4 flex items-center gap-x-2">
                   <Link
