@@ -109,17 +109,19 @@ export default async function HomeUserCard({
         <div className="w-full px-4 relative z-10">
           {user ? (
             <div className="w-full space-y-2">
-              <SubscriptionBadge />
               {role === "ADMIN" ? (
                 <Button
                  
-                  className="rounded-md bg-pink-200 w-full shadow-sm hover:shadow transition-all duration-300"
+                  className="rounded-md bg-pink-500 w-full shadow-sm hover:shadow hover:bg-pink-600 text-white transition-all duration-300"
                 >
                   <Link href={"/dashboard/admin"} className="w-full">
                     Switch to Admin Dashboard
                   </Link>
                 </Button>
-              ) : role === "SELLER" ? (
+              ) : (
+                <>
+                <SubscriptionBadge />
+                {role === "SELLER" ? (
                 <Button
                  
                 
@@ -147,6 +149,8 @@ export default async function HomeUserCard({
                     Apply to become a seller
                   </Link>
                 </Button>
+              )}
+                </>
               )}
             </div>
           ) : (
