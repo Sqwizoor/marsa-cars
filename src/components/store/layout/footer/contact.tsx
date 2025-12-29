@@ -24,17 +24,14 @@ export default function Contact() {
       {/* Customer Support */}
       <div className="space-y-4">
         <div className="flex items-start gap-x-4 group">
-          <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
-            <Headset className="w-6 h-6" />
+          <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+            <SocialLogo icon="whatsapp" size={24} fill="white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-slate-300 text-sm mb-1">Got Questions? Call us 24/7!</span>
+            <span className="text-slate-300 text-sm mb-1">WhatsApp Business</span>
             <div className="flex flex-col gap-1">
-              <a href="tel:8009213647" className="text-xl font-semibold hover:text-blue-400 transition-colors duration-200">
-                (800) 9213-6472
-              </a>
-              <a href="tel:8007324185" className="text-lg hover:text-blue-400 transition-colors duration-200">
-                (800) 7324-1859
+              <a href="https://wa.me/27790705695" className="text-xl font-semibold hover:text-green-400 transition-colors duration-200">
+                +27 79 0705 695
               </a>
             </div>
           </div>
@@ -51,14 +48,14 @@ export default function Contact() {
           <div className="flex items-start gap-3 group">
             <MapPin className="w-5 h-5 text-blue-400 mt-0.5 group-hover:scale-110 transition-transform" />
             <span className="text-sm text-slate-300 leading-relaxed">
-              1357 Maple Grove Avenue, Springfield, IL 62704, USA
+              Address: [ Pay & Collect address Johannesburg South , 30 ElandClose road Unit C16 Elandspark Alberton Johannesburg ]
             </span>
           </div>
           
           <div className="flex items-center gap-3 group">
             <Mail className="w-5 h-5 text-purple-400 group-hover:scale-110 transition-transform" />
-            <a href="mailto:support@marsacars.com" className="text-sm text-slate-300 hover:text-white transition-colors">
-              support@marsacars.com
+            <a href="mailto:support@joumase.cars" className="text-sm text-slate-300 hover:text-white transition-colors">
+              support@joumase.cars
             </a>
           </div>
         </div>
