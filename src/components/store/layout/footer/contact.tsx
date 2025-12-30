@@ -54,8 +54,8 @@ export default function Contact() {
           
           <div className="flex items-center gap-3 group">
             <Mail className="w-5 h-5 text-purple-400 group-hover:scale-110 transition-transform" />
-            <a href="mailto:support@joumase.cars" className="text-sm text-slate-300 hover:text-white transition-colors">
-              support@joumase.cars
+            <a href="mailto:sales@joumasecars.africa" className="text-sm text-slate-300 hover:text-white transition-colors">
+              sales@joumasecars.africa
             </a>
           </div>
         </div>

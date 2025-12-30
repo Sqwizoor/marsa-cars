@@ -78,8 +78,8 @@ export default async function Header() {
         </div>
 
         {/* Secondary row: Search on mobile */}
-        <div className="pb-0.5 lg:hidden pr-3 sm:pr-4">
-          <div className="rounded-xl ">
+        <div className="pb-1 lg:hidden pr-3 sm:pr-4">
+          <div className="rounded-xl w-[90%] mx-auto">
             <Search />
           </div>
         </div>

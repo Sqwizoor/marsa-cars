@@ -14,7 +14,7 @@ const images = [
     title: "Summer Sale",
     subtitle: "Up to 50% off on all car parts",
     buttonText: "Shop Now",
-    link: "/search"
+    link: "/browse"
   },
   { 
     id: 2, 
@@ -22,7 +22,7 @@ const images = [
     title: "New Arrivals",
     subtitle: "Check out the latest gadgets for your ride",
     buttonText: "Explore",
-    link: "/search"
+    link: "/browse"
   },
   { 
     id: 3, 
@@ -30,7 +30,7 @@ const images = [
     title: "Premium Wheels",
     subtitle: "Upgrade your style with our premium selection",
     buttonText: "View Collection",
-    link: "/search"
+    link: "/browse"
   },
 ]
 
@@ -145,7 +145,7 @@ export default function HomeMainSwiper() {
                     size="lg"
                     className="rounded-full px-8 py-6 text-base sm:text-lg font-bold bg-gradient-to-r from-pink-600 to-rose-600 text-white hover:from-pink-700 hover:to-rose-700 hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(255,23,68,0.4)] border-2 border-transparent"
                   >
-                    <Link href="/seller/apply">
+                    <Link href="/subscriptions">
                       Become A Seller
                     </Link>
                   </Button>

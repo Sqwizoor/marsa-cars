@@ -23,62 +23,8 @@ export default function SubscriptionsPage() {
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleSubscribe = async (tier: string) => {
-    setLoading(tier);
-
-    try {
-      const response = await fetch("/api/subscriptions/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ tier }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(data.error || "Failed to create subscription");
-        setLoading(null);
-        return;
-      }
-
-      if (data.trialStarted) {
-        toast.success(
-          `Free trial activated! Ends on ${new Date(
-            data.trialEndsAt
-          ).toLocaleDateString()}`
-        );
-        setLoading(null);
-        router.push("/dashboard/advertiser");
-        return;
-      }
-
-      if (!data.paymentUrl || !data.paymentData) {
-        toast.error("Unable to initialize payment. Please try again.");
-        setLoading(null);
-        return;
-      }
-
-      // Create a form and submit to PayFast
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = data.paymentUrl;
-
-      Object.keys(data.paymentData).forEach((key) => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = data.paymentData[key];
-        form.appendChild(input);
-      });
-
-      document.body.appendChild(form);
-      form.submit();
-    } catch (error) {
-      console.error("Error creating subscription:", error);
-      toast.error("Failed to create subscription");
-      setLoading(null);
-    }
+    // Redirect to seller application with selected plan
+    router.push(`/seller/apply?plan=${tier}`);
   };
 
   return (
@@ -87,10 +33,10 @@ export default function SubscriptionsPage() {
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Advertise Your Business
+            Start Selling & Advertising Today
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Choose the perfect plan, unlock a {SUBSCRIPTION_TRIAL_DAYS}-day free trial, and only start paying once you are confident in your reach.
+            Join thousands of successful sellers. Choose a plan to launch your store and boost your reach with premium advertising features.
           </p>
         </div>
 
@@ -153,7 +99,7 @@ export default function SubscriptionsPage() {
                     }`}
                     size="lg"
                   >
-                    {loading === plan.tier ? "Processing..." : "Get Started"}
+                    {loading === plan.tier ? "Processing..." : "Start Selling"}
                   </Button>
                 </CardFooter>
               </Card>
@@ -180,18 +126,18 @@ export default function SubscriptionsPage() {
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-primary">2</span>
               </div>
-              <h3 className="font-semibold mb-2">Complete Payment</h3>
+              <h3 className="font-semibold mb-2">Create Your Store</h3>
               <p className="text-sm text-muted-foreground">
-                Secure payment via PayFast - your subscription activates immediately
+                Set up your professional store profile and list your first products in minutes
               </p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-primary">3</span>
               </div>
-              <h3 className="font-semibold mb-2">Start Advertising</h3>
+              <h3 className="font-semibold mb-2">Grow Your Business</h3>
               <p className="text-sm text-muted-foreground">
-                Create and manage your ads to reach thousands of customers
+                Manage orders, track sales, and reach more customers with built-in advertising tools
               </p>
             </div>
           </div>

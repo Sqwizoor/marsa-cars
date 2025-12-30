@@ -145,7 +145,7 @@ export default async function HomeUserCard({
                   variant="orange-gradient"
                   className="rounded-md w-full shadow-sm hover:shadow transition-all duration-300"
                 >
-                  <Link href={"/seller/apply"} className="w-full">
+                  <Link href={"/subscriptions"} className="w-full">
                     Apply to become a seller
                   </Link>
                 </Button>

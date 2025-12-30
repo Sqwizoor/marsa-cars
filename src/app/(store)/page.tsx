@@ -100,32 +100,6 @@ export default async function HomePage() {
                         <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-white/20 shadow-sm">Limited Time Offer</span>
                       </div>
                       <h2 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter drop-shadow-sm">Super Deals</h2>
-                      <p className="text-white/90 text-base font-medium mt-2 max-w-md">Save up to 90% on premium auto parts. Don't miss out on these exclusive offers.</p>
-                    </div>
-                    
-                    <div className="flex flex-col items-start lg:items-end gap-2">
-                      <span className="text-xs font-bold uppercase tracking-widest opacity-80">Ends in:</span>
-                      <div className="flex items-center gap-2 bg-black/20 backdrop-blur-md rounded-xl p-3 border border-white/10 shadow-inner">
-                        <div className="text-center min-w-[50px]">
-                          <div className="text-2xl font-bold leading-none font-mono">41</div>
-                          <div className="text-[10px] uppercase opacity-70 mt-1 font-medium">Days</div>
-                        </div>
-                        <div className="text-xl font-bold opacity-50 pb-4">:</div>
-                        <div className="text-center min-w-[50px]">
-                          <div className="text-2xl font-bold leading-none font-mono">15</div>
-                          <div className="text-[10px] uppercase opacity-70 mt-1 font-medium">Hrs</div>
-                        </div>
-                        <div className="text-xl font-bold opacity-50 pb-4">:</div>
-                        <div className="text-center min-w-[50px]">
-                          <div className="text-2xl font-bold leading-none font-mono">24</div>
-                          <div className="text-[10px] uppercase opacity-70 mt-1 font-medium">Min</div>
-                        </div>
-                        <div className="text-xl font-bold opacity-50 pb-4">:</div>
-                        <div className="text-center min-w-[50px]">
-                          <div className="text-2xl font-bold leading-none font-mono text-yellow-300">04</div>
-                          <div className="text-[10px] uppercase opacity-70 mt-1 font-medium">Sec</div>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -135,6 +109,14 @@ export default async function HomePage() {
                       (product): product is ProductType => "variants" in product
                     )} 
                     type="curved"
+                    breakpoints={{
+                      0: { slidesPerView: 2, spaceBetween: 10 },
+                      500: { slidesPerView: 2, spaceBetween: 10 },
+                      768: { slidesPerView: 3, spaceBetween: 20 },
+                      1024: { slidesPerView: 4, spaceBetween: 20 },
+                      1280: { slidesPerView: 5, spaceBetween: 20 },
+                      1400: { slidesPerView: 6, spaceBetween: 20 }
+                    }}
                   >
                     <div className="hidden"></div>
                   </MainSwiper>
