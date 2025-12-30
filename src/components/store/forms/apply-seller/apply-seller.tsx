@@ -48,10 +48,15 @@ export default function ApplySellerMultiForm() {
     returnPolicy: "",
   });
   return (
-    <div className="grid grid-cols-[400px_1fr]">
-      <Instructions />
-      <div className="relative p-5 w-full">
-        <ProgressBar step={step} />
+    <div className="flex flex-col lg:grid lg:grid-cols-[400px_1fr] h-[calc(100vh-64px)]">
+      <div className="lg:h-full flex-shrink-0">
+        <Instructions />
+      </div>
+      <div className="relative p-3 md:p-5 w-full h-full flex flex-col min-h-0">
+        <div className="flex-shrink-0 mb-4">
+          <ProgressBar step={step} />
+        </div>
+        <div className="flex-1 min-h-0 overflow-hidden">
         {/* Steps */}
         {step === 1 ? (
           <Step1
@@ -77,6 +82,7 @@ export default function ApplySellerMultiForm() {
         ) : step === 4 ? (
           <Step4 selectedPlan={selectedPlan} formData={formData} />
         ) : null}
+        </div>
       </div>
     </div>
   );

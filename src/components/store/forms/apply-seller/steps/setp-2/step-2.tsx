@@ -96,7 +96,7 @@ export default function Step2({
                   control={form.control}
                   name="logo"
                   render={({ field }) => (
-                    <FormItem className="absolute -bottom-20 -left-48 z-10 inset-x-40">
+                    <FormItem className="absolute -bottom-16 left-1/2 -translate-x-1/2 z-10 w-32 h-32 md:w-auto md:h-auto md:inset-x-auto md:left-8 md:translate-x-0">
                       <FormControl>
                         <ImageUpload
                           error={form.formState.errors.logo ? true : false}

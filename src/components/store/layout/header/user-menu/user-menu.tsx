@@ -199,7 +199,7 @@ const extraLinks = [
   },
   {
     title: "Become a Seller",
-    link: "/become-seller",
+    link: "/subscriptions",
   },
   {
     title: "Help Center",

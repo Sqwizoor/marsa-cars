@@ -1,17 +1,39 @@
-import { Dot, Info } from "lucide-react";
+"use client";
+import { Dot, Info, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 export default function Instructions() {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="h-[calc(100vh-64px)] bg-teal-100 border-t-4 border-teal-500 text-teal-900 px-4 py-3 shadow-md">
-      <div className="flex">
-        <div className="me-1">
-          <Info className="stroke-teal-500" />
-        </div>
-        <div>
+    <div className={cn(
+      "bg-teal-100 border-t-4 border-teal-500 text-teal-900 shadow-md transition-all duration-300",
+      "lg:h-[calc(100vh-64px)] lg:overflow-y-auto"
+    )}>
+      {/* Mobile Toggle Header */}
+      <div 
+        className="flex items-center justify-between p-4 lg:cursor-default cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex items-center gap-2">
+          <Info className="stroke-teal-500 w-5 h-5" />
           <p className="font-bold">Instructions</p>
+        </div>
+        <div className="lg:hidden">
+          {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className={cn(
+        "px-4 pb-4 overflow-hidden transition-all duration-300",
+        isOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0 lg:max-h-full lg:opacity-100 p-0 lg:p-4 lg:pt-0"
+      )}>
+        <div>
           {instructions.map((inst, index) => (
             <div key={index} className="flex gap-x-1 mt-1">
-              <Dot className="w-4" />
+              <Dot className="w-4 flex-shrink-0" />
               <p className="text-sm">{inst.info}</p>
             </div>
           ))}
