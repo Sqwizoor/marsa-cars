@@ -46,7 +46,7 @@ export default async function HomePage() {
             <div className="w-full grid gap-2 grid-cols-1 min-[915px]:grid-cols-[1fr_350px] min-[1465px]:grid-cols-[200px_1fr_350px]">
               {/* Left */}
               <div
-                className="cursor-pointer hidden min-[1465px]:block bg-cover bg-center bg-no-repeat rounded-md h-[400px] sm:h-[500px] min-[1465px]:h-full w-full"
+                className="cursor-pointer hidden min-[1465px]:block bg-cover bg-center bg-no-repeat rounded-md h-[400px] sm:h-[500px] min-[1465px]:h-auto w-full"
                 style={{
                   backgroundImage:
                     "url(/assets/images/ads/image.png)",

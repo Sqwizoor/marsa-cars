@@ -92,7 +92,7 @@ export default function HomeMainSwiper() {
     <div className="relative w-full overflow-hidden rounded-lg shadow-lg group">
       {/* Slides */}
       <div
-        className="relative w-full h-[300px] sm:h-[350px] md:h-[400px] min-[1465px]:h-[600px]"
+        className="relative w-full h-[300px] sm:h-[350px] md:h-[400px]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
