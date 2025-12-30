@@ -8,12 +8,27 @@ import { SignOutButton, UserButton, useUser } from "@clerk/nextjs";
 import { ChevronDown, UserIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function UserMenu() {
   const { user, isLoaded } = useUser();
   const [subscription, setSubscription] = useState<any>(null);
   const [subLoading, setSubLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     async function fetchSub() {
@@ -36,9 +51,9 @@ export default function UserMenu() {
 
   if (!isLoaded) return null;
   return (
-    <div className="relative group">
+    <div className="relative" ref={menuRef}>
       {/* Trigger */}
-      <div>
+      <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer">
         {user ? (
           <Image
             src={user.imageUrl}
@@ -66,9 +81,11 @@ export default function UserMenu() {
       {/* Content */}
       <div
         className={cn(
-          "hidden absolute top-0 -left-20 group-hover:block cursor-pointer",
+          "absolute top-0 -left-20 cursor-pointer",
           {
             "-left-[200px] lg:-left-[148px]": user,
+            "hidden": !isOpen,
+            "block": isOpen,
           }
         )}
       >

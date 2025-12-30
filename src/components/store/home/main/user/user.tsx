@@ -51,8 +51,8 @@ export default async function HomeUserCard({
   }
 
   return (
-    <div className="h-fit hidden min-[1170px]:block relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
-      <div className="h-fit rounded-lg overflow-hidden pb-4 relative">
+    <div className="h-full hidden min-[1170px]:flex flex-col relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+      <div className="h-full flex flex-col rounded-lg overflow-hidden pb-4 relative">
         {/* Header background */}
         <div className="absolute top-0 left-0 w-full h-[101px] z-0">
           <Image
@@ -170,8 +170,8 @@ export default async function HomeUserCard({
         </div>
 
         {/* Ad swiper with improved styling and dark overlay for better text visibility */}
-        <div className="w-full px-4 mt-4 relative z-10">
-          <div className="w-full h-[300px] rounded-lg overflow-hidden shadow-sm relative">
+        <div className="w-full px-4 mt-4 relative z-10 flex-1 flex flex-col">
+          <div className="w-full h-full min-h-[300px] rounded-lg overflow-hidden shadow-sm relative flex-1">
             {/* Background image */}
             <div className="absolute inset-0 z-0">
               <Image
