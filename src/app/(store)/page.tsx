@@ -103,15 +103,19 @@ export default async function HomePage() {
                     </div>
                   </div>
                 </div>
-                <div className="p-6 bg-gray-50/50">
+                <div className="p-2 sm:p-6 bg-gray-50/50">
                   <MainSwiper 
                     products={[...products_best_deals, ...products_super_deals].filter(
                       (product): product is ProductType => "variants" in product
                     )} 
                     type="curved"
+                    autoplay={{
+                      delay: 2000,
+                      disableOnInteraction: false,
+                    }}
                     breakpoints={{
-                      0: { slidesPerView: 2, spaceBetween: 10 },
-                      500: { slidesPerView: 2, spaceBetween: 10 },
+                      0: { slidesPerView: 2, spaceBetween: 5 },
+                      500: { slidesPerView: 2.2, spaceBetween: 8 },
                       768: { slidesPerView: 3, spaceBetween: 20 },
                       1024: { slidesPerView: 4, spaceBetween: 20 },
                       1280: { slidesPerView: 5, spaceBetween: 20 },
@@ -132,8 +136,8 @@ export default async function HomePage() {
                   <span>More to love</span>
                   <div className="h-[1px] flex-1 border-t-[2px] border-t-[hsla(0,0%,59.2%,.3)] my-4 mx-[14px]" />
                 </div>
-                <div className="mt-7 bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl shadow-sm">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1530px]:grid-cols-7 gap-4">
+                <div className="mt-4 md:mt-7 bg-gradient-to-br from-gray-50 to-white p-2 sm:p-6 rounded-xl md:rounded-2xl shadow-sm">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1530px]:grid-cols-7 gap-2 md:gap-4">
                     {products.map((product) => (
                       <ProductCard key={product.id} product={product} />
                     ))}

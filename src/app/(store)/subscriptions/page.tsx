@@ -28,20 +28,20 @@ export default function SubscriptionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+        <div className="text-center mb-10 md:mb-16">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Start Selling & Advertising Today
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
             Join thousands of successful sellers. Choose a plan to launch your store and boost your reach with premium advertising features.
           </p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-10 md:mb-16">
           {SUBSCRIPTION_PLANS.map((plan) => {
             const Icon = plan.icon;
             return (
@@ -49,8 +49,8 @@ export default function SubscriptionsPage() {
                 key={plan.tier}
                 className={`relative overflow-hidden transition-all hover:shadow-2xl ${
                   plan.popular
-                    ? "border-primary shadow-lg scale-105"
-                    : "hover:scale-105"
+                    ? "border-primary shadow-lg scale-100 md:scale-105"
+                    : "hover:scale-100 md:hover:scale-105"
                 }`}
               >
                 {plan.popular && (
@@ -59,20 +59,20 @@ export default function SubscriptionsPage() {
                   </div>
                 )}
 
-                <CardHeader className="text-center pb-8 pt-12">
+                <CardHeader className="text-center pb-6 md:pb-8 pt-8 md:pt-12">
                   <div
-                    className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${plan.color} flex items-center justify-center`}
+                    className={`w-14 h-14 md:w-16 md:h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${plan.color} flex items-center justify-center`}
                   >
-                    <Icon className="w-8 h-8 text-white" />
+                    <Icon className="w-7 h-7 md:w-8 md:h-8 text-white" />
                   </div>
-                  <CardTitle className="text-2xl font-bold">
+                  <CardTitle className="text-xl md:text-2xl font-bold">
                     {plan.name}
                   </CardTitle>
-                  <CardDescription className="mt-2">
+                  <CardDescription className="mt-2 text-sm md:text-base">
                     {plan.description}
                   </CardDescription>
                   <div className="mt-4">
-                    <span className="text-5xl font-bold">R{plan.price}</span>
+                    <span className="text-4xl md:text-5xl font-bold">R{plan.price}</span>
                     <span className="text-muted-foreground ml-2">/month</span>
                   </div>
                 </CardHeader>
@@ -108,14 +108,14 @@ export default function SubscriptionsPage() {
         </div>
 
         {/* FAQ/Info Section */}
-        <div className="bg-card rounded-lg p-8 shadow-lg">
-          <h2 className="text-2xl font-bold mb-6 text-center">
+        <div className="bg-card rounded-lg p-6 md:p-8 shadow-lg">
+          <h2 className="text-xl md:text-2xl font-bold mb-6 text-center">
             How It Works
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-primary">1</span>
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-xl md:text-2xl font-bold text-primary">1</span>
               </div>
               <h3 className="font-semibold mb-2">Choose Your Plan</h3>
               <p className="text-sm text-muted-foreground">
@@ -123,8 +123,8 @@ export default function SubscriptionsPage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-primary">2</span>
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-xl md:text-2xl font-bold text-primary">2</span>
               </div>
               <h3 className="font-semibold mb-2">Create Your Store</h3>
               <p className="text-sm text-muted-foreground">
@@ -132,8 +132,8 @@ export default function SubscriptionsPage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-primary">3</span>
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-xl md:text-2xl font-bold text-primary">3</span>
               </div>
               <h3 className="font-semibold mb-2">Grow Your Business</h3>
               <p className="text-sm text-muted-foreground">

@@ -21,7 +21,7 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
                 Top Quality • Best Prices
               </p>
             </div>
-            <div
+            {/* <div
               className="w-full h-12 md:h-14 pl-3 md:pl-4 text-white overflow-hidden pr-10 md:pr-12
               text-left bg-contain bg-no-repeat mx-auto md:mx-0 mt-2 md:mt-1"
               style={{ backgroundImage: "url(/assets/images/ads/coupon.gif)" }}
@@ -32,7 +32,7 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
               <p className="text-xs md:text-sm leading-4 text-white font-semibold">
                 17% OFF
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
         {/* Product swiper */}
@@ -48,13 +48,13 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
               disableOnInteraction: false,
             }}
             breakpoints={{
-              320: { slidesPerView: 2, spaceBetween: 0 },
-              420: { slidesPerView: 2.5, spaceBetween: 0 },
-              520: { slidesPerView: 2.8, spaceBetween: 0 },
-              640: { slidesPerView: 3, spaceBetween: 0 },
-              768: { slidesPerView: 3.5, spaceBetween: 0 },
-              1024: { slidesPerView: 4, spaceBetween: 0 },
-              1280: { slidesPerView: 4.5, spaceBetween: 0 },
+              320: { slidesPerView: 2, spaceBetween: 5 },
+              420: { slidesPerView: 2.5, spaceBetween: 5 },
+              520: { slidesPerView: 2.8, spaceBetween: 5 },
+              640: { slidesPerView: 3, spaceBetween: 5 },
+              768: { slidesPerView: 3.5, spaceBetween: 10 },
+              1024: { slidesPerView: 4, spaceBetween: 10 },
+              1280: { slidesPerView: 4.5, spaceBetween: 10 },
             }}
           />
         </div>
