@@ -48,34 +48,38 @@ export default function ProductSort() {
 
   return (
     <div
-      className="relative w-full transition-all"
+      className="relative w-full transition-all flex justify-between items-center"
       style={{ transitionDuration: "30ms" }}
     >
-      <div className="pr-[50px] inline-block relative">
+      <div className="lg:hidden">
+        {/* Placeholder for mobile filter trigger, will be handled by a separate component or integrated here if needed */}
+      </div>
+      <div className="inline-block relative ml-auto">
         <div className="flex">
-          <div className="h-9 w-[227px] !float-right">
-            <div className="h-9 w-[227px] !float-left">
+          <div className="h-9 w-[200px] sm:w-[227px] !float-right">
+            <div className="h-9 w-[200px] sm:w-[227px] !float-left">
               <div
-                className="h-9 w-[227px] z-20 relative inline-block outline-0 group"
+                className="h-9 w-[200px] sm:w-[227px] z-20 relative inline-block outline-0 group"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
                 onMouseEnter={() => setIsMenuOpen(true)}
                 onMouseLeave={() => setIsMenuOpen(false)}
               >
                 {/* Trigger */}
-                <div className="h-9 w-[227px]">
+                <div className="h-9 w-[200px] sm:w-[227px]">
                   <div className="inline-flex relative w-full">
                     <div className="relative">
                       <span
-                        className="w-[70px] h-full flex items-center justify-center absolute top-0 transition-all"
+                        className="w-[60px] sm:w-[70px] h-full flex items-center justify-center absolute top-0 transition-all"
                         style={{ transitionDuration: "20ms" }}
                       >
-                        <label htmlFor="">Sort by</label>
+                        <label htmlFor="" className="text-xs sm:text-sm">Sort by</label>
                       </span>
                     </div>
                     <input
                       type="text"
                       disabled
                       value={sort}
-                      className="pl-[70px] text-sm font-bold h-9 pr-10 bg-none border cursor-pointer px-3 bg-transparent text-main-primary w-full outline-0 align-bottom"
+                      className="pl-[60px] sm:pl-[70px] text-xs sm:text-sm font-bold h-9 pr-8 sm:pr-10 bg-none border cursor-pointer px-3 bg-transparent text-main-primary w-full outline-0 align-bottom"
                     />
                     <div className="relative">
                       <span

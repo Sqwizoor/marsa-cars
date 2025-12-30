@@ -32,11 +32,13 @@ export default async function BrowsePage({
   return (
     <>
       {/* <Header /> */}
-      <div className="max-w-[95%] mx-auto">
+      <div className="max-w-[95%] mx-auto pb-20">
         <h1 className="sr-only">Browse Products</h1>
-        <div className="flex mt-5 gap-x-5">
-          <ProductFilters queries={params} />
-          <div className="p-4 space-y-5">
+        <div className="flex flex-col lg:flex-row mt-5 gap-x-5">
+          <div className="hidden lg:block">
+            <ProductFilters queries={params} />
+          </div>
+          <div className="flex-1 p-0 lg:p-4 space-y-5">
             <ProductSort />
             {/* Product list */}
             <ProductList products={products} />

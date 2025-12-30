@@ -7,17 +7,17 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
   return (
     <div className="relative rounded-md overflow-hidden">
       <div
-        className="w-full flex flex-col items-center bg-cover bg-yellow-600 bg-center bg-no-repeat gap-3 py-4"
+        className="w-full flex flex-col items-center bg-cover bg-yellow-600 bg-center bg-no-repeat gap-2 py-2"
         // style={{ backgroundImage: "url(/assets/images/ads/featured.webp)" }}
       >
         {/* Coupon */}
-        <div className="shrink-0 w-full px-4">
+        <div className="shrink-0 w-full px-2">
           <div className="w-full relative h-auto flex flex-col justify-center">
             <div className="flex flex-col justify-center items-center h-auto">
-              <h3 className="leading-5 font-bold my-1 text-white w-full text-center text-lg md:text-xl">
+              <h3 className="leading-tight font-bold my-0.5 text-white w-full text-center text-base md:text-lg">
                 Discover Amazing Deals!
               </h3>
-              <p className="text-sm md:text-base w-full text-white text-center">
+              <p className="text-xs md:text-sm w-full text-white text-center">
                 Top Quality • Best Prices
               </p>
             </div>
