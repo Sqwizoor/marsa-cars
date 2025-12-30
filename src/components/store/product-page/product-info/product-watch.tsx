@@ -5,35 +5,35 @@ import React, { useEffect, useState } from "react";
 export default function ProductWatch({ productId }: { productId: string }) {
   const [watcherCount, setWatcherCount] = useState<number>(0);
 
-  useEffect(() => {
-    // const ws = new WebSocket(`ws:aquamarine-imaginary-apricot.glitch.me/${productId}`);
-    const ws = new WebSocket(
-      `wss://aquamarine-imaginary-apricot.glitch.me/${productId}`
-    );
+  // useEffect(() => {
+  //   // const ws = new WebSocket(`ws:aquamarine-imaginary-apricot.glitch.me/${productId}`);
+  //   const ws = new WebSocket(
+  //     `wss://aquamarine-imaginary-apricot.glitch.me/${productId}`
+  //   );
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (productId === data.productId) {
-        setWatcherCount(data.count);
-      }
-    };
+  //   ws.onmessage = (event) => {
+  //     const data = JSON.parse(event.data);
+  //     if (productId === data.productId) {
+  //       setWatcherCount(data.count);
+  //     }
+  //   };
 
-    ws.onopen = () => {
-      console.log("Connected to WebSocket server");
-    };
+  //   ws.onopen = () => {
+  //     console.log("Connected to WebSocket server");
+  //   };
 
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
+  //   ws.onerror = (error) => {
+  //     console.error("WebSocket error:", error);
+  //   };
 
-    ws.onclose = () => {
-      console.log("Disconnected from WebSocket server");
-    };
+  //   ws.onclose = () => {
+  //     console.log("Disconnected from WebSocket server");
+  //   };
 
-    return () => {
-      ws.close();
-    };
-  }, [productId]);
+  //   return () => {
+  //     ws.close();
+  //   };
+  // }, [productId]);
   if (watcherCount > 0) {
     return (
       <div className="mb-2 text-sm">
