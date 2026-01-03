@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { Store } from "@prisma/client";
 
 // Function: getStoreMembers
@@ -38,17 +38,17 @@ export const getStoreMembers = async (storeUrl: string) => {
 export const addStoreMember = async (storeUrl: string, email: string) => {
   try {
     const user = await currentUser();
-    if (!user) throw new Error("Unauthenticated.");
+    if (!user) return { error: "Unauthenticated." };
 
     const store = await db.store.findUnique({
       where: { url: storeUrl },
     });
 
-    if (!store) throw new Error("Store not found.");
+    if (!store) return { error: "Store not found." };
 
     // Only owner can add members
     if (store.userId !== user.id) {
-      throw new Error("Only the store owner can add members.");
+      return { error: "Only the store owner can add members." };
     }
 
     const memberUser = await db.user.findUnique({
@@ -56,11 +56,11 @@ export const addStoreMember = async (storeUrl: string, email: string) => {
     });
 
     if (!memberUser) {
-      throw new Error("User with this email not found. Please ask them to sign up first.");
+      return { error: "User with this email not found. Please ask them to sign up first." };
     }
 
     if (memberUser.id === user.id) {
-      throw new Error("You are already the owner of this store.");
+      return { error: "You are already the owner of this store." };
     }
 
     // Check if already a member
@@ -76,7 +76,23 @@ export const addStoreMember = async (storeUrl: string, email: string) => {
     });
 
     if (existingMember) {
-        throw new Error("User is already a member of this store.");
+        return { error: "User is already a member of this store." };
+    }
+
+    // Update role to SELLER if they are just a USER
+    if (memberUser.role === "USER") {
+        await db.user.update({
+            where: { id: memberUser.id },
+            data: { role: "SELLER" }
+        });
+
+        // Also update Clerk metadata so they can access dashboard immediately
+        const client = await clerkClient();
+        await client.users.updateUserMetadata(memberUser.id, {
+            privateMetadata: {
+                role: "SELLER"
+            }
+        });
     }
 
     await db.store.update({
@@ -91,7 +107,7 @@ export const addStoreMember = async (storeUrl: string, email: string) => {
     return { success: true, message: "Member added successfully." };
   } catch (error) {
     console.log(error);
-    throw error;
+    return { error: "Something went wrong. Please try again." };
   }
 };
 
@@ -100,20 +116,20 @@ export const addStoreMember = async (storeUrl: string, email: string) => {
 export const removeStoreMember = async (storeUrl: string, memberId: string) => {
   try {
     const user = await currentUser();
-    if (!user) throw new Error("Unauthenticated.");
+    if (!user) return { error: "Unauthenticated." };
 
     const store = await db.store.findUnique({
       where: { url: storeUrl },
     });
 
-    if (!store) throw new Error("Store not found.");
+    if (!store) return { error: "Store not found." };
 
     // Only owner can remove members
     if (store.userId !== user.id) {
         // Allow members to leave? Maybe later. For now only owner removes.
         // If member wants to leave, they can theoretically use this if we change logic,
         // but typically "removeStoreMember" implies admin action.
-        throw new Error("Only the store owner can remove members.");
+        return { error: "Only the store owner can remove members." };
     }
 
     await db.store.update({
@@ -128,6 +144,6 @@ export const removeStoreMember = async (storeUrl: string, memberId: string) => {
     return { success: true, message: "Member removed successfully." };
   } catch (error) {
     console.log(error);
-    throw error;
+    return { error: "Something went wrong. Please try again." };
   }
 };

@@ -38,13 +38,21 @@ export const StoreMembers = ({ storeUrl, members, isOwner }: StoreMembersProps) 
   const onAddMember = async (values: z.infer<typeof AddMemberSchema>) => {
     try {
       setIsLoading(true);
-      await addStoreMember(storeUrl, values.email);
-      toast({
-        title: "Success",
-        description: "Member added successfully.",
-      });
-      form.reset();
-      router.refresh();
+      const response = await addStoreMember(storeUrl, values.email);
+      if (response.error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: response.error,
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Member added successfully.",
+        });
+        form.reset();
+        router.refresh();
+      }
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : "Something went wrong.";
         toast({
@@ -60,12 +68,20 @@ export const StoreMembers = ({ storeUrl, members, isOwner }: StoreMembersProps) 
   const onRemoveMember = async (memberId: string) => {
     try {
       setIsLoading(true);
-      await removeStoreMember(storeUrl, memberId);
-      toast({
-        title: "Success",
-        description: "Member removed successfully.",
-      });
-      router.refresh();
+      const response = await removeStoreMember(storeUrl, memberId);
+      if (response.error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: response.error,
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Member removed successfully.",
+        });
+        router.refresh();
+      }
     } catch (error: unknown) {
          const errorMessage = error instanceof Error ? error.message : "Something went wrong.";
         toast({

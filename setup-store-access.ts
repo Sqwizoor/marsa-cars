@@ -3,8 +3,8 @@ import { db } from "./src/lib/db";
 
 async function main() {
   const storeUrl = "porche-shockklk";
-  const userEmail = "mandisi@joumasecars.africa";
-  const userName = "Mandisi"; // Placeholder name
+  const userEmail = "mjmzulwini@gmail.com";
+  const userName = "MJM Zulwini"; // Placeholder name
   
   const userPassword = "password"; // Placeholder password
   console.log(`Looking for store: ${storeUrl}`);
@@ -52,7 +52,21 @@ async function main() {
             where: { id: user.id },
             data: { role: "SELLER" }
         });
-        console.log("Updated user role to SELLER");
+        
+        // Also update Clerk metadata
+        try {
+            // Dynamically import to avoid issues if run outside next context, though bun should handle it if env vars are present
+            const { clerkClient } = await import("@clerk/nextjs/server");
+            const client = await clerkClient();
+            await client.users.updateUserMetadata(user.id, {
+                privateMetadata: {
+                    role: "SELLER"
+                }
+            });
+            console.log("Updated user role to SELLER in DB and Clerk Metadata");
+        } catch (error) {
+            console.error("Failed to update Clerk metadata:", error);
+        }
     }
   }
 
