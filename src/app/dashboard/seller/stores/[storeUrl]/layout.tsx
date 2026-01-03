@@ -27,7 +27,10 @@ export default async function SellerStoreDashboardLayout({
   // Retrieve the list of stores associated with the authenticated user.
   const stores = await db.store.findMany({
     where: {
-      userId: user.id,
+      OR: [
+        { userId: user.id },
+        { members: { some: { id: user.id } } },
+      ],
     },
   });
 

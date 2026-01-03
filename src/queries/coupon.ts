@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { ensureSellerSubscription } from "@/lib/subscription-guard";
 import { CartWithCartItemsType } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
-import { Coupon } from "@prisma/client";
+import { Coupon, Store } from "@prisma/client";
 
 // Function: upsertCoupon
 // Description: Upserts a coupon into the database, updating it if it exists or creating a new one if not.
@@ -101,15 +101,19 @@ export const getStoreCoupons = async (storeUrl: string) => {
     if (!storeUrl) throw new Error("Store URL is required.");
 
     // Retrieve store ID using storeUrl and ensure it belongs to the current user
-    const store = await db.store.findUnique({
+    const store = (await db.store.findUnique({
       where: {
         url: storeUrl,
       },
-    });
+      include: {
+        members: true,
+      },
+    })) as (Store & { members: { id: string }[] }) | null;
 
     if (!store) throw new Error("Store not found.");
 
-    if (store.userId !== user.id)
+    const isMember = store.members.some((m) => m.id === user.id);
+    if (store.userId !== user.id && !isMember)
       throw new Error("Unauthorized Access: You do not own this store.");
 
     // Retrieve and return all coupons for the specified store
@@ -182,13 +186,17 @@ export const deleteCoupon = async (couponId: string, storeUrl: string) => {
       where: {
         url: storeUrl,
       },
+      include: {
+        members: true,
+      },
     });
 
     // Verify store exists
     if (!store) throw new Error("Store not found.");
 
-    // Verify that the logged-in user is the owner of the store
-    if (store.userId !== user.id) {
+    // Verify that the logged-in user is the owner or member of the store
+    const isMember = store.members.some((m) => m.id === user.id);
+    if (store.userId !== user.id && !isMember) {
       throw new Error(
         "You are not the owner of this store. Only the store owner can delete coupons."
       );

@@ -8,8 +8,14 @@ export async function getStoreAnalytics(storeUrl: string, days: number = 30) {
     const user = await currentUser()
     if (!user) throw new Error("Unauthenticated")
 
-    const store = await db.store.findUnique({
-      where: { url: storeUrl, userId: user.id },
+    const store = await db.store.findFirst({
+      where: {
+        url: storeUrl,
+        OR: [
+          { userId: user.id },
+          { members: { some: { id: user.id } } },
+        ],
+      },
     })
 
     if (!store) throw new Error("Store not found")

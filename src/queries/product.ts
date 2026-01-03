@@ -58,8 +58,14 @@ export const upsertProduct = async (
     if (!product) throw new Error("Please provide product data.");
 
     // Find the store by URL
-    const store = await db.store.findUnique({
-      where: { url: storeUrl, userId: user.id },
+    const store = await db.store.findFirst({
+      where: {
+        url: storeUrl,
+        OR: [
+          { userId: user.id },
+          { members: { some: { id: user.id } } },
+        ],
+      },
     });
     if (!store) throw new Error("Store not found.");
 

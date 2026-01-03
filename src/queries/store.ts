@@ -187,10 +187,13 @@ export const updateStoreDefaultShippingDetails = async (
       throw new Error("No shipping details provided to update.");
     }
     // Make sure seller is updating their own store
-    const check_ownership = await db.store.findUnique({
+    const check_ownership = await db.store.findFirst({
       where: {
         url: storeUrl,
-        userId: user.id,
+        OR: [
+          { userId: user.id },
+          { members: { some: { id: user.id } } },
+        ],
       },
     });
 
@@ -243,10 +246,13 @@ export const getStoreShippingRates = async (storeUrl: string) => {
     if (!storeUrl) throw new Error("Store URL is required.");
 
     // Make sure seller is updating their own store
-    const check_ownership = await db.store.findUnique({
+    const check_ownership = await db.store.findFirst({
       where: {
         url: storeUrl,
-        userId: user.id,
+        OR: [
+          { userId: user.id },
+          { members: { some: { id: user.id } } },
+        ],
       },
     });
 
@@ -256,8 +262,14 @@ export const getStoreShippingRates = async (storeUrl: string) => {
       );
 
     // Get store details
-    const store = await db.store.findUnique({
-      where: { url: storeUrl, userId: user.id },
+    const store = await db.store.findFirst({
+      where: {
+        url: storeUrl,
+        OR: [
+          { userId: user.id },
+          { members: { some: { id: user.id } } },
+        ],
+      },
     });
 
     if (!store) throw new Error("Store could not be found.");
@@ -323,10 +335,13 @@ export const upsertShippingRate = async (
     await ensureSellerSubscription(user.id);
 
     // Make sure seller is updating their own store
-    const check_ownership = await db.store.findUnique({
+    const check_ownership = await db.store.findFirst({
       where: {
         url: storeUrl,
-        userId: user.id,
+        OR: [
+          { userId: user.id },
+          { members: { some: { id: user.id } } },
+        ],
       },
     });
 
@@ -393,17 +408,21 @@ export const getStoreOrders = async (storeUrl: string) => {
     await ensureSellerSubscription(user.id);
 
     // Get store id using url
-    const store = await db.store.findUnique({
+    const store = (await db.store.findUnique({
       where: {
         url: storeUrl,
       },
-    });
+      include: {
+        members: true,
+      },
+    })) as (Store & { members: { id: string }[] }) | null;
 
     // Ensure store existence
     if (!store) throw new Error("Store not found.");
 
-    // Verify ownership
-    if (user.id !== store.userId) {
+    // Verify ownership or membership
+    const isMember = store.members.some((m) => m.id === user.id);
+    if (user.id !== store.userId && !isMember) {
       throw new Error("You don't have persmission to access this store.");
     }
 
@@ -719,8 +738,14 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
     const user = await currentUser();
     if (!user) throw new Error("Unauthenticated.");
 
-    const store = await db.store.findUnique({
-      where: { url: storeUrl, userId: user.id },
+    const store = await db.store.findFirst({
+      where: {
+        url: storeUrl,
+        OR: [
+          { userId: user.id },
+          { members: { some: { id: user.id } } },
+        ],
+      },
     });
 
     if (!store) throw new Error("Store not found.");
