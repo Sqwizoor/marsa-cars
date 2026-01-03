@@ -560,3 +560,7 @@ export const StoreShippingSchema = z.object({
     .int()
     .default(31),
 });
+
+export const AddMemberSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});

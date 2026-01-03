@@ -6,6 +6,7 @@ async function main() {
   const userEmail = "mandisi@joumasecars.africa";
   const userName = "Mandisi"; // Placeholder name
   
+  const userPassword = "password"; // Placeholder password
   console.log(`Looking for store: ${storeUrl}`);
   const store = await db.store.findUnique({
     where: { url: storeUrl },
