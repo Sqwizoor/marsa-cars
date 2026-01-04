@@ -206,7 +206,6 @@ export const updateStoreDefaultShippingDetails = async (
     const updatedStore = await db.store.update({
       where: {
         url: storeUrl,
-        userId: user.id,
       },
       data: details,
     });
@@ -361,7 +360,6 @@ export const upsertShippingRate = async (
     const store = await db.store.findUnique({
       where: {
         url: storeUrl,
-        userId: user.id,
       },
     });
     if (!store) throw new Error("Please provide a valid store URL.");
