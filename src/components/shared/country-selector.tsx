@@ -1,3 +1,5 @@
+"use client";
+
 import COUNTRIES from "@/data/countries.json";
 import { SelectMenuOption } from "@/lib/types";
 import { AnimatePresence, motion } from "framer-motion";
