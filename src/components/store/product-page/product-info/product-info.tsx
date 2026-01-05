@@ -71,7 +71,7 @@ const ProductInfo: FC<Props> = ({
       <div>
         <h1 className="text-main-primary inline font-bold leading-5">
           {name}
-          {variantInfo.length > 1 && variantName !== name && ` · ${variantName}`}
+          {variantInfo.length > 1 && variantName && variantName !== name && ` · ${variantName}`}
         </h1>
       </div>
       {/* Sku - Rating - Num reviews */}

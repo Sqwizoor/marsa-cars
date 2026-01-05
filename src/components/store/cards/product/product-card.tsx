@@ -49,7 +49,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
             <div className="pb-2">
               {/* Title */}
               <div className="text-sm font-medium text-main-primary truncate mt-2 w-full">
-                {name} 
+                {name} {variantName && variantName !== name && `- ${variantName}`}
               </div>
               {/* Rating - Sales */}
               {rating > 0 && sales > 0 && (

@@ -128,7 +128,7 @@ export type ProductWishlistType = Prisma.PromiseReturnType<
 export type VariantSimplified = {
   variantId: string;
   variantSlug: string;
-  variantName: string;
+  variantName: string | null;
   images: ProductVariantImage[];
   sizes: Size[];
 };
@@ -336,7 +336,7 @@ export type ProductSize = {
 export type ProductSimpleVariantType = {
   variantId: string;
   variantSlug: string;
-  variantName: string;
+  variantName: string | null;
   variantImage: string;
   images: ProductVariantImage[];
   sizes: Size[];
@@ -351,7 +351,7 @@ export type ProductWithVariants = {
   numReviews: number;
   variants: {
     id: string;
-    variantName: string;
+    variantName: string | null;
     variantImage: string;
     slug: string;
     sizes: Size[];
@@ -362,7 +362,7 @@ export type ProductWithVariants = {
 export type SimpleProduct = {
   name: string;
   slug: string;
-  variantName: string;
+  variantName: string | null;
   variantSlug: string;
   price: number;
   image: string;
@@ -384,7 +384,7 @@ export type ReviewDetailsType = {
 };
 
 export type VariantInfoType = {
-  variantName: string;
+  variantName: string | null;
   variantSlug: string;
   variantImage: string;
   variantUrl: string;

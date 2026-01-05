@@ -194,9 +194,9 @@ model Product {
 
 model ProductVariant {
   id                 String  @id @default(uuid())
-  variantName        String
+  variantName        String?
   variantDescription String? @db.Text
-  variantImage       String
+  variantImage       String?
   slug               String  @unique
   isSale             Boolean @default(false)
   saleEndDate        String?
