@@ -153,7 +153,8 @@ export const ProductFormSchema = z.object({
     .regex(/^(?!.*(?:[-_ ]){2,})[a-zA-Z0-9_ -]+$/, {
       message:
         "Product variant name may only contain letters, numbers, spaces, hyphens, and underscores, without consecutive special characters.",
-    }),
+    })
+    .optional(),
   variantDescription: z
     .string({
       required_error: "Product variant description is mandatory.",
@@ -168,7 +169,8 @@ export const ProductFormSchema = z.object({
   variantImage: z
     .object({ url: z.string() })
     .array()
-    .length(1, "Choose a product variant image."),
+    .length(1, "Choose a product variant image.")
+    .optional(),
   categoryId: z
     .string({
       required_error: "Product category ID is mandatory.",
@@ -276,7 +278,8 @@ export const ProductFormSchema = z.object({
       {
         message: "All product variant specs inputs must be filled correctly.",
       }
-    ),
+    )
+    .optional(),
   questions: z
     .object({
       question: z.string(),

@@ -58,6 +58,20 @@ export const upsertProduct = async (
     // Ensure product data is provided
     if (!product) throw new Error("Please provide product data.");
 
+    // Fill defaults for optional variant fields
+    if (!product.variantName) {
+      product.variantName = product.name;
+    }
+    if (!product.variantDescription) {
+      product.variantDescription = product.description;
+    }
+    if (!product.variantImage && product.images && product.images.length > 0) {
+      product.variantImage = product.images[0].url;
+    }
+    if (!product.variant_specs || product.variant_specs.length === 0) {
+      product.variant_specs = product.product_specs;
+    }
+
     // Find the store by URL
     const store = await db.store.findUnique({
       where: { url: storeUrl, userId: user.id },
@@ -106,7 +120,7 @@ const handleProductCreate = async (
   );
 
   const variantSlug = await generateUniqueSlug(
-    slugify(product.variantName, {
+    slugify(product.variantName || product.name, {
       replacement: "-",
       lower: true,
       trim: true,
@@ -140,10 +154,10 @@ const handleProductCreate = async (
       create: [
         {
           id: product.variantId,
-          variantName: product.variantName,
+          variantName: product.variantName || product.name,
           variantDescription: product.variantDescription,
           slug: variantSlug,
-          variantImage: product.variantImage,
+          variantImage: product.variantImage || product.images[0].url,
           sku: product.sku,
           weight: product.weight,
           keywords: product.keywords.join(","),
@@ -168,7 +182,7 @@ const handleProductCreate = async (
             })),
           },
           specs: {
-            create: product.variant_specs.map((spec) => ({
+            create: (product.variant_specs || []).map((spec) => ({
               name: spec.name,
               value: spec.value,
             })),
@@ -204,7 +218,7 @@ const handleProductCreate = async (
 
 const handleCreateVariant = async (product: ProductWithVariantType) => {
   const variantSlug = await generateUniqueSlug(
-    slugify(product.variantName, {
+    slugify(product.variantName || product.name, {
       replacement: "-",
       lower: true,
       trim: true,
@@ -215,7 +229,7 @@ const handleCreateVariant = async (product: ProductWithVariantType) => {
   const variantData = {
     id: product.variantId,
     productId: product.productId,
-    variantName: product.variantName,
+    variantName: product.variantName || product.name,
     variantDescription: product.variantDescription,
     slug: variantSlug,
     isSale: product.isSale,
@@ -223,7 +237,7 @@ const handleCreateVariant = async (product: ProductWithVariantType) => {
     sku: product.sku,
     keywords: product.keywords.join(","),
     weight: product.weight,
-    variantImage: product.variantImage,
+    variantImage: product.variantImage || product.images[0].url,
     images: {
       create: product.images.map((img) => ({
         url: img.url,
@@ -243,7 +257,7 @@ const handleCreateVariant = async (product: ProductWithVariantType) => {
       })),
     },
     specs: {
-      create: product.variant_specs.map((spec) => ({
+      create: (product.variant_specs || []).map((spec) => ({
         name: spec.name,
         value: spec.value,
       })),

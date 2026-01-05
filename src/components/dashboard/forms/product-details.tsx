@@ -255,7 +255,7 @@ const ProductDetails = ({
           variantName: values.variantName,
           variantDescription: values.variantDescription || "",
           images: values.images,
-          variantImage: values.variantImage[0].url,
+          variantImage: values.variantImage?.[0]?.url,
           categoryId: values.categoryId,
           subCategoryId: values.subCategoryId,
           offerTagId: values.offerTagId || "",
@@ -457,19 +457,25 @@ const ProductDetails = ({
                       )}
                     />
                   )}
-                  <FormField
-                    disabled={isLoading}
-                    control={form.control}
-                    name="variantName"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <Input placeholder="Variant name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {(isNewVariantPage || (data?.productId && data?.variantId)) && (
+                    <FormField
+                      disabled={isLoading}
+                      control={form.control}
+                      name="variantName"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input
+                              placeholder="Variant name"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
               </InputFieldset>
               {/* Product and variant description editors (tabs) */}
@@ -481,65 +487,88 @@ const ProductDetails = ({
                     : "Note: The product description is the main description for the product (Will display in every variant page). You can add an extra description specific to this variant using 'Variant description' tab."
                 }
               >
-                <Tabs
-                  defaultValue={isNewVariantPage ? "variant" : "product"}
-                  className="w-full"
-                >
-                  {!isNewVariantPage && (
-                    <TabsList className="w-full grid grid-cols-2">
-                      <TabsTrigger value="product">
-                        Product description
-                      </TabsTrigger>
-                      <TabsTrigger value="variant">
-                        Variant description
-                      </TabsTrigger>
-                    </TabsList>
-                  )}
-                  <TabsContent value="product">
-                    <FormField
-                      disabled={isLoading}
-                      control={form.control}
-                      name="description"
-                      render={() => (
-                        <FormItem className="flex-1">
-                          <FormControl>
-                            <JoditEditor
-                              ref={productDescEditor}
-                              config={config}
-                              value={form.getValues().description}
-                              onChange={(content: string) => {
-                                form.setValue("description", content);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TabsContent>
-                  <TabsContent value="variant">
-                    <FormField
-                      disabled={isLoading}
-                      control={form.control}
-                      name="variantDescription"
-                      render={() => (
-                        <FormItem className="flex-1">
-                          <FormControl>
-                            <JoditEditor
-                              ref={variantDescEditor}
-                              config={config}
-                              value={form.getValues().variantDescription || ""}
-                              onChange={(content: string | undefined) => {
-                                form.setValue("variantDescription", content);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TabsContent>
-                </Tabs>
+                {!isNewVariantPage && !data?.productId ? (
+                  <FormField
+                    disabled={isLoading}
+                    control={form.control}
+                    name="description"
+                    render={() => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <JoditEditor
+                            ref={productDescEditor}
+                            config={config}
+                            value={form.getValues().description}
+                            onChange={(content: string) => {
+                              form.setValue("description", content);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <Tabs
+                    defaultValue={isNewVariantPage ? "variant" : "product"}
+                    className="w-full"
+                  >
+                    {!isNewVariantPage && (
+                      <TabsList className="w-full grid grid-cols-2">
+                        <TabsTrigger value="product">
+                          Product description
+                        </TabsTrigger>
+                        <TabsTrigger value="variant">
+                          Variant description
+                        </TabsTrigger>
+                      </TabsList>
+                    )}
+                    <TabsContent value="product">
+                      <FormField
+                        disabled={isLoading}
+                        control={form.control}
+                        name="description"
+                        render={() => (
+                          <FormItem className="flex-1">
+                            <FormControl>
+                              <JoditEditor
+                                ref={productDescEditor}
+                                config={config}
+                                value={form.getValues().description}
+                                onChange={(content: string) => {
+                                  form.setValue("description", content);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TabsContent>
+                    <TabsContent value="variant">
+                      <FormField
+                        disabled={isLoading}
+                        control={form.control}
+                        name="variantDescription"
+                        render={() => (
+                          <FormItem className="flex-1">
+                            <FormControl>
+                              <JoditEditor
+                                ref={variantDescEditor}
+                                config={config}
+                                value={form.getValues().variantDescription || ""}
+                                onChange={(content: string | undefined) => {
+                                  form.setValue("variantDescription", content);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TabsContent>
+                  </Tabs>
+                )}
               </InputFieldset>
               {/* Category - SubCategory - offer*/}
               {!isNewVariantPage && (
@@ -711,34 +740,37 @@ const ProductDetails = ({
               {/* Variant image - Keywords*/}
               <div className="flex items-center gap-10 py-14">
                 {/* Variant image */}
-                <div className="border-r pr-10">
-                  <FormField
-                    control={form.control}
-                    name="variantImage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="ml-14">Variant Image</FormLabel>
-                        <FormControl>
-                          <ImageUpload
-                            dontShowPreview
-                            type="profile"
-                            value={field.value.map((image) => image.url)}
-                            disabled={isLoading}
-                            onChange={(url) => field.onChange([{ url }])}
-                            onRemove={(url) =>
-                              field.onChange([
-                                ...field.value.filter(
-                                  (current) => current.url !== url
-                                ),
-                              ])
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage className="!mt-4" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                {(isNewVariantPage ||
+                  (data?.productId && data?.variantId)) && (
+                  <div className="border-r pr-10">
+                    <FormField
+                      control={form.control}
+                      name="variantImage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="ml-14">Variant Image</FormLabel>
+                          <FormControl>
+                            <ImageUpload
+                              dontShowPreview
+                              type="profile"
+                              value={field.value ? field.value.map((image) => image.url) : []}
+                              disabled={isLoading}
+                              onChange={(url) => field.onChange([{ url }])}
+                              onRemove={(url) =>
+                                field.onChange([
+                                  ...(field.value || []).filter(
+                                    (current) => current.url !== url
+                                  ),
+                                ])
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage className="!mt-4" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
                 {/* Keywords */}
                 <div className="w-full flex-1 space-y-3">
                   <FormField
@@ -814,61 +846,81 @@ const ProductDetails = ({
                     : "Note: The product specifications are the main specs for the product (Will display in every variant page). You can add extra specs specific to this variant using 'Variant Specifications' tab."
                 }
               >
-                <Tabs
-                  defaultValue={
-                    isNewVariantPage ? "variantSpecs" : "productSpecs"
-                  }
-                  className="w-full"
-                >
-                  {!isNewVariantPage && (
-                    <TabsList className="w-full grid grid-cols-2">
-                      <TabsTrigger value="productSpecs">
-                        Product Specifications
-                      </TabsTrigger>
-                      <TabsTrigger value="variantSpecs">
-                        Variant Specifications
-                      </TabsTrigger>
-                    </TabsList>
-                  )}
-                  <TabsContent value="productSpecs">
-                    <div className="w-full flex flex-col gap-y-3">
-                      <ClickToAddInputs
-                        details={productSpecs}
-                        setDetails={setProductSpecs}
-                        initialDetail={{
-                          name: "",
-                          value: "",
-                        }}
-                        containerClassName="flex-1"
-                        inputClassName="w-full"
-                      />
-                      {errors.product_specs && (
-                        <span className="text-sm font-medium text-destructive">
-                          {errors.product_specs.message}
-                        </span>
-                      )}
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="variantSpecs">
-                    <div className="w-full flex flex-col gap-y-3">
-                      <ClickToAddInputs
-                        details={variantSpecs}
-                        setDetails={setVariantSpecs}
-                        initialDetail={{
-                          name: "",
-                          value: "",
-                        }}
-                        containerClassName="flex-1"
-                        inputClassName="w-full"
-                      />
-                      {errors.variant_specs && (
-                        <span className="text-sm font-medium text-destructive">
-                          {errors.variant_specs.message}
-                        </span>
-                      )}
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                {!isNewVariantPage && !data?.productId ? (
+                  <div className="w-full flex flex-col gap-y-3">
+                    <ClickToAddInputs
+                      details={productSpecs}
+                      setDetails={setProductSpecs}
+                      initialDetail={{
+                        name: "",
+                        value: "",
+                      }}
+                      containerClassName="flex-1"
+                      inputClassName="w-full"
+                    />
+                    {errors.product_specs && (
+                      <span className="text-sm font-medium text-destructive">
+                        {errors.product_specs.message}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <Tabs
+                    defaultValue={
+                      isNewVariantPage ? "variantSpecs" : "productSpecs"
+                    }
+                    className="w-full"
+                  >
+                    {!isNewVariantPage && (
+                      <TabsList className="w-full grid grid-cols-2">
+                        <TabsTrigger value="productSpecs">
+                          Product Specifications
+                        </TabsTrigger>
+                        <TabsTrigger value="variantSpecs">
+                          Variant Specifications
+                        </TabsTrigger>
+                      </TabsList>
+                    )}
+                    <TabsContent value="productSpecs">
+                      <div className="w-full flex flex-col gap-y-3">
+                        <ClickToAddInputs
+                          details={productSpecs}
+                          setDetails={setProductSpecs}
+                          initialDetail={{
+                            name: "",
+                            value: "",
+                          }}
+                          containerClassName="flex-1"
+                          inputClassName="w-full"
+                        />
+                        {errors.product_specs && (
+                          <span className="text-sm font-medium text-destructive">
+                            {errors.product_specs.message}
+                          </span>
+                        )}
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="variantSpecs">
+                      <div className="w-full flex flex-col gap-y-3">
+                        <ClickToAddInputs
+                          details={variantSpecs}
+                          setDetails={setVariantSpecs}
+                          initialDetail={{
+                            name: "",
+                            value: "",
+                          }}
+                          containerClassName="flex-1"
+                          inputClassName="w-full"
+                        />
+                        {errors.variant_specs && (
+                          <span className="text-sm font-medium text-destructive">
+                            {errors.variant_specs.message}
+                          </span>
+                        )}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                )}
               </InputFieldset>
               {/* Questions*/}
               {!isNewVariantPage && (
@@ -1074,7 +1126,7 @@ const ProductDetails = ({
                                 <MultiSelect
                                   className="!max-w-[800px]"
                                   options={countryOptions} // Array of options, each with `label` and `value`
-                                  value={field.value} // Pass the array of objects directly
+                                  value={field.value || []} // Pass the array of objects directly
                                   onChange={(selected: CountryOption[]) => {
                                     field.onChange(selected);
                                   }}

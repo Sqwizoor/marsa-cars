@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import AnimatedContainer from "../../animated-container";
 import {
   getSubscriptionPlanByTier,
@@ -135,12 +134,6 @@ export default function Step4({
               >
                 {loading ? "Redirecting to PayFast..." : "Start R10 trial with PayFast"}
               </button>
-              <Link
-                href="/"
-                className="text-xs text-slate-500 hover:text-slate-800"
-              >
-                Skip for now  Ill finish later
-              </Link>
             </div>
           </div>
         </div>

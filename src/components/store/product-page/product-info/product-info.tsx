@@ -70,7 +70,8 @@ const ProductInfo: FC<Props> = ({
       {/* Title */}
       <div>
         <h1 className="text-main-primary inline font-bold leading-5">
-          {name} · {variantName}
+          {name}
+          {variantInfo.length > 1 && variantName !== name && ` · ${variantName}`}
         </h1>
       </div>
       {/* Sku - Rating - Num reviews */}
@@ -159,7 +160,7 @@ const ProductInfo: FC<Props> = ({
             </span>
           </div>
           <div className="mt-4">
-            {variantInfo.length > 0 && (
+            {variantInfo.length > 1 && (
               <ProductVariantSelector
                 variants={variantInfo}
                 slug={productData.variantSlug}

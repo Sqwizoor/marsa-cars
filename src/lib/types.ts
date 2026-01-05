@@ -59,10 +59,10 @@ export type ProductWithVariantType = {
   variantId: string;
   name: string;
   description: string;
-  variantName: string;
+  variantName: string | undefined;
   variantDescription: string | undefined;
   images: { id?: string; url: string }[];
-  variantImage: string;
+  variantImage: string | undefined;
   categoryId: string;
   offerTagId: string;
   subCategoryId: string;
@@ -80,7 +80,7 @@ export type ProductWithVariantType = {
     discount: number;
   }[];
   product_specs: { id?: string; name: string; value: string }[];
-  variant_specs: { id?: string; name: string; value: string }[];
+  variant_specs: { id?: string; name: string; value: string }[] | undefined;
   keywords: string[];
   questions: { id?: string; question: string; answer: string }[];
   freeShippingForAllCountries: boolean;
