@@ -633,6 +633,7 @@ model OrderItem {
   productSlug String
   variantSlug String
   sku         String
+  storeId     String?
   name        String
   image       String
   size        String
