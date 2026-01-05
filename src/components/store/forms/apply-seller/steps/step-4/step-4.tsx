@@ -46,7 +46,7 @@ export default function Step4({
   };
 
   return (
-    <div className="h-full">
+    <div className="w-full">
       <AnimatedContainer>
         <div className="h-full w-full bg-white rounded-2xl p-8 flex items-center justify-center shadow-sm border border-slate-200">
           <div className="max-w-xl w-full space-y-8 text-slate-900">

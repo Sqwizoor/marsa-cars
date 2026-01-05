@@ -48,15 +48,15 @@ export default function ApplySellerMultiForm() {
     returnPolicy: "",
   });
   return (
-    <div className="flex flex-col lg:grid lg:grid-cols-[400px_1fr] h-[calc(100vh-64px)]">
-      <div className="lg:h-full flex-shrink-0">
+    <div className="flex flex-col lg:grid lg:grid-cols-[400px_1fr] min-h-[calc(100vh-64px)]">
+      <div className="flex-shrink-0">
         <Instructions />
       </div>
-      <div className="relative p-3 md:p-5 w-full h-full flex flex-col min-h-0">
+      <div className="relative p-3 md:p-5 w-full flex flex-col">
         <div className="flex-shrink-0 mb-4">
           <ProgressBar step={step} />
         </div>
-        <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="flex-1">
         {/* Steps */}
         {step === 1 ? (
           <Step1

@@ -13,9 +13,9 @@ export default function AnimatedContainer({
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="h-full"
+      className="w-full"
     >
-      <div className="h-full flex flex-col pt-4 overflow-y-auto px-2">
+      <div className="flex flex-col pt-4 px-2">
         {children}
       </div>
     </motion.div>

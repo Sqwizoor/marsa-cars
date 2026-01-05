@@ -9,7 +9,7 @@ export default function Instructions() {
   return (
     <div className={cn(
       "bg-teal-100 border-t-4 border-teal-500 text-teal-900 shadow-md transition-all duration-300",
-      "lg:h-[calc(100vh-64px)] lg:overflow-y-auto"
+      "lg:sticky lg:top-0 lg:h-[calc(100vh-64px)] lg:overflow-y-auto"
     )}>
       {/* Mobile Toggle Header */}
       <div 

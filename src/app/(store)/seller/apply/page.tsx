@@ -3,7 +3,7 @@ import MinimalHeader from "@/components/store/layout/minimal-header/header";
 
 export default function SellerApplyPage() {
   return (
-    <div className="bg-[#eef4fc] h-screen overflow-y-hidden">
+    <div className="bg-[#eef4fc] min-h-screen">
       <MinimalHeader />
       <ApplySellerMultiForm />
     </div>

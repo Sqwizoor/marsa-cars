@@ -85,7 +85,7 @@ export default function Step2({
   }
 
   return (
-    <div className="h-full">
+    <div className="w-full">
       <AnimatedContainer>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)}>

@@ -130,8 +130,8 @@ export default function Step1({
             </div>
           </div>
         ) : (
-          <div className="h-full">
-            <div className="h-full flex flex-col justify-center space-y-4">
+          <div className="w-full py-12">
+            <div className="flex flex-col justify-center space-y-4">
               <div className="w-full bg-blue-100 border border-blue-200 text-sm text-blue-800 rounded-lg ">
                 <div className="flex p-4">
                   Please sign in (Or sign up if you are new) to start

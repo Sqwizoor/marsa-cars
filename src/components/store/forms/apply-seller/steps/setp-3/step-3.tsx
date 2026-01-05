@@ -109,7 +109,7 @@ export default function Step3({
   }
 
   return (
-    <div className="h-full">
+    <div className="w-full">
       <AnimatedContainer>
         <div className="pl-1 text-gray-600 mt-2 mb-4">
           <p className="font-medium">Fill out your store&apos;s default shipping details (this is optional).</p>
