@@ -42,7 +42,7 @@ const ProductVariantSelector: FC<Props> = ({
             )}
           >
             <Image
-              src={variant.variantImage}
+              src={variant.variantImage || "/placeholder.png"}
               alt={`product variant ${variant.variantUrl}`}
               width={48}
               height={48}
