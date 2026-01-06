@@ -427,7 +427,7 @@ const ProductDetails = ({
                 {/* Colors */}
                 <div className="w-full flex flex-col gap-y-3 xl:pl-5">
                   <ClickToAddInputs
-                    details={data?.colors || colors}
+                    details={colors}
                     setDetails={setColors}
                     initialDetail={{ color: "" }}
                     header="Colors"

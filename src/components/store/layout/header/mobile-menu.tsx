@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import Logo from "@/components/shared/logo";
 
-export default function MobileMenu() {
+export default function MobileMenu({ role }: { role?: string }) {
   const { user, isLoaded } = useUser();
   const [open, setOpen] = useState(false);
 
@@ -70,16 +70,45 @@ export default function MobileMenu() {
 
             {/* Seller CTA */}
             <div className="px-2 py-2">
-                <Link 
-                    href="/subscriptions" 
-                    onClick={() => setOpen(false)}
-                    className="group relative flex items-center justify-center gap-2 w-full p-3 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
-                >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
-                    <Store className="w-5 h-5 fill-white/20" />
-                    <span className="font-bold tracking-wide">Become A Seller</span>
-                    <Sparkles className="w-4 h-4 text-yellow-300" />
-                </Link>
+                {role === "SELLER" ? (
+                    <Link
+                        href="/dashboard/seller"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center justify-center gap-2 w-full p-3 rounded-xl bg-pink-500 hover:bg-pink-600 text-white shadow-md transition-all duration-300"
+                    >
+                        <Store className="w-5 h-5" />
+                        <span className="font-bold tracking-wide">Switch to Seller Dashboard</span>
+                    </Link>
+                ) : role === "ADVERTISER" ? (
+                    <Link
+                        href="/dashboard/advertiser"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center justify-center gap-2 w-full p-3 rounded-xl bg-gradient-to-r from-orange-400 to-orange-600 text-white shadow-md transition-all duration-300"
+                    >
+                        <Store className="w-5 h-5" />
+                        <span className="font-bold tracking-wide">Advertiser Dashboard</span>
+                    </Link>
+                ) : role === "ADMIN" ? (
+                    <Link
+                        href="/dashboard/admin"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center justify-center gap-2 w-full p-3 rounded-xl bg-pink-500 hover:bg-pink-600 text-white shadow-md transition-all duration-300"
+                    >
+                        <Store className="w-5 h-5" />
+                        <span className="font-bold tracking-wide">Admin Dashboard</span>
+                    </Link>
+                ) : (
+                    <Link 
+                        href="/subscriptions" 
+                        onClick={() => setOpen(false)}
+                        className="group relative flex items-center justify-center gap-2 w-full p-3 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+                        <Store className="w-5 h-5 fill-white/20" />
+                        <span className="font-bold tracking-wide">Become A Seller</span>
+                        <Sparkles className="w-4 h-4 text-yellow-300" />
+                    </Link>
+                )}
             </div>
 
             {/* Main Navigation */}

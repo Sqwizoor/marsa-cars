@@ -10,11 +10,41 @@ import { getAllOfferTags } from "@/queries/offer-tag";
 import OfferTagsWrapper from "./offer-tags-wrapper";
 import { MessageSquare } from "lucide-react";
 import MobileMenu from "./mobile-menu";
+import { currentUser } from "@clerk/nextjs/server";
+import { db } from "@/lib/db";
 
 export default async function Header() {
   // Get cookies from the store
   const cookieStore = cookies();
   const userCountryCookie = (await cookieStore).get("userCountry");
+
+  // Get current user and role
+  const user = await currentUser();
+  let role = user?.privateMetadata.role as string | undefined;
+
+  if (user) {
+    const dbUser = await db.user.findUnique({
+      where: { id: user.id },
+      select: {
+        role: true,
+        stores: { take: 1 },
+        ads: { take: 1 },
+      },
+    });
+
+    if (dbUser) {
+      role = dbUser.role;
+      if (role === "USER") {
+        if (user.privateMetadata.role === "ADMIN") {
+          role = "ADMIN";
+        } else if (dbUser.stores.length > 0) {
+          role = "SELLER";
+        } else if (dbUser.ads.length > 0) {
+          role = "ADVERTISER";
+        }
+      }
+    }
+  }
 
   // Set default country if cookie is missing
   let userCountry: Country = {
@@ -47,7 +77,7 @@ export default async function Header() {
             <div className="flex items-center gap-1 lg:hidden pr-3 sm:pr-4">
               <UserMenu />
               <Cart />
-              <MobileMenu />
+              <MobileMenu role={role} />
             </div>
           </div>
 

@@ -34,14 +34,7 @@ export default async function SellerProductsPage({
           Create product
         </>
       }
-      modalChildren={
-        <ProductDetails
-          categories={plainCategories}
-          offerTags={plainOfferTags}
-          storeUrl={storeUrl}
-          countries={[]}
-        />
-      }
+      modalChildren={null}
       newTabLink={`/dashboard/seller/stores/${storeUrl}/products/new`}
       filterValue="name"
       data={plainProducts}

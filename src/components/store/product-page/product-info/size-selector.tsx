@@ -33,6 +33,14 @@ const SizeSelector: FC<Props> = ({ sizeId, sizes, handleChange }) => {
   );
 
   useEffect(() => {
+    if (sizes.length > 0 && !sizeId) {
+      const defaultSize = sizes[0];
+      params.set("size", defaultSize.id);
+      replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  }, [sizes, sizeId, pathname, replace, params]);
+
+  useEffect(() => {
     if (!sizeId) {
       return;
     }
