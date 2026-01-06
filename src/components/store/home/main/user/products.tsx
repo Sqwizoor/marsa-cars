@@ -14,6 +14,7 @@ export default function UserCardProducts({
         type="mini"
         slidesPerView={3}
         spaceBetween={10}
+        autoplay={true}
       />
     </div>
   );

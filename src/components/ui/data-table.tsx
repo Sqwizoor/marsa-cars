@@ -111,7 +111,13 @@ export default function DataTable<TData, TValue>({
           {newTabLink && (
             <Link href={newTabLink}>
               <Button className="bg-primary hover:bg-primary/90">
-                <FilePlus2 className="me-1" /> Create in new page
+                {!modalChildren && actionButtonText ? (
+                  actionButtonText
+                ) : (
+                  <>
+                    <FilePlus2 className="me-1" /> Create in new page
+                  </>
+                )}
               </Button>
             </Link>
           )}

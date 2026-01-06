@@ -49,21 +49,25 @@ const MainSwiper: FC<Props> = ({
     <div className="p-2 md:p-3 rounded-md cursor-pointer relative group">
       <div>{children}</div>
       
-      {/* Custom Navigation Buttons */}
-      <button 
-        ref={prevRef} 
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 disabled:opacity-0 hover:bg-white hover:scale-110 text-gray-800 border border-gray-100"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="w-5 h-5" />
-      </button>
-      <button 
-        ref={nextRef} 
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 disabled:opacity-0 hover:bg-white hover:scale-110 text-gray-800 border border-gray-100"
-        aria-label="Next slide"
-      >
-        <ChevronRight className="w-5 h-5" />
-      </button>
+      {/* Custom Navigation Buttons - Only show for non-mini types or if needed */}
+      {type !== "mini" && (
+        <>
+          <button 
+            ref={prevRef} 
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 disabled:opacity-0 hover:bg-white hover:scale-110 text-gray-800 border border-gray-100"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button 
+            ref={nextRef} 
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 disabled:opacity-0 hover:bg-white hover:scale-110 text-gray-800 border border-gray-100"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </>
+      )}
 
       <Swiper
         modules={[Navigation, Pagination, Scrollbar, Autoplay]}

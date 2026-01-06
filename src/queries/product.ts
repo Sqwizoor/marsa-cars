@@ -280,12 +280,24 @@ export const getProductVariant = async (
     include: {
       category: true,
       subCategory: true,
+      questions: true,
+      specs: true,
+      freeShipping: {
+        include: {
+          eligibaleCountries: {
+            include: {
+              country: true,
+            },
+          },
+        },
+      },
       variants: {
         where: {
           id: variantId,
         },
         include: {
           images: true,
+          specs: true,
           colors: {
             select: {
               name: true,
@@ -312,14 +324,28 @@ export const getProductVariant = async (
     variantName: product.variants[0].variantName,
     variantDescription: product.variants[0].variantDescription,
     images: product.variants[0].images,
+    variantImage: product.variants[0].variantImage,
     categoryId: product.categoryId,
     subCategoryId: product.subCategoryId,
+    offerTagId: product.offerTagId,
     isSale: product.variants[0].isSale,
+    saleEndDate: product.variants[0].saleEndDate?.toISOString().split(".")[0],
     brand: product.brand,
     sku: product.variants[0].sku,
+    weight: product.variants[0].weight,
     colors: product.variants[0].colors,
     sizes: product.variants[0].sizes,
     keywords: product.variants[0].keywords.split(","),
+    questions: product.questions,
+    product_specs: product.specs,
+    variant_specs: product.variants[0].specs,
+    freeShippingForAllCountries: product.freeShippingForAllCountries,
+    freeShippingCountriesIds: product.freeShipping?.eligibaleCountries.map(
+      (c) => ({
+        label: c.country.name,
+        value: c.country.id,
+      })
+    ),
   };
 };
 

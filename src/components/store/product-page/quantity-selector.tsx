@@ -29,8 +29,25 @@ const QuantitySelector = ({
   // useEffect hook to handle changes when sizeId updates
   useEffect(() => {
     if (!sizeId) return;
-    handleChange("quantity", 1);
-  }, [sizeId, handleChange]);
+    // Don't reset quantity if it's already set correctly or if we want to persist it
+    // But typically when size changes we reset to 1.
+    // However, the issue might be that this runs too often or conflicts with other state updates.
+    // Let's ensure we only reset if necessary, or verify this isn't locking the state.
+    
+    // For now, keep it simple: only reset if quantity is invalid for new size
+    // But the requirement says "Selector quantity can't increase".
+    // This usually means maxQty is 0 or 1.
+    
+    // If maxQty is > 0 and we can't increase, check the handleIncrease logic.
+    // handleIncrease checks: if (quantity < maxQty)
+    
+    // If we just loaded the page and size is auto-selected, maxQty should be correct.
+    
+    // Ensure we start with at least 1 if possible
+    if (quantity < 1 && stock > 0) {
+         handleChange("quantity", 1);
+    }
+  }, [sizeId, handleChange, stock, quantity]);
 
   const maxQty = useMemo(() => {
     if (!sizeId) return 0;
@@ -44,7 +61,11 @@ const QuantitySelector = ({
       return stock;
     }
 
-    const remaining = search_product.stock - search_product.quantity;
+    // const remaining = search_product.stock - search_product.quantity;
+    // return Math.max(remaining, 0);
+    // Use the stock passed from parent (which comes from current selection)
+    // minus what is already in cart
+    const remaining = stock - (search_product.quantity || 0);
     return Math.max(remaining, 0);
   }, [cart, productId, variantId, sizeId, stock]);
 

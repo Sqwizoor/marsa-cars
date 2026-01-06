@@ -39,12 +39,15 @@ export default function AnimatedDeals() {
             <Link href="/browse" className="group">
               <div className="bg-pink-500 rounded-xl p-3 w-32 h-24 flex items-center justify-center relative overflow-hidden transition-transform hover:-translate-y-1 duration-300">
                 <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <Image 
-                  src={TopSellerImg} 
-                  alt="Top Seller" 
-                  className="object-contain w-full h-full drop-shadow-md group-hover:scale-110 transition-transform duration-500" 
-                />
-                <div className="absolute bottom-1 left-0 right-0 text-center">
+                <div className="relative w-full h-full">
+                  <Image 
+                    src={TopSellerImg} 
+                    alt="Top Seller" 
+                    fill
+                    className="object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-500" 
+                  />
+                </div>
+                <div className="absolute bottom-1 left-0 right-0 text-center z-10">
                    <span className="text-[9px] font-bold text-white/90 uppercase tracking-wider bg-black/20 px-2 py-0.5 rounded-full backdrop-blur-sm">Top Seller</span>
                 </div>
               </div>
@@ -52,12 +55,15 @@ export default function AnimatedDeals() {
             <Link href="/browse" className="group">
               <div className="bg-pink-500 rounded-xl p-3 w-32 h-24 flex items-center justify-center relative overflow-hidden transition-transform hover:-translate-y-1 duration-300">
                 <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <Image 
-                  src={TopRatedImg} 
-                  alt="Top Rated" 
-                  className="object-contain w-full h-full drop-shadow-md group-hover:scale-110 transition-transform duration-500" 
-                />
-                <div className="absolute bottom-1 left-0 right-0 text-center">
+                <div className="relative w-full h-full">
+                  <Image 
+                    src={TopRatedImg} 
+                    alt="Top Rated" 
+                    fill
+                    className="object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-500" 
+                  />
+                </div>
+                <div className="absolute bottom-1 left-0 right-0 text-center z-10">
                    <span className="text-[9px] font-bold text-white/90 uppercase tracking-wider bg-black/20 px-2 py-0.5 rounded-full backdrop-blur-sm">Top Rated</span>
                 </div>
               </div>
