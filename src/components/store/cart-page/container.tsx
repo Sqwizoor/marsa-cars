@@ -68,8 +68,8 @@ export default function CartContainer({
         <>
           {loading ? (
             <div className="bg-[#f5f5f5] min-h-[calc(100vh-65px)]">
-              <div className="max-w-[1200px] mx-auto py-6 flex">
-                <div className="min-w-0 flex-1">
+              <div className="max-w-[1200px] mx-auto py-6 flex flex-col lg:flex-row px-2 gap-5">
+                <div className="min-w-0 flex-1 order-1">
                   <div className="mb-3">
                     <Skeleton className="h-6 w-48" />
                   </div>
@@ -82,7 +82,7 @@ export default function CartContainer({
                     <Skeleton className="h-32 w-full" />
                   </div>
                 </div>
-                <div className="sticky top-4 ml-5 w-[380px] max-h-max">
+                <div className="w-full lg:w-[380px] max-h-max order-2 lg:sticky lg:top-4">
                   <div className="p-4 bg-white space-y-3">
                     <Skeleton className="h-6 w-32" />
                     <Skeleton className="h-4 w-full" />
@@ -95,8 +95,8 @@ export default function CartContainer({
             </div>
           ) : (
             <div className="bg-[#f5f5f5] min-h-[calc(100vh-65px)]">
-              <div className="max-w-[1200px] mx-auto py-6 flex">
-                <div className="min-w-0 flex-1">
+              <div className="max-w-[1200px] mx-auto py-6 flex flex-col lg:flex-row px-2 gap-5">
+                <div className="min-w-0 flex-1 order-1">
                   {/* Cart header */}
                   <CartHeader
                     cartItems={cartItems}
@@ -121,7 +121,7 @@ export default function CartContainer({
                   </div>
                 </div>
                 {/* Cart side */}
-                <div className="sticky top-4 ml-5 w-[380px] max-h-max">
+                <div className="w-full lg:w-[380px] max-h-max order-2 lg:sticky lg:top-4">
                   {/* Cart summary */}
                   <CartSummary
                     cartItems={cartItems}
