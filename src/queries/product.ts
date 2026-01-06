@@ -329,7 +329,9 @@ export const getProductVariant = async (
     subCategoryId: product.subCategoryId,
     offerTagId: product.offerTagId,
     isSale: product.variants[0].isSale,
-    saleEndDate: product.variants[0].saleEndDate?.toISOString().split(".")[0],
+    saleEndDate: product.variants[0].saleEndDate
+      ? new Date(product.variants[0].saleEndDate).toISOString().split(".")[0]
+      : undefined,
     brand: product.brand,
     sku: product.variants[0].sku,
     weight: product.variants[0].weight,
