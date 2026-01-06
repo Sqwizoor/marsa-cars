@@ -209,7 +209,7 @@ const handleProductCreate = async (
 
 const handleCreateVariant = async (product: ProductWithVariantType) => {
   const variantSlug = await generateUniqueSlug(
-    slugify(product.variantName, {
+    slugify(product.variantName || product.name, {
       replacement: "-",
       lower: true,
       trim: true,
@@ -248,7 +248,7 @@ const handleCreateVariant = async (product: ProductWithVariantType) => {
       })),
     },
     specs: {
-      create: product.variant_specs.map((spec) => ({
+      create: product.variant_specs?.map((spec) => ({
         name: spec.name,
         value: spec.value,
       })),
