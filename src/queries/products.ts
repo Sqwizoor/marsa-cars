@@ -143,7 +143,7 @@ const handleProductCreate = async (
           variantName: product.variantName,
           variantDescription: product.variantDescription,
           slug: variantSlug,
-          variantImage: product.variantImage || product.images[0].url,
+          variantImage: product.variantImage,
           sku: product.sku,
           weight: product.weight,
           keywords: product.keywords.join(","),
@@ -223,7 +223,7 @@ const handleCreateVariant = async (product: ProductWithVariantType) => {
     sku: product.sku,
     keywords: product.keywords.join(","),
     weight: product.weight,
-    variantImage: product.variantImage || product.images[0].url,
+    variantImage: product.variantImage,
     images: {
       create: product.images.map((img) => ({
         url: img.url,
