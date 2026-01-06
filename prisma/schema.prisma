@@ -206,7 +206,7 @@ model ProductVariant {
   weight             Float
 
   productId String
-  product   Product @relation("ProductToProductVariant", fields: [productId], references: [id])
+  product   Product @relation("ProductToProductVariant", fields: [productId], references: [id], onDelete: Cascade)
 
   sizes    Size[]                @relation("ProductVariantSizes")
   images   ProductVariantImage[] @relation("ProductVariantToVariantImage")

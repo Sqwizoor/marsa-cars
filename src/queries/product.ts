@@ -428,6 +428,42 @@ export const deleteProduct = async (productId: string) => {
   if (!productId) throw new Error("Please provide product id.");
 
   // Delete product from the database
+  // First, delete related records that might cause constraint violations if cascade delete isn't set up correctly in the database schema,
+  // although Prisma schema suggests cascade delete for most relations.
+  // The error P2003 `ProductVariant_productId_fkey` suggests that ProductVariants are not being deleted when the Product is deleted.
+  // We should manually delete variants first or ensure cascade delete is working.
+  // Since the schema has `onDelete: Cascade` for `variants ProductVariant[]`, Prisma should handle it.
+  // However, sometimes circular dependencies or other constraints can cause issues.
+  // Let's try deleting variants explicitly first.
+
+  const variants = await db.productVariant.findMany({
+    where: { productId },
+    select: { id: true },
+  });
+
+  const variantIds = variants.map((v) => v.id);
+
+  // Delete related data for variants (images, sizes, colors, specs) - although these should also cascade from variant
+  // But to be safe and debug the issue:
+  await db.productVariantImage.deleteMany({
+    where: { productVariantId: { in: variantIds } },
+  });
+  await db.size.deleteMany({
+    where: { productVariantId: { in: variantIds } },
+  });
+  await db.color.deleteMany({
+    where: { productVariantId: { in: variantIds } },
+  });
+  await db.spec.deleteMany({
+    where: { variantId: { in: variantIds } },
+  });
+
+  // Now delete variants
+  await db.productVariant.deleteMany({
+    where: { productId },
+  });
+
+  // Now delete the product
   const response = await db.product.delete({ where: { id: productId } });
   return response;
 };
