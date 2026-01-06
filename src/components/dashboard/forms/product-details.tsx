@@ -173,7 +173,7 @@ const ProductDetails = ({
       // Setting default form values from data (if available)
       name: data?.name,
       description: data?.description,
-      variantName: data?.variantName,
+      variantName: data?.variantName ?? undefined,
       variantDescription: data?.variantDescription,
       images: data?.images || [],
       variantImage: data?.variantImage ? [{ url: data.variantImage }] : [],
