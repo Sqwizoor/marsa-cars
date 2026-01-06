@@ -49,7 +49,7 @@ export default async function HomePage() {
                 className="cursor-pointer hidden min-[1465px]:block bg-cover bg-center bg-no-repeat rounded-md h-[400px] sm:h-[500px] min-[1465px]:h-auto w-full"
                 style={{
                   backgroundImage:
-                    "url(/assets/images/ads/new-side.png)",
+                    "url(/assets/images/sideline/new-side.png)",
                 }}
               />
               {/* Middle */}
