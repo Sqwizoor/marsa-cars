@@ -111,7 +111,7 @@ const handleProductCreate = async (
   );
 
   const variantSlug = await generateUniqueSlug(
-    slugify(product.variantName, {
+    slugify(product.variantName || product.name, {
       replacement: "-",
       lower: true,
       trim: true,
