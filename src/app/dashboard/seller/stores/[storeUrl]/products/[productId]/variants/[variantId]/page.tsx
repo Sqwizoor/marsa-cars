@@ -36,6 +36,7 @@ export default async function ProductVariantPage({
         data={{
           ...productDetails,
           variantDescription: productDetails.variantDescription ?? undefined,
+          offerTagId: productDetails.offerTagId ?? undefined,
           colors: productDetails.colors.map((c) => ({ color: c.name })),
         }}
       />
