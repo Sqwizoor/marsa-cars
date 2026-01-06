@@ -62,7 +62,7 @@ export const columns: ColumnDef<StoreProductType>[] = [
                 <div className="relative group flex-shrink-0">
                   <Image
                     src={variant.images?.[0]?.url || "/placeholder.png"}
-                    alt={variant.variantName}
+                    alt={variant.variantName || ""}
                     width={60}
                     height={60}
                     className="w-12 h-12 rounded object-cover shadow-sm"
