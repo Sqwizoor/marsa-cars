@@ -96,7 +96,7 @@ export default function ReviewDetails({
   const variants = variantsInfo.map((variant) => ({
     name: variant.variantName || "Standard",
     value: variant.variantName || "Standard",
-    image: variant.variantImage,
+    image: variant.variantImage || undefined,
     colors: variant.colors
       .map((color) => color?.name)
       .filter((name): name is string => Boolean(name))
