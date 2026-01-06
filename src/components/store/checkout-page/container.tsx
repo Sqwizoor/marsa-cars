@@ -52,8 +52,8 @@ const CheckoutContainer: FC<Props> = ({
     }
   }, [activeCountry, cartItems]);
   return (
-    <div className="flex">
-      <div className="flex-1 my-3">
+    <div className="flex flex-col lg:flex-row">
+      <div className="flex-1 my-3 order-1">
         <UserShippingAddresses
           addresses={addresses}
           countries={countries}
@@ -77,11 +77,13 @@ const CheckoutContainer: FC<Props> = ({
           </div>
         </div>
       </div>
-      <PlaceOrderCard
-        cartData={cartData}
-        setCartData={setCartData}
-        shippingAddress={selectedAddress}
-      />
+      <div className="order-2 lg:order-2">
+        <PlaceOrderCard
+          cartData={cartData}
+          setCartData={setCartData}
+          shippingAddress={selectedAddress}
+        />
+      </div>
     </div>
   );
 };

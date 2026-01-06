@@ -15,6 +15,11 @@ export default function UserCardProducts({
         slidesPerView={3}
         spaceBetween={10}
         autoplay={true}
+        breakpoints={{
+          0: {
+            slidesPerView: 3,
+          },
+        }}
       />
     </div>
   );

@@ -843,92 +843,94 @@ const ProductDetails = ({
                 </div>
               </InputFieldset>
               {/* Product and variant specs*/}
-              <InputFieldset
-                label="Specifications"
-                description={
-                  isNewVariantPage
-                    ? ""
-                    : "Note: The product specifications are the main specs for the product (Will display in every variant page). You can add extra specs specific to this variant using 'Variant Specifications' tab."
-                }
-              >
-                {!isNewVariantPage && (!data?.productId || isEditPage) ? (
-                  <div className="w-full flex flex-col gap-y-3">
-                    <ClickToAddInputs
-                      details={productSpecs}
-                      setDetails={setProductSpecs}
-                      initialDetail={{
-                        name: "",
-                        value: "",
-                      }}
-                      containerClassName="flex-1"
-                      inputClassName="w-full"
-                    />
-                    {errors.product_specs && (
-                      <span className="text-sm font-medium text-destructive">
-                        {errors.product_specs.message}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <Tabs
-                    defaultValue={
-                      isNewVariantPage ? "variantSpecs" : "productSpecs"
-                    }
-                    className="w-full"
-                  >
-                    {!isNewVariantPage && (
-                      <TabsList className="w-full grid grid-cols-2">
-                        <TabsTrigger value="productSpecs">
-                          Product Specifications
-                        </TabsTrigger>
-                        <TabsTrigger value="variantSpecs">
-                          Variant Specifications
-                        </TabsTrigger>
-                      </TabsList>
-                    )}
-                    <TabsContent value="productSpecs">
-                      <div className="w-full flex flex-col gap-y-3">
-                        <ClickToAddInputs
-                          details={productSpecs}
-                          setDetails={setProductSpecs}
-                          initialDetail={{
-                            name: "",
-                            value: "",
-                          }}
-                          containerClassName="flex-1"
-                          inputClassName="w-full"
-                        />
-                        {errors.product_specs && (
-                          <span className="text-sm font-medium text-destructive">
-                            {errors.product_specs.message}
-                          </span>
-                        )}
-                      </div>
-                    </TabsContent>
-                    <TabsContent value="variantSpecs">
-                      <div className="w-full flex flex-col gap-y-3">
-                        <ClickToAddInputs
-                          details={variantSpecs}
-                          setDetails={setVariantSpecs}
-                          initialDetail={{
-                            name: "",
-                            value: "",
-                          }}
-                          containerClassName="flex-1"
-                          inputClassName="w-full"
-                        />
-                        {errors.variant_specs && (
-                          <span className="text-sm font-medium text-destructive">
-                            {errors.variant_specs.message}
-                          </span>
-                        )}
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-                )}
-              </InputFieldset>
+              {!isEditPage && (
+                <InputFieldset
+                  label="Specifications"
+                  description={
+                    isNewVariantPage
+                      ? ""
+                      : "Note: The product specifications are the main specs for the product (Will display in every variant page). You can add extra specs specific to this variant using 'Variant Specifications' tab."
+                  }
+                >
+                  {!isNewVariantPage && !data?.productId ? (
+                    <div className="w-full flex flex-col gap-y-3">
+                      <ClickToAddInputs
+                        details={productSpecs}
+                        setDetails={setProductSpecs}
+                        initialDetail={{
+                          name: "",
+                          value: "",
+                        }}
+                        containerClassName="flex-1"
+                        inputClassName="w-full"
+                      />
+                      {errors.product_specs && (
+                        <span className="text-sm font-medium text-destructive">
+                          {errors.product_specs.message}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <Tabs
+                      defaultValue={
+                        isNewVariantPage ? "variantSpecs" : "productSpecs"
+                      }
+                      className="w-full"
+                    >
+                      {!isNewVariantPage && (
+                        <TabsList className="w-full grid grid-cols-2">
+                          <TabsTrigger value="productSpecs">
+                            Product Specifications
+                          </TabsTrigger>
+                          <TabsTrigger value="variantSpecs">
+                            Variant Specifications
+                          </TabsTrigger>
+                        </TabsList>
+                      )}
+                      <TabsContent value="productSpecs">
+                        <div className="w-full flex flex-col gap-y-3">
+                          <ClickToAddInputs
+                            details={productSpecs}
+                            setDetails={setProductSpecs}
+                            initialDetail={{
+                              name: "",
+                              value: "",
+                            }}
+                            containerClassName="flex-1"
+                            inputClassName="w-full"
+                          />
+                          {errors.product_specs && (
+                            <span className="text-sm font-medium text-destructive">
+                              {errors.product_specs.message}
+                            </span>
+                          )}
+                        </div>
+                      </TabsContent>
+                      <TabsContent value="variantSpecs">
+                        <div className="w-full flex flex-col gap-y-3">
+                          <ClickToAddInputs
+                            details={variantSpecs}
+                            setDetails={setVariantSpecs}
+                            initialDetail={{
+                              name: "",
+                              value: "",
+                            }}
+                            containerClassName="flex-1"
+                            inputClassName="w-full"
+                          />
+                          {errors.variant_specs && (
+                            <span className="text-sm font-medium text-destructive">
+                              {errors.variant_specs.message}
+                            </span>
+                          )}
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  )}
+                </InputFieldset>
+              )}
               {/* Questions*/}
-              {!isNewVariantPage && (
+              {!isNewVariantPage && !isEditPage && (
                 <InputFieldset label="Questions & Answers">
                   <div className="w-full flex flex-col gap-y-3">
                     <ClickToAddInputs
