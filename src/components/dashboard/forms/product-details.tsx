@@ -463,7 +463,7 @@ const ProductDetails = ({
                       )}
                     />
                   )}
-                  {(isNewVariantPage || (data?.productId && data?.variantId)) && (
+                  {isNewVariantPage && (
                     <FormField
                       disabled={isLoading}
                       control={form.control}
@@ -493,7 +493,7 @@ const ProductDetails = ({
                     : "Note: The product description is the main description for the product (Will display in every variant page). You can add an extra description specific to this variant using 'Variant description' tab."
                 }
               >
-                {!isNewVariantPage && !data?.productId ? (
+                {!isNewVariantPage && (!data?.productId || isEditPage) ? (
                   <FormField
                     disabled={isLoading}
                     control={form.control}
@@ -746,8 +746,7 @@ const ProductDetails = ({
               {/* Variant image - Keywords*/}
               <div className="flex items-center gap-10 py-14">
                 {/* Variant image */}
-                {(isNewVariantPage ||
-                  (data?.productId && data?.variantId)) && (
+                {isNewVariantPage && (
                   <div className="border-r pr-10">
                     <FormField
                       control={form.control}
@@ -852,7 +851,7 @@ const ProductDetails = ({
                     : "Note: The product specifications are the main specs for the product (Will display in every variant page). You can add extra specs specific to this variant using 'Variant Specifications' tab."
                 }
               >
-                {!isNewVariantPage && !data?.productId ? (
+                {!isNewVariantPage && (!data?.productId || isEditPage) ? (
                   <div className="w-full flex flex-col gap-y-3">
                     <ClickToAddInputs
                       details={productSpecs}
