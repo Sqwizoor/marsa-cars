@@ -169,7 +169,6 @@ export const ProductFormSchema = z.object({
   variantImage: z
     .object({ url: z.string() })
     .array()
-    .length(1, "Choose a product variant image.")
     .optional(),
   categoryId: z
     .string({
@@ -271,14 +270,6 @@ export const ProductFormSchema = z.object({
       value: z.string(),
     })
     .array()
-    .min(1, "Please provide at least one product variant spec.")
-    .refine(
-      (product_specs) =>
-        product_specs.every((s) => s.name.length > 0 && s.value.length > 0),
-      {
-        message: "All product variant specs inputs must be filled correctly.",
-      }
-    )
     .optional(),
   questions: z
     .object({
