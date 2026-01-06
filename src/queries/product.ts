@@ -173,7 +173,7 @@ const handleProductCreate = async (
             })),
           },
           specs: {
-            create: product.variant_specs.map((spec) => ({
+            create: product.variant_specs?.map((spec) => ({
               name: spec.name,
               value: spec.value,
             })),
