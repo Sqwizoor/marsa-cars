@@ -169,9 +169,9 @@ export type CartProductType = {
   productSlug: string;
   variantSlug: string;
   name: string;
-  variantName: string;
+  variantName: string | null;
   image: string;
-  variantImage: string;
+  variantImage: string | null;
   sizeId: string;
   size: string;
   quantity: number;
@@ -337,7 +337,7 @@ export type ProductSimpleVariantType = {
   variantId: string;
   variantSlug: string;
   variantName: string | null;
-  variantImage: string;
+  variantImage: string | null;
   images: ProductVariantImage[];
   sizes: Size[];
 };
@@ -352,7 +352,7 @@ export type ProductWithVariants = {
   variants: {
     id: string;
     variantName: string | null;
-    variantImage: string;
+    variantImage: string | null;
     slug: string;
     sizes: Size[];
     images: ProductVariantImage[];
@@ -386,7 +386,7 @@ export type ReviewDetailsType = {
 export type VariantInfoType = {
   variantName: string | null;
   variantSlug: string;
-  variantImage: string;
+  variantImage: string | null;
   variantUrl: string;
   images: ProductVariantImage[];
   sizes: Size[];
