@@ -94,8 +94,8 @@ export default function ReviewDetails({
   };
 
   const variants = variantsInfo.map((variant) => ({
-    name: variant.variantName,
-    value: variant.variantName,
+    name: variant.variantName || "Standard",
+    value: variant.variantName || "Standard",
     image: variant.variantImage,
     colors: variant.colors
       .map((color) => color?.name)
@@ -133,7 +133,7 @@ export default function ReviewDetails({
 
   useEffect(() => {
     if (!variantName && variantsInfo.length > 0) {
-      form.setValue("variantName", variantsInfo[0].variantName);
+      form.setValue("variantName", variantsInfo[0].variantName || "");
     }
   }, [form, variantName, variantsInfo]);
 
