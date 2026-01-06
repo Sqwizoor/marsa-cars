@@ -59,10 +59,10 @@ export type ProductWithVariantType = {
   variantId: string;
   name: string;
   description: string;
-  variantName: string | undefined;
+  variantName: string | undefined | null;
   variantDescription: string | undefined;
   images: { id?: string; url: string }[];
-  variantImage: string | undefined;
+  variantImage: string | undefined | null;
   categoryId: string;
   offerTagId: string;
   subCategoryId: string;
