@@ -237,6 +237,7 @@ const ProductDetails = ({
     if (data) {
       form.reset({
         ...data,
+        variantName: data.variantName ?? undefined,
         variantImage: data.variantImage ? [{ url: data.variantImage }] : [],
       });
     }
