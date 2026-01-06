@@ -46,7 +46,7 @@ export type InventoryItem = {
   productId: string;
   variantId: string;
   productName: string;
-  variantName: string;
+  variantName: string | null;
   sku: string;
   size: string;
   price: number;
