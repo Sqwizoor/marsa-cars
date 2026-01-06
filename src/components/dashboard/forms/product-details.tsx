@@ -119,6 +119,7 @@ const ProductDetails = ({
 
   // Is new variant page
   const isNewVariantPage = data?.productId && !data?.variantId;
+  const isEditPage = data?.productId && data?.variantId;
 
   // Jodit editor refs
   const productDescEditor = useRef(null);
@@ -383,9 +384,11 @@ const ProductDetails = ({
                   control={form.control}
                   name="images"
                   render={({ field }) => (
-                    <FormItem className="w-full xl:border-r">
+                    <FormItem
+                      className={`w-full ${!isEditPage ? "xl:border-r" : ""}`}
+                    >
                       <FormControl>
-                      <div>
+                        <div>
                           <ImagesPreviewGrid
                             images={form.getValues().images}
                             onRemove={(url) => {
@@ -425,20 +428,22 @@ const ProductDetails = ({
                   )}
                 />
                 {/* Colors */}
-                <div className="w-full flex flex-col gap-y-3 xl:pl-5">
-                  <ClickToAddInputs
-                    details={colors}
-                    setDetails={setColors}
-                    initialDetail={{ color: "" }}
-                    header="Colors"
-                    colorPicker
-                  />
-                  {errors.colors && (
-                    <span className="text-sm font-medium text-destructive">
-                      {errors.colors.message}
-                    </span>
-                  )}
-                </div>
+                {!isEditPage && (
+                  <div className="w-full flex flex-col gap-y-3 xl:pl-5">
+                    <ClickToAddInputs
+                      details={colors}
+                      setDetails={setColors}
+                      initialDetail={{ color: "" }}
+                      header="Colors"
+                      colorPicker
+                    />
+                    {errors.colors && (
+                      <span className="text-sm font-medium text-destructive">
+                        {errors.colors.message}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
               {/* Name */}
               <InputFieldset label="Name">
