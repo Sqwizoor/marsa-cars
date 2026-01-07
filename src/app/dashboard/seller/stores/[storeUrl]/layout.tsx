@@ -1,46 +1,49 @@
-// React,Next.js
-import { ReactNode } from "react";
-import { redirect } from "next/navigation";
-
-// Custom UI Components
 import Header from "@/components/dashboard/header/header";
 import Sidebar from "@/components/dashboard/siderbar/siderbar";
-
-// Clerk
-import { currentUser } from "@clerk/nextjs/server";
-
-// DB
 import { db } from "@/lib/db";
+import { redirect } from "next/navigation";
+import React from "react";
+import DashboardTour from "@/components/dashboard/dashboard-tour";
 
-export default async function SellerStoreDashboardLayout({
+interface SellerStoreDashboardLayoutProps {
+  children: React.ReactNode;
+  params: {
+    storeUrl: string;
+  };
+}
+
+const SellerStoreDashboardLayout = async ({
   children,
-}: {
-  children: ReactNode;
-}) {
-  // Fetch the current user. If the user is not authenticated, redirect them to the home page.
-  const user = await currentUser();
-  if (!user) {
-    redirect("/");
-    return; // Ensure no further code is executed after redirect
+  params,
+}: SellerStoreDashboardLayoutProps) => {
+  // Get the store
+  const store = await db.store.findUnique({
+    where: {
+      url: params.storeUrl,
+    },
+  });
+
+  if (!store) {
+    redirect("/dashboard/seller");
   }
 
-  // Retrieve the list of stores associated with the authenticated user.
+  // Get all stores
   const stores = await db.store.findMany({
-    where: {
-      OR: [
-        { userId: user.id },
-        { members: { some: { id: user.id } } },
-      ],
+    orderBy: {
+      createdAt: "desc",
     },
   });
 
   return (
-    <div className="min-h-screen w-full flex">
+    <div className="h-full w-full">
       <Sidebar stores={stores} />
-      <div className="w-full ml-[300px]">
-        <Header />
-        <div className="w-full p-4 mt-[75px]">{children}</div>
+      <Header />
+      <div id="tour-content-area" className="md:pl-[300px] pt-[75px] h-full w-full">
+        {children}
       </div>
+      <DashboardTour />
     </div>
   );
-}
+};
+
+export default SellerStoreDashboardLayout;

@@ -62,6 +62,7 @@ const StoreSwitcher: FC<StoreSwitcherProps> = ({ stores, className }) => {
           role="combobox"
           aria-expanded={open}
           aria-label="Select a store"
+          id="tour-store-switcher"
           className={cn("w-[250px] justify-between py-2", className)}
         >
           <StoreIcon className="mr-2 w-4 h-4" />

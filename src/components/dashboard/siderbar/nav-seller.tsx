@@ -33,7 +33,7 @@ export default function SidebarNavSeller({
   const activeStore = storeUrlStart ? storeUrlStart.split("/")[0] : "";
 
   return (
-    <nav className="relative grow">
+    <nav id="tour-sidebar-nav" className="relative grow">
       <Command className="rounded-lg overflow-visible bg-transparent">
         <CommandInput placeholder="Search..." />
         <CommandList className="py-2 overflow-visible">

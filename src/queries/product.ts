@@ -545,71 +545,49 @@ export const getProducts = async (
   };
   const andConditions = wherClause.AND as Prisma.ProductWhereInput[];
 
-  // PERFORMANCE OPTIMIZATION: Run all lookup queries in parallel instead of sequential
-  const lookupPromises = [];
-
   // Apply store filter (using store URL)
   if (filters.store) {
-    lookupPromises.push(
-      db.store.findUnique({
-        where: { url: filters.store },
-        select: { id: true },
-      }).then(store => ({ type: 'store', data: store }))
-    );
+    const store = await db.store.findUnique({
+      where: { url: filters.store },
+      select: { id: true },
+    });
+    if (store) {
+      andConditions.push({ storeId: store.id });
+    }
   }
 
   // Apply category filter (using category URL)
   if (filters.category) {
-    lookupPromises.push(
-      db.category.findUnique({
-        where: { url: filters.category },
-        select: { id: true },
-      }).then(category => ({ type: 'category', data: category }))
-    );
+    const category = await db.category.findUnique({
+      where: { url: filters.category },
+      select: { id: true },
+    });
+    if (category) {
+      andConditions.push({ categoryId: category.id });
+    }
   }
 
   // Apply subCategory filter (using subCategory URL)
   if (filters.subCategory) {
-    lookupPromises.push(
-      db.subCategory.findUnique({
-        where: { url: filters.subCategory },
-        select: { id: true },
-      }).then(subCategory => ({ type: 'subCategory', data: subCategory }))
-    );
+    const subCategory = await db.subCategory.findUnique({
+      where: { url: filters.subCategory },
+      select: { id: true },
+    });
+    if (subCategory) {
+      andConditions.push({ subCategoryId: subCategory.id });
+    }
   }
 
   // Apply Offer filter (using offer URL)
   if (filters.offer) {
-    lookupPromises.push(
-      db.offerTag.findUnique({
-        where: { url: filters.offer },
-        select: { id: true },
-      }).then(offer => ({ type: 'offer', data: offer }))
-    );
-  }
-
-  // Wait for all lookups to complete in parallel
-  const lookupResults = await Promise.all(lookupPromises);
-  
-  // Apply the results to the where clause
-  lookupResults.forEach(result => {
-    if (result.data) {
-      switch (result.type) {
-        case 'store':
-          andConditions.push({ storeId: result.data.id });
-          break;
-        case 'category':
-          andConditions.push({ categoryId: result.data.id });
-          break;
-        case 'subCategory':
-          andConditions.push({ subCategoryId: result.data.id });
-          break;
-        case 'offer':
-          andConditions.push({ offerTagId: result.data.id });
-          break;
-      }
+    const offer = await db.offerTag.findUnique({
+      where: { url: filters.offer },
+      select: { id: true },
+    });
+    if (offer) {
+      andConditions.push({ offerTagId: offer.id });
     }
-  });
+  }
 
   // Apply size filter (using array of sizes)
   if (filters.size && Array.isArray(filters.size)) {
@@ -668,52 +646,51 @@ export const getProducts = async (
       orderBy = { views: "desc" };
   }
 
-  // PERFORMANCE OPTIMIZATION: Run product query and count in parallel
-  const [products, totalCount] = await Promise.all([
-    db.product.findMany({
-      where: wherClause,
-      orderBy,
-      take: limit,
-      skip: skip,
-      select: {
-        id: true,
-        slug: true,
-        name: true,
-        rating: true,
-        sales: true,
-        numReviews: true,
-        variants: {
-          select: {
-            id: true,
-            slug: true,
-            variantName: true,
-            variantImage: true,
-            sizes: {
-              select: {
-                size: true,
-                price: true,
-                discount: true,
-                quantity: true,
-              },
+  // Run product query and count sequentially to save connections
+  const products = await db.product.findMany({
+    where: wherClause,
+    orderBy,
+    take: limit,
+    skip: skip,
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      rating: true,
+      sales: true,
+      numReviews: true,
+      variants: {
+        select: {
+          id: true,
+          slug: true,
+          variantName: true,
+          variantImage: true,
+          sizes: {
+            select: {
+              size: true,
+              price: true,
+              discount: true,
+              quantity: true,
             },
-            images: {
-              select: {
-                url: true,
-                order: true,
-              },
-              orderBy: {
-                order: 'asc',
-              },
-              take: 1, // Only get first image for performance
+          },
+          images: {
+            select: {
+              url: true,
+              order: true,
             },
+            orderBy: {
+              order: 'asc',
+            },
+            take: 1, // Only get first image for performance
           },
         },
       },
-    }),
-    db.product.count({
-      where: wherClause,
-    }),
-  ]);
+    },
+  });
+
+  const totalCount = await db.product.count({
+    where: wherClause,
+  });
 
   const getMinPrice = (product: ProductPriceInfo) =>
     Math.min(

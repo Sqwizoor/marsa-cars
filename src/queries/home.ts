@@ -123,52 +123,51 @@ export const getHomeDataDynamic = async (
     }
   };
 
-  const results = await Promise.all(
-    params.map(async ({ property, value, type }) => {
-      const dbField = mapProperty(property);
+  const results = [];
+  for (const { property, value, type } of params) {
+    const dbField = mapProperty(property);
 
-      // Construct the 'where' clause based on the dbField
-      const whereClause =
-        dbField === "offerTag.url"
-          ? { offerTag: { url: value } }
-          : dbField === "category.url"
-          ? { category: { url: value } }
-          : dbField === "subCategory.url"
-          ? { subCategory: { url: value } }
-          : {};
+    // Construct the 'where' clause based on the dbField
+    const whereClause =
+      dbField === "offerTag.url"
+        ? { offerTag: { url: value } }
+        : dbField === "category.url"
+        ? { category: { url: value } }
+        : dbField === "subCategory.url"
+        ? { subCategory: { url: value } }
+        : {};
 
-      // Query products based on the constructed where clause
-      const products = await db.product.findMany({
-        where: whereClause,
-        select: {
-          id: true,
-          slug: true,
-          name: true,
-          rating: true,
-          sales: true,
-          numReviews: true,
-          variants: {
-            select: {
-              id: true,
-              variantName: true,
-              variantImage: true,
-              slug: true,
-              sizes: true,
-              images: true,
-            },
+    // Query products based on the constructed where clause
+    const products = await db.product.findMany({
+      where: whereClause,
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        rating: true,
+        sales: true,
+        numReviews: true,
+        variants: {
+          select: {
+            id: true,
+            variantName: true,
+            variantImage: true,
+            slug: true,
+            sizes: true,
+            images: true,
           },
         },
-      });
+      },
+    });
 
-      // Format the data based on the input
-      const formattedData = formatProductData(products, type);
+    // Format the data based on the input
+    const formattedData = formatProductData(products, type);
 
-      // Determine the output key based on the property and value
-      const outputKey = `products_${value.replace(/-/g, "_")}`;
+    // Determine the output key based on the property and value
+    const outputKey = `products_${value.replace(/-/g, "_")}`;
 
-      return { [outputKey]: formattedData };
-    })
-  );
+    results.push({ [outputKey]: formattedData });
+  }
 
   return results.reduce((acc, result) => ({ ...acc, ...result }), {});
 };
