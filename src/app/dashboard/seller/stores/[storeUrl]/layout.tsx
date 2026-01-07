@@ -39,8 +39,10 @@ const SellerStoreDashboardLayout = async ({
     <div className="h-full w-full">
       <Sidebar stores={stores} />
       <Header />
-      <div id="tour-content-area" className="md:pl-[300px] pt-[75px] h-full w-full">
-        {children}
+      <div id="tour-content-area" className="md:pl-[300px] pt-[75px] h-full w-full bg-slate-50 dark:bg-slate-900/50">
+        <div className="p-6 h-full">
+          {children}
+        </div>
       </div>
       <DashboardTour />
     </div>

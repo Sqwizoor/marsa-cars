@@ -6,13 +6,15 @@ export default function InputFieldset({
   label,
   description,
   children,
+  id,
 }: {
   label: string;
   description?: string;
   children: ReactNode;
+  id?: string;
 }) {
   return (
-    <div>
+    <div id={id}>
       <fieldset className="border rounded-md p-4">
         <legend className="px-2">
           <FormLabel>{label}</FormLabel>

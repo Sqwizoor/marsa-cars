@@ -378,7 +378,7 @@ const ProductDetails = ({
               className="space-y-4"
             >
               {/* Images - colors */}
-              <div className="flex flex-col gap-y-6 xl:flex-row">
+              <div id="tour-product-images" className="flex flex-col gap-y-6 xl:flex-row">
                 {/* Images */}
                 <FormField
                   control={form.control}
@@ -446,7 +446,7 @@ const ProductDetails = ({
                 )}
               </div>
               {/* Name */}
-              <InputFieldset label="Name">
+              <InputFieldset id="tour-product-name" label="Name">
                 <div className="flex flex-col lg:flex-row gap-4">
                   {!isNewVariantPage && (
                     <FormField
@@ -486,6 +486,7 @@ const ProductDetails = ({
               </InputFieldset>
               {/* Product and variant description editors (tabs) */}
               <InputFieldset
+                id="tour-product-description"
                 label="Description"
                 description={
                   isNewVariantPage
@@ -578,7 +579,7 @@ const ProductDetails = ({
               </InputFieldset>
               {/* Category - SubCategory - offer*/}
               {!isNewVariantPage && (
-                <InputFieldset label="Category">
+                <InputFieldset id="tour-product-category" label="Category">
                   <div className="flex gap-4">
                     <FormField
                       disabled={isLoading}
@@ -1178,7 +1179,7 @@ const ProductDetails = ({
                   </div>
                 </InputFieldset>
               )}
-              <Button type="submit" disabled={isLoading}>
+              <Button id="tour-product-submit" type="submit" disabled={isLoading}>
                 {isLoading ? (
                   <Skeleton className="h-4 w-40 bg-white/40" />
                 ) : data?.productId && data.variantId ? (

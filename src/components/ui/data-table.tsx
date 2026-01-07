@@ -89,6 +89,7 @@ export default function DataTable<TData, TValue>({
         <div className="flex items-center py-4 gap-2">
           <Search />
           <Input
+            id="tour-table-search"
             placeholder={searchPlaceholder}
             value={
               (table.getColumn(filterValue)?.getFilterValue() as string) ?? ""
@@ -102,6 +103,7 @@ export default function DataTable<TData, TValue>({
         <div className="flex gap-x-2">
           {modalChildren && (
             <Button
+              id="tour-table-modal-button"
               className="flex- gap-2"
               onClick={handleOpenModal}
             >
@@ -110,7 +112,7 @@ export default function DataTable<TData, TValue>({
           )}
           {newTabLink && (
             <Link href={newTabLink}>
-              <Button className="bg-primary hover:bg-primary/90">
+              <Button id="tour-table-new-tab-button" className="bg-primary hover:bg-primary/90">
                 {!modalChildren && actionButtonText ? (
                   actionButtonText
                 ) : (
@@ -125,7 +127,7 @@ export default function DataTable<TData, TValue>({
       </div>
 
       {/* Table */}
-      <div className=" border bg-background rounded-lg">
+      <div id="tour-data-table" className=" border bg-background rounded-lg">
         <Table className="">
           {/* Table header */}
           {!noHeader && (
