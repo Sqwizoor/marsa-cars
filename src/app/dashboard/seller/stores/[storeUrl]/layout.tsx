@@ -7,19 +7,20 @@ import DashboardTour from "@/components/dashboard/dashboard-tour";
 
 interface SellerStoreDashboardLayoutProps {
   children: React.ReactNode;
-  params: {
+  params: Promise<{
     storeUrl: string;
-  };
+  }>;
 }
 
 const SellerStoreDashboardLayout = async ({
   children,
   params,
 }: SellerStoreDashboardLayoutProps) => {
+  const { storeUrl } = await params;
   // Get the store
   const store = await db.store.findUnique({
     where: {
-      url: params.storeUrl,
+      url: storeUrl,
     },
   });
 
