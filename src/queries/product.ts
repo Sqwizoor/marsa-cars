@@ -15,7 +15,7 @@ import {
   SortOrder,
   VariantImageType,
 } from "@/lib/types";
-import { Prisma, Store } from "@prisma/client";
+import { Prisma, Store, ProductApprovalStatus } from "@prisma/client";
 
 // Clerk
 import { currentUser } from "@clerk/nextjs/server";
@@ -52,7 +52,9 @@ export const upsertProduct = async (
     //     "Unauthorized Access: Seller Privileges Required for Entry."
     //   );
 
-    await ensureSellerSubscription(user.id);
+    if (user.privateMetadata.role !== "ADMIN") {
+      await ensureSellerSubscription(user.id);
+    }
 
     // Ensure product data is provided
     if (!product) throw new Error("Please provide product data.");
@@ -450,7 +452,9 @@ export const deleteProduct = async (productId: string) => {
   //     "Unauthorized Access: Seller Privileges Required for Entry."
   //   );
 
-  await ensureSellerSubscription(user.id);
+  if (user.privateMetadata.role !== "ADMIN") {
+    await ensureSellerSubscription(user.id);
+  }
 
   // Ensure product data is provided
   if (!productId) throw new Error("Please provide product id.");
@@ -2917,3 +2921,51 @@ export const updateProductStock = async (
 //     });
 //   }
 // };
+
+// Function: getAdminProducts
+// Description: Retrieves products for admin review, filtered by status.
+export const getAdminProducts = async (status?: ProductApprovalStatus) => {
+  const user = await currentUser();
+  if (!user || user.privateMetadata.role !== "ADMIN") return [];
+
+  const where: any = {};
+  if (status) {
+    where.status = status;
+  }
+
+  const products = await db.product.findMany({
+    where,
+    include: {
+      store: true,
+      category: true,
+      variants: {
+        take: 1,
+        include: {
+          images: {
+            take: 1,
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+  return products;
+};
+
+// Function: updateProductStatus
+// Description: Updates the status of a product (Approve/Reject).
+export const updateProductStatus = async (
+  productId: string,
+  status: ProductApprovalStatus
+) => {
+  const user = await currentUser();
+  if (!user || user.privateMetadata.role !== "ADMIN")
+    throw new Error("Unauthorized");
+
+  await db.product.update({
+    where: { id: productId },
+    data: { status },
+  });
+};

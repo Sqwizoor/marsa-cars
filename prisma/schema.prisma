@@ -164,6 +164,7 @@ model Product {
   views                       Int               @default(0)
   freeShipping                FreeShipping?     @relation("ProductFreeShipping")
   freeShippingForAllCountries Boolean           @default(false)
+  status                      ProductApprovalStatus @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -1132,4 +1133,10 @@ model ForumUserStats {
   @@index([reputation])
   @@index([postCount])
   @@index([lastActiveAt])
+}
+
+enum ProductApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

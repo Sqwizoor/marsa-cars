@@ -17,6 +17,11 @@ export const adminDashboardSidebarOptions: DashboardSidebarMenuInterface[] = [
     link: "/dashboard/admin/stores",
   },
   {
+    label: "Product Reviews",
+    icon: "products",
+    link: "/dashboard/admin/products",
+  },
+  {
     label: "Orders",
     icon: "box-list",
     link: "/dashboard/admin/orders",

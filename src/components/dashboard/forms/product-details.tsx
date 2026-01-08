@@ -827,7 +827,7 @@ const ProductDetails = ({
                 )}
               </div>
               {/* Sizes*/}
-              <InputFieldset label="Sizes, Quantities, Prices, Disocunts">
+              <InputFieldset label="Sizes, Quantities, Prices, Discounts">
                 <div className="w-full flex flex-col gap-y-3">
                   <ClickToAddInputs
                     details={sizes}

@@ -176,7 +176,17 @@ const ClickToAddInputs = <T extends DetailRecord>({
                 className={cn("w-28 placeholder:capitalize", inputClassName)}
                 type={typeof detail[property] === "number" ? "number" : "text"}
                 name={property}
-                placeholder={property}
+                placeholder={
+                  property === "size"
+                    ? "Size (e.g. S, M, L)"
+                    : property === "quantity"
+                    ? "Quantity"
+                    : property === "price"
+                    ? "Price"
+                    : property === "discount"
+                    ? "Discount percent"
+                    : property
+                }
                 value={detail[property] as string}
                 min={typeof detail[property] === "number" ? 0 : undefined}
                 step="0.01"

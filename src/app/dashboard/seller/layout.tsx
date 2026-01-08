@@ -33,7 +33,7 @@ export default async function SellerDashboardLayout({
   const hasStore =
     (dbUser?.stores && dbUser.stores.length > 0) ||
     (dbUser?.memberOfStores && dbUser.memberOfStores.length > 0);
-  const isSeller = dbUser?.role === "SELLER" || user.privateMetadata.role === "SELLER" || hasStore;
+  const isSeller = dbUser?.role === "SELLER" || user.privateMetadata.role === "SELLER" || hasStore || dbUser?.role === "ADMIN" || user.privateMetadata.role === "ADMIN";
 
   if (!isSeller) {
     if (dbUser?.role === "ADVERTISER") {
