@@ -1,5 +1,6 @@
 import Header from "@/components/dashboard/header/header";
 import Sidebar from "@/components/dashboard/siderbar/siderbar";
+import SidebarWrapper from "@/components/dashboard/siderbar/sidebar-wrapper";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
@@ -22,16 +23,15 @@ export default async function AdminDashboardLayout({
     <ClerkProvider>
       <>
         <div className="w-full h-full">
-          {/* Sidebar */}
-
-          <div className="fixed left-0 top-0 w-[300px] h-full">
-            {/* Add your sidebar content here */}
+          {/* Sidebar with mobile wrapper */}
+          <SidebarWrapper>
             <Sidebar isAdmin />
-          </div>
+          </SidebarWrapper>
+          
           {/* Main content */}
-          <div className="ml-[300px]">
+          <div className="md:ml-[300px]">
             <Header />
-            <div className="w-full mt-[75px] p-4">{children}</div>
+            <div className="w-full mt-[75px] p-2 sm:p-4 md:p-6">{children}</div>
           </div>
         </div>
       </>

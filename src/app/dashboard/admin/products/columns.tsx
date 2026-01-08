@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { updateProductStatus } from "@/queries/product";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 // Define the shape of the data for the table
 export type AdminProductType = {
@@ -82,11 +82,11 @@ export const columns: ColumnDef<AdminProductType>[] = [
   },
   {
     accessorKey: "store",
-    header: "Store",
+    header: () => <span className="hidden md:inline">Store</span>,
     cell: ({ row }) => (
       <Link
         href={`/store/${row.original.store.url}`}
-        className="text-blue-600 hover:underline flex items-center gap-1"
+        className="text-blue-600 hover:underline items-center gap-1 hidden md:flex"
         target="_blank"
       >
         {row.original.store.name}
@@ -116,10 +116,10 @@ export const columns: ColumnDef<AdminProductType>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: "Created At",
+    header: () => <span className="hidden lg:inline">Created At</span>,
     cell: ({ row }) => {
       return (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground hidden lg:inline-block">
           {new Date(row.original.createdAt).toLocaleDateString()}
         </span>
       );
@@ -130,21 +130,17 @@ export const columns: ColumnDef<AdminProductType>[] = [
     cell: ({ row }) => {
         const product = row.original;
         const router = useRouter();
-        const { toast } = useToast();
 
         const handleStatusUpdate = async (status: ProductApprovalStatus) => {
             try {
                 await updateProductStatus(product.id, status);
-                toast({
-                    title: `Product ${status.toLowerCase()}`,
+                toast.success(`Product ${status.toLowerCase()}`, {
                     description: `Product has been marked as ${status}.`,
                 });
                 router.refresh();
             } catch (error) {
-                toast({
-                    title: "Error",
-                    description: "Failed to update product status.",
-                    variant: "destructive",
+                toast.error("Failed to update product status", {
+                    description: "An error occurred while updating the product.",
                 });
             }
         };

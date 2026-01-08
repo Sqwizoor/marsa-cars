@@ -85,9 +85,9 @@ export default function DataTable<TData, TValue>({
   return (
     <>
       {/* Search input and action button */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center py-4 gap-2">
-          <Search />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Search className="flex-shrink-0" />
           <Input
             id="tour-table-search"
             placeholder={searchPlaceholder}
@@ -97,7 +97,7 @@ export default function DataTable<TData, TValue>({
             onChange={(event) =>
               table.getColumn(filterValue)?.setFilterValue(event.target.value)
             }
-            className="h-12"
+            className="h-12 w-full"
           />
         </div>
         <div className="flex gap-x-2">
@@ -127,7 +127,7 @@ export default function DataTable<TData, TValue>({
       </div>
 
       {/* Table */}
-      <div id="tour-data-table" className=" border bg-background rounded-lg">
+      <div id="tour-data-table" className="border bg-background rounded-lg overflow-x-auto">
         <Table className="">
           {/* Table header */}
           {!noHeader && (
