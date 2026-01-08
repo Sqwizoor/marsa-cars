@@ -79,15 +79,10 @@ export default function SubscriptionIndicator() {
       className="hidden lg:inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500/80 to-purple-600/80 px-3 py-1 text-xs font-semibold text-white shadow hover:from-indigo-500 hover:to-purple-600 transition"
       title="View subscription details"
     >
-      <span>{isTrial ? "Trial" : data.tier}</span>
+      <span>{data.tier}</span>
       <span className="rounded bg-white/20 px-2 py-0.5">
         {remaining === -1 ? "∞" : `${remaining} left`}
       </span>
-      {isTrial && daysLeft !== null && daysLeft >= 0 && (
-        <span className="ml-1 border-l border-white/20 pl-2">
-          {daysLeft} days left
-        </span>
-      )}
       {/* show renewal info for paid plans only */}
       {!isTrial && expiryLabel && (
         <span className="text-white/70">Renews {expiryLabel}</span>

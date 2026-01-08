@@ -27,24 +27,30 @@ export async function POST(req: NextRequest) {
     const paymentStatus = itn["payment_status"];
     const mPaymentId = itn["m_payment_id"];
 
-    if (!mPaymentId || !mPaymentId.startsWith("trial_")) {
-      console.warn("ITN is not a trial payment", mPaymentId);
+    // Accept both old trial_ and new sub_ prefixes
+    if (!mPaymentId || (!mPaymentId.startsWith("trial_") && !mPaymentId.startsWith("sub_"))) {
+      console.warn("ITN is not a trial/subscription payment", mPaymentId);
       return NextResponse.json({ status: "ignored" });
     }
 
     if (paymentStatus !== "COMPLETE") {
-      console.warn("Trial payment not complete", paymentStatus);
+      console.warn("Payment not complete", paymentStatus);
       return NextResponse.json({ status: "pending" });
     }
 
+    // sub_TIER_USERID_TIMESTAMP
     const parts = mPaymentId.split("_");
-    const userId = parts[1];
+    const userId = mPaymentId.startsWith("trial_") ? parts[1] : parts[2];
+    
     if (!userId) {
-      console.error("No userId in trial m_payment_id");
+      console.error("No userId in m_payment_id");
       return NextResponse.json({ status: "error" });
     }
 
-    await activateSellerTrial(userId);
+    const planTier = itn["custom_str1"] || "BRONZE";
+    const amount = parseFloat(itn["amount_gross"] || "0");
+
+    await activateSellerTrial(userId, planTier, amount);
 
     return NextResponse.json({ status: "ok" });
   } catch (e: any) {

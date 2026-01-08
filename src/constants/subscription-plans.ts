@@ -15,13 +15,11 @@ export type SubscriptionPlan = {
   popular?: boolean;
 };
 
-export const SUBSCRIPTION_TRIAL_DAYS = 60;
-
 export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
     tier: "BRONZE",
     name: "Bronze",
-    price: 199,
+    price: 499,
     description: "Perfect for getting started",
     adLimit: 10,
     icon: Zap,
@@ -31,13 +29,13 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       "Basic analytics",
       "Email support",
       "Standard ad placement",
-      `${SUBSCRIPTION_TRIAL_DAYS}-day free trial then monthly billing`,
+      "Monthly billing",
     ],
   },
   {
     tier: "SILVER",
     name: "Silver",
-    price: 399,
+    price: 699,
     description: "Great for growing businesses",
     adLimit: 30,
     icon: TrendingUp,
@@ -48,14 +46,14 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       "Advanced analytics",
       "Priority email support",
       "Premium ad placement",
-      `${SUBSCRIPTION_TRIAL_DAYS}-day free trial then monthly billing`,
+      "Monthly billing",
       "Featured badge",
     ],
   },
   {
     tier: "GOLD",
     name: "Gold",
-    price: 599,
+    price: 1399,
     description: "For unlimited growth",
     adLimit: -1,
     icon: Crown,
@@ -65,7 +63,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       "Real-time analytics",
       "24/7 priority support",
       "Top ad placement",
-      `${SUBSCRIPTION_TRIAL_DAYS}-day free trial then monthly billing`,
+      "Monthly billing",
       "Featured badge",
       "Custom targeting",
     ],

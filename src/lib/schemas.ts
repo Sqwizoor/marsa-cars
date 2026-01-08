@@ -301,7 +301,7 @@ export const ProductFormSchema = z.object({
       "Each country must have a valid name and ID."
     )
     .default([]),
-  shippingFeeMethod: z.nativeEnum(ShippingFeeMethod),
+  shippingFeeMethod: z.nativeEnum(ShippingFeeMethod).default(ShippingFeeMethod.ITEM),
 });
 
 // OfferTag form schema

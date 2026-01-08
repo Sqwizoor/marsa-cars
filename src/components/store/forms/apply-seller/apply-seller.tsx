@@ -10,7 +10,6 @@ import Instructions from "./instructions";
 import ProgressBar from "./progress-bar";
 import Step1 from "./steps/step-1/step-1";
 import Step2 from "./steps/setp-2/step-2";
-import Step3 from "./steps/setp-3/step-3";
 import Step4 from "./steps/step-4/step-4";
 
 export default function ApplySellerMultiForm() {
@@ -73,13 +72,6 @@ export default function ApplySellerMultiForm() {
             setStep={setStep}
           />
         ) : step === 3 ? (
-          <Step3
-            formData={formData}
-            setFormData={setFormData}
-            step={step}
-            setStep={setStep}
-          />
-        ) : step === 4 ? (
           <Step4 selectedPlan={selectedPlan} formData={formData} />
         ) : null}
         </div>

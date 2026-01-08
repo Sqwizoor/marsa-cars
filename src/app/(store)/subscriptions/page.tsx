@@ -15,7 +15,6 @@ import {
 import { toast } from "react-hot-toast";
 import {
   SUBSCRIPTION_PLANS,
-  SUBSCRIPTION_TRIAL_DAYS,
 } from "@/constants/subscription-plans";
 
 export default function SubscriptionsPage() {

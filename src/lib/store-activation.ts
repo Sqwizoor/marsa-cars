@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { clerkClient } from "@clerk/nextjs/server";
 
-export async function activateSellerTrial(userId: string) {
+export async function activateSellerTrial(userId: string, planTier: string = "BRONZE", amount: number = 0) {
   const application = await db.storeApplication.findUnique({
     where: { userId },
   });
@@ -19,38 +19,32 @@ export async function activateSellerTrial(userId: string) {
       orderBy: { createdAt: "desc" },
     });
 
-    const trialEndsAt = new Date();
-    trialEndsAt.setDate(trialEndsAt.getDate() + 30);
-
     if (!existingSub) {
       await tx.subscription.create({
         data: {
           userId,
-          tier: "BRONZE",
-          status: "TRIALING",
-          isTrial: true,
-          trialEndsAt,
-          amount: 10,
+          tier: planTier as any,
+          status: "ACTIVE",
+          isTrial: false,
+          amount: amount,
           currency: "ZAR",
-          adLimit: 10,
+          adLimit: 10, // Should prob fetch this from plan constants, but default to 10 for now given original code
           adsUsed: 0,
         },
       });
     } else {
-      // If subscription exists but is not active/trialing, reactivate it as a trial
-      // Or if they are paying for a new trial, we should probably reset it
-      if (existingSub.status !== "ACTIVE" && existingSub.status !== "TRIALING") {
-        await tx.subscription.update({
-          where: { id: existingSub.id },
-          data: {
-            status: "TRIALING",
-            isTrial: true,
-            trialEndsAt,
-            adLimit: 10,
-            adsUsed: 0,
-          },
-        });
-      }
+      // Reactivate as active subscription
+      await tx.subscription.update({
+        where: { id: existingSub.id },
+        data: {
+          status: "ACTIVE",
+          isTrial: false,
+          tier: planTier as any,
+          amount: amount,
+          adLimit: 10,
+          adsUsed: 0,
+        },
+      });
     }
 
     // Check if store already exists

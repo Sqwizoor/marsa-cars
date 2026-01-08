@@ -13,6 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import ImageUpload from "@/components/dashboard/shared/image-upload"
 import Input from "@/components/store/ui/input"
 import { Textarea } from "@/components/store/ui/textarea"
+import { applySeller } from "@/queries/store"
+import toast from "react-hot-toast"
 
 interface FormData {
   name: string
@@ -63,7 +65,32 @@ export default function Step2({
       url: values.url,
     }))
 
-    setStep((prev) => prev + 1)
+    try {
+      const response = await applySeller({
+        name: values.name,
+        description: values.description,
+        email: values.email,
+        phone: values.phone,
+        logo: values.logo[0]?.url || "",
+        cover: values.cover[0]?.url || "",
+        url: values.url,
+        defaultShippingService: "International Delivery",
+        defaultShippingFeePerItem: 0,
+        defaultShippingFeeForAdditionalItem: 0,
+        defaultShippingFeePerKg: 0,
+        defaultShippingFeeFixed: 0,
+        defaultDeliveryTimeMin: 7,
+        defaultDeliveryTimeMax: 30,
+        returnPolicy: "Return in 30 days.",
+      })
+      if (response.id) {
+        setStep((prev) => prev + 1)
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast.error(errorMessage)
+      console.error("Error submitting form:", error)
+    }
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

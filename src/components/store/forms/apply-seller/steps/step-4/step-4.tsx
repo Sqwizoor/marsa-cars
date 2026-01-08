@@ -26,11 +26,11 @@ export default function Step4({
       const res = await fetch("/api/payments/payfast/trial-initiate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ store: formData }),
+        body: JSON.stringify({ store: formData, plan: selectedPlan }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to start trial payment");
+        throw new Error(data.error || "Failed to start subscription payment");
       }
       const data = await res.json();
       if (!data.redirect) {
@@ -55,16 +55,16 @@ export default function Step4({
                   Seller onboarding
                 </p>
                 <h2 className="mt-2 text-2xl sm:text-3xl font-semibold">
-                  Kick-start your store trial
+                  Activate your subscription
                 </h2>
                 <p className="mt-2 text-sm text-slate-600">
-                  Pay a once-off <span className="font-semibold text-emerald-600">R10</span> to
-                  activate your seller trial and unlock advertising.
+                  Example: <span className="font-semibold text-emerald-600">R{plan?.price || 499}</span> per month.
+                  We support <span className="font-semibold">Debit Cards</span> for automatic monthly payments.
                 </p>
               </div>
-              <div className="hidden sm:flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-200">
-                <span className="text-lg font-semibold text-emerald-600">
-                  R10
+              <div className="hidden sm:flex h-14 min-w-[3.5rem] items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-200 px-2">
+                <span className="text-lg font-semibold text-emerald-600 whitespace-nowrap">
+                  R{plan?.price || 499}
                 </span>
               </div>
             </div>
@@ -88,16 +88,16 @@ export default function Step4({
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">
-                  Trial fee
+                  Subscription fee
                 </p>
                 <p className="mt-1 text-lg font-semibold text-emerald-600">
-                  R10
+                  R{plan?.price || 499}
                   <span className="ml-1 text-xs font-normal text-slate-500">
-                    once-off
+                    / month
                   </span>
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
-                  Helps keep the marketplace free from spam stores.
+                  Automatic monthly billing via Debit Card.
                 </p>
               </div>
               <div className="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
@@ -132,7 +132,7 @@ export default function Step4({
                 disabled={loading}
                 className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading ? "Redirecting to PayFast..." : "Start R10 trial with PayFast"}
+                {loading ? "Redirecting to PayFast..." : `Subscribe for R${plan?.price || 499} with PayFast`}
               </button>
             </div>
           </div>

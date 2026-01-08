@@ -126,15 +126,10 @@ export default function UserMenu() {
                         className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500/80 to-purple-600/80 px-3 py-1 text-xs font-semibold text-white shadow hover:from-indigo-500 hover:to-purple-600 transition"
                         title="View subscription details"
                       >
-                        <span>{subscription.phase === "TRIAL" ? "Trial" : subscription.tier}</span>
+                        <span>{subscription.tier}</span>
                         <span className="rounded bg-white/20 px-2 py-0.5">
                           {subscription.remainingAds === -1 ? "∞" : `${subscription.remainingAds} left`}
                         </span>
-                        {(subscription.phase === "TRIAL" || subscription.status === "TRIALING") && (subscription.expiresAt || subscription.trialEndsAt) && (
-                            <span className="ml-1 border-l border-white/20 pl-2">
-                                {Math.ceil((new Date(subscription.expiresAt || subscription.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days left
-                            </span>
-                        )}
                       </Link>
                     </div>
                   </>
