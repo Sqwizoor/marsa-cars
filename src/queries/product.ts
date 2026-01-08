@@ -1460,8 +1460,8 @@ export const getProductsByIds = async (
 
     // Return products sorted in the order of ids provided
     const ordered_products = ids
-      .map((id) =>
-        new_products.find((product) => product.variants[0].variantId === id)
+      .map((id: string) =>
+        new_products.find((product: any) => product.variants[0].variantId === id)
       )
       .filter(Boolean); // Filter out undefined values
 
