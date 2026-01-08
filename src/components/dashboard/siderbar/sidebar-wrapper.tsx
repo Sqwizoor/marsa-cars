@@ -39,7 +39,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
       {/* Sidebar */}
       <div
         className={cn(
-          "fixed left-0 top-0 h-full w-[280px] z-40 transform transition-transform duration-300 ease-in-out md:translate-x-0 md:w-[300px]",
+          "fixed left-0 top-0 h-full w-[280px] z-40 transform transition-transform duration-300 ease-in-out bg-background border-r",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >

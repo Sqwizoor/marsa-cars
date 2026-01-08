@@ -23,13 +23,20 @@ export default async function AdminDashboardLayout({
     <ClerkProvider>
       <>
         <div className="w-full h-full">
-          {/* Sidebar with mobile wrapper */}
-          <SidebarWrapper>
-            <Sidebar isAdmin />
-          </SidebarWrapper>
+          {/* Desktop Sidebar - hidden on mobile, fixed on desktop */}
+          <div className="hidden md:block fixed left-0 top-0 w-[300px] h-full border-r bg-background">
+             <Sidebar isAdmin />
+          </div>
+
+          {/* Mobile Sidebar - visible on mobile, hidden on desktop */}
+          <div className="md:hidden">
+            <SidebarWrapper>
+              <Sidebar isAdmin />
+            </SidebarWrapper>
+          </div>
           
           {/* Main content */}
-          <div className="md:ml-[300px]">
+          <div className="w-full md:ml-[300px]">
             <Header />
             <div className="w-full mt-[75px] p-2 sm:p-4 md:p-6">{children}</div>
           </div>
