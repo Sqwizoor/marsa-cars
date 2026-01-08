@@ -84,11 +84,12 @@ export async function POST(req: NextRequest) {
       ["m_payment_id", paymentId],
       ["amount", amountStr],
       ["item_name", `${selectedPlan.name} Subscription`],
-      ["subscription_type", "1"], // 1 = Subscription
-      ["billing_date", new Date().toISOString().split('T')[0]], // Start immediately
-      ["recurring_amount", amountStr],
-      ["frequency", "3"], // 3 = Monthly
-      ["cycles", "0"], // 0 = Indefinite
+      // ["subscription_type", "1"], // 1 = Subscription (Commented out to allow all payment methods)
+      // ["billing_date", new Date().toISOString().split('T')[0]], 
+      // ["recurring_amount", amountStr],
+      // ["frequency", "3"], 
+      // ["cycles", "0"], 
+
       ["custom_str1", selectedPlan.tier], // Pass plan tier to ITN
     ];
 
