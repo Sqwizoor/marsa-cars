@@ -7,12 +7,17 @@ import { getAllCategories } from "@/queries/category";
 import { getAllOfferTags } from "@/queries/offer-tag";
 import { getProductMainInfo } from "@/queries/product";
 
+import { currentUser } from "@clerk/nextjs/server";
+
 export default async function SellerNewProductVariantPage({
   params,
 }: {
   params: Promise<{ storeUrl: string; productId: string }>;
 }) {
   const { storeUrl, productId } = await params;
+  const user = await currentUser();
+  const role = (user?.privateMetadata?.role as string) || "USER";
+
   const categories = await getAllCategories();
   const offerTags = await getAllOfferTags();
   const product = await getProductMainInfo(productId);
@@ -30,6 +35,7 @@ export default async function SellerNewProductVariantPage({
         data={product}
         offerTags={offerTags}
         countries={countries}
+        role={role}
       />
     </div>
   );

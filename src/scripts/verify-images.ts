@@ -45,12 +45,12 @@ async function verifyImages() {
                 await res.arrayBuffer(); 
                 if (!isMismatch) successCount++;
             }
-        } catch (e) {
+        } catch (e: any) {
             console.log(`❌ Error fetching DB URL for ${user.email}: ${e.message}`);
             brokenUrlCount++;
         }
 
-    } catch (e) {
+    } catch (e: any) {
         console.log(`❌ Error fetching Clerk user ${user.id} (${user.email}): ${e.message}`);
     }
   }

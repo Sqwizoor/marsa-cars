@@ -104,6 +104,7 @@ interface ProductDetailsProps {
   offerTags: OfferTag[];
   storeUrl: string;
   countries: Country[];
+  role?: string;
 }
 
 const ProductDetails = ({
@@ -112,6 +113,7 @@ const ProductDetails = ({
   offerTags,
   storeUrl,
   countries,
+  role = "USER", // Default to USER if not provided
 }: ProductDetailsProps) => {
   // Initializing necessary hooks
   const { toast } = useToast(); // Hook for displaying toast messages
@@ -778,6 +780,7 @@ const ProductDetails = ({
                   </div>
                 )}
                 {/* Keywords */}
+                {role === "ADMIN" && (
                 <div className="w-full flex-1 space-y-3">
                   <FormField
                     control={form.control}
@@ -800,6 +803,7 @@ const ProductDetails = ({
                             }}
                           />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -820,6 +824,7 @@ const ProductDetails = ({
                     ))}
                   </div>
                 </div>
+                )}
               </div>
               {/* Sizes*/}
               <InputFieldset label="Sizes, Quantities, Prices, Disocunts">

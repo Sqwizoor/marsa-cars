@@ -219,12 +219,10 @@ export const ProductFormSchema = z.object({
       required_error: "Product keywords are mandatory.",
       invalid_type_error: "Keywords must be valid strings.",
     })
-    .min(1, {
-      message: "Please provide at least 1 keyword.",
-    })
     .max(10, {
       message: "You can provide up to 10 keywords.",
-    }),
+    })
+    .default([]),
   colors: z
     .object({ color: z.string() })
     .array()
@@ -277,14 +275,7 @@ export const ProductFormSchema = z.object({
       answer: z.string(),
     })
     .array()
-    .min(1, "Please provide at least one product question.")
-    .refine(
-      (questions) =>
-        questions.every((q) => q.question.length > 0 && q.answer.length > 0),
-      {
-        message: "All product question inputs must be filled correctly.",
-      }
-    ),
+    .default([]),
   isSale: z.boolean().default(false),
   saleEndDate: z.string().optional(),
   freeShippingForAllCountries: z.boolean().default(false),

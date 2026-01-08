@@ -7,12 +7,17 @@ import { getAllOfferTags } from "@/queries/offer-tag";
 import { getProductVariant } from "@/queries/product";
 import { db } from "@/lib/db";
 
+import { currentUser } from "@clerk/nextjs/server";
+
 export default async function ProductVariantPage({
   params,
 }: {
   params: Promise<{ storeUrl: string; productId: string; variantId: string }>;
 }) {
   const { productId, variantId, storeUrl } = await params;
+  const user = await currentUser();
+  const role = (user?.privateMetadata?.role as string) || "USER";
+
   const categories = await getAllCategories();
   const offerTags = await getAllOfferTags();
   const countries = await db.country.findMany({
@@ -33,6 +38,7 @@ export default async function ProductVariantPage({
         offerTags={offerTags}
         storeUrl={storeUrl}
         countries={countries}
+        role={role}
         data={{
           ...productDetails,
           variantDescription: productDetails.variantDescription ?? undefined,
