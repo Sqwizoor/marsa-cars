@@ -190,10 +190,9 @@ export const updateStoreDefaultShippingDetails = async (
     const check_ownership = await db.store.findFirst({
       where: {
         url: storeUrl,
-        OR: [
-          { userId: user.id },
-          { members: { some: { id: user.id } } },
-        ],
+        ...(user.privateMetadata.role !== "ADMIN" && {
+          OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
+        }),
       },
     });
 
@@ -248,10 +247,9 @@ export const getStoreShippingRates = async (storeUrl: string) => {
     const check_ownership = await db.store.findFirst({
       where: {
         url: storeUrl,
-        OR: [
-          { userId: user.id },
-          { members: { some: { id: user.id } } },
-        ],
+        ...(user.privateMetadata.role !== "ADMIN" && {
+          OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
+        }),
       },
     });
 
@@ -264,10 +262,9 @@ export const getStoreShippingRates = async (storeUrl: string) => {
     const store = await db.store.findFirst({
       where: {
         url: storeUrl,
-        OR: [
-          { userId: user.id },
-          { members: { some: { id: user.id } } },
-        ],
+        ...(user.privateMetadata.role !== "ADMIN" && {
+          OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
+        }),
       },
     });
 
@@ -337,10 +334,9 @@ export const upsertShippingRate = async (
     const check_ownership = await db.store.findFirst({
       where: {
         url: storeUrl,
-        OR: [
-          { userId: user.id },
-          { members: { some: { id: user.id } } },
-        ],
+        ...(user.privateMetadata.role !== "ADMIN" && {
+          OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
+        }),
       },
     });
 
@@ -420,7 +416,8 @@ export const getStoreOrders = async (storeUrl: string) => {
 
     // Verify ownership or membership
     const isMember = store.members.some((m) => m.id === user.id);
-    if (user.id !== store.userId && !isMember) {
+    const isAdmin = user.privateMetadata.role === "ADMIN";
+    if (user.id !== store.userId && !isMember && !isAdmin) {
       throw new Error("You don't have persmission to access this store.");
     }
 
@@ -739,10 +736,9 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
     const store = await db.store.findFirst({
       where: {
         url: storeUrl,
-        OR: [
-          { userId: user.id },
-          { members: { some: { id: user.id } } },
-        ],
+        ...(user.privateMetadata.role !== "ADMIN" && {
+          OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
+        }),
       },
     });
 
