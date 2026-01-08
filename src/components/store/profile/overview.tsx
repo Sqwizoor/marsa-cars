@@ -48,17 +48,17 @@ export default async function ProfileOverview() {
             )}
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap py-4">
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 py-4">
           {menu.map((item) => (
             <Link
               key={item.link}
               href={item.link}
-              className="w-36 relative flex flex-col items-center justify-center cursor-pointer"
+              className="relative flex flex-col items-center justify-center cursor-pointer p-3 hover:bg-gray-50 rounded-lg transition-colors"
             >
-              <div className="text-3xl">
+              <div className="text-2xl sm:text-3xl">
                 <span>{item.icon}</span>
               </div>
-              <div className="mt-2">{item.title}</div>
+              <div className="mt-2 text-sm sm:text-base text-center">{item.title}</div>
             </Link>
           ))}
         </div>

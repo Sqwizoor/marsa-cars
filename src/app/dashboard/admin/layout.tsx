@@ -36,7 +36,7 @@ export default async function AdminDashboardLayout({
           </div>
           
           {/* Main content */}
-          <div className="w-full md:ml-[300px]">
+          <div className="w-full md:pl-[300px] min-h-screen">
             <Header />
             <div className="w-full mt-[75px] p-2 sm:p-4 md:p-6">{children}</div>
           </div>

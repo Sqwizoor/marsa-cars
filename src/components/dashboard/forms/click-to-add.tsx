@@ -140,8 +140,21 @@ const ClickToAddInputs = <T extends DetailRecord>({
           {Object.keys(detail).map((property, propIndex) => (
             <div
               key={propIndex}
-              className={cn("flex items-center gap-x-4", containerClassName)}
+              className={cn("flex flex-col gap-y-1.5", containerClassName)}
             >
+              {/* Label */}
+              <span className="text-xs text-muted-foreground font-medium capitalize">
+                {property === "size"
+                  ? "Size"
+                  : property === "quantity"
+                  ? "Quantity"
+                  : property === "price"
+                  ? "Price"
+                  : property === "discount"
+                  ? "Discount %"
+                  : property}
+              </span>
+
               {/* Color picker toggle */}
               {property === "color" && colorPicker && (
                 <div className="flex gap-x-4">
@@ -173,18 +186,18 @@ const ClickToAddInputs = <T extends DetailRecord>({
 
               {/* Input field for each property */}
               <Input
-                className={cn("w-28 placeholder:capitalize", inputClassName)}
+                className={cn("placeholder:capitalize", inputClassName)}
                 type={typeof detail[property] === "number" ? "number" : "text"}
                 name={property}
                 placeholder={
                   property === "size"
-                    ? "Size (e.g. S, M, L)"
+                    ? "e.g. S, M, L"
                     : property === "quantity"
                     ? "Quantity"
                     : property === "price"
                     ? "Price"
                     : property === "discount"
-                    ? "Discount percent"
+                    ? "Discount"
                     : property
                 }
                 value={detail[property] as string}

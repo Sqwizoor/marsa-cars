@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, ExternalLink, Check, X, Eye } from "lucide-react";
+import { MoreHorizontal, ExternalLink, Check, X, Eye, Edit, Trash, Ban } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { updateProductStatus } from "@/queries/product";
+import { updateProductStatus, deleteProduct } from "@/queries/product";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -37,6 +37,7 @@ export type AdminProductType = {
   createdAt: Date;
   variants: {
     id: string;
+    slug: string;
     images: { url: string }[];
   }[];
 };
@@ -145,6 +146,24 @@ export const columns: ColumnDef<AdminProductType>[] = [
             }
         };
 
+        const handleDelete = async () => {
+            if (!confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
+                return;
+            }
+            
+            try {
+                await deleteProduct(product.id);
+                toast.success("Product deleted", {
+                    description: "The product has been permanently deleted.",
+                });
+                router.refresh();
+            } catch (error) {
+                toast.error("Failed to delete product", {
+                    description: "An error occurred while deleting the product.",
+                });
+            }
+        };
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -153,21 +172,43 @@ export const columns: ColumnDef<AdminProductType>[] = [
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            
+            {/* Edit Product */}
             <DropdownMenuItem
                 onClick={() => router.push(`/dashboard/seller/stores/${product.store.url}/products/${product.id}/variants/${product.variants[0]?.id}/?adminView=true`)}
-                // Note: I'm redirecting to the seller edit page.
-                // Admin has permission because I updated ProductDetails to check role.
             >
-              <Eye className="mr-2 h-4 w-4" /> Review / Edit
+              <Edit className="mr-2 h-4 w-4" /> Edit Product
             </DropdownMenuItem>
+            
+            {/* View Product (Public) */}
+            <DropdownMenuItem
+                onClick={() => window.open(`/product/${product.slug}/${product.variants[0]?.slug}`, '_blank')}
+            >
+              <Eye className="mr-2 h-4 w-4" /> View Product
+            </DropdownMenuItem>
+            
             <DropdownMenuSeparator />
+            
+            {/* Approve */}
             <DropdownMenuItem onClick={() => handleStatusUpdate("APPROVED")}>
               <Check className="mr-2 h-4 w-4 text-green-600" /> Approve
             </DropdownMenuItem>
+            
+            {/* Ban/Reject */}
             <DropdownMenuItem onClick={() => handleStatusUpdate("REJECTED")}>
-              <X className="mr-2 h-4 w-4 text-red-600" /> Reject
+              <Ban className="mr-2 h-4 w-4 text-orange-600" /> Ban Product
+            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator />
+            
+            {/* Delete */}
+            <DropdownMenuItem 
+                onClick={handleDelete}
+                className="text-red-600 focus:text-red-600 focus:bg-red-50"
+            >
+              <Trash className="mr-2 h-4 w-4" /> Delete Product
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
