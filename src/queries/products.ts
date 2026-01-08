@@ -59,8 +59,13 @@ export const upsertProduct = async (
     if (!product) throw new Error("Please provide product data.");
 
     // Find the store by URL
-    const store = await db.store.findUnique({
-      where: { url: storeUrl, userId: user.id },
+    const store = await db.store.findFirst({
+      where: {
+        url: storeUrl,
+        ...(user.privateMetadata.role !== "ADMIN" && {
+          userId: user.id,
+        }),
+      },
     });
     if (!store) throw new Error("Store not found.");
 
@@ -77,6 +82,7 @@ export const upsertProduct = async (
     if (existingProduct) {
       if (existingVariant) {
         // Update existing variant and product
+        await handleProductUpdate(product);
       } else {
         // Create new variant
         await handleCreateVariant(product);
@@ -89,6 +95,82 @@ export const upsertProduct = async (
     console.log(error);
     throw error;
   }
+};
+
+const handleProductUpdate = async (product: ProductWithVariantType) => {
+  // Update product info
+  await db.product.update({
+    where: { id: product.productId },
+    data: {
+      name: product.name,
+      description: product.description,
+      brand: product.brand,
+      category: { connect: { id: product.categoryId } },
+      subCategory: { connect: { id: product.subCategoryId } },
+      offerTag: { connect: { id: product.offerTagId } },
+      shippingFeeMethod: product.shippingFeeMethod,
+      freeShippingForAllCountries: product.freeShippingForAllCountries,
+      // Update specs, questions (delete and recreate)
+      specs: {
+        deleteMany: {},
+        create: product.product_specs.map((spec) => ({
+          name: spec.name,
+          value: spec.value,
+        })),
+      },
+      questions: {
+        deleteMany: {},
+        create: product.questions.map((q) => ({
+          question: q.question,
+          answer: q.answer,
+        })),
+      },
+    },
+  });
+
+  // Update variant info
+  await db.productVariant.update({
+    where: { id: product.variantId },
+    data: {
+      variantName: product.variantName,
+      variantDescription: product.variantDescription,
+      variantImage: product.variantImage,
+      sku: product.sku,
+      weight: product.weight,
+      isSale: product.isSale,
+      saleEndDate: product.saleEndDate,
+      keywords: product.keywords.join(","),
+      // Update images, colors, sizes, specs (delete and recreate)
+      images: {
+        deleteMany: {},
+        create: product.images.map((img) => ({
+          url: img.url,
+        })),
+      },
+      colors: {
+        deleteMany: {},
+        create: product.colors.map((color) => ({
+          name: color.color,
+        })),
+      },
+      sizes: {
+        deleteMany: {},
+        create: product.sizes.map((size) => ({
+          size: size.size,
+          price: size.price,
+          quantity: size.quantity,
+          discount: size.discount,
+        })),
+      },
+      specs: {
+        deleteMany: {},
+        create: (product.variant_specs || []).map((spec) => ({
+          name: spec.name,
+          value: spec.value,
+        })),
+      },
+    },
+  });
 };
 
 const handleProductCreate = async (

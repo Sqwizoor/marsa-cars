@@ -63,10 +63,12 @@ export const upsertProduct = async (
     const store = await db.store.findFirst({
       where: {
         url: storeUrl,
-        OR: [
-          { userId: user.id },
-          { members: { some: { id: user.id } } },
-        ],
+        ...(user.privateMetadata.role !== "ADMIN" && {
+          OR: [
+            { userId: user.id },
+            { members: { some: { id: user.id } } },
+          ],
+        }),
       },
     });
     if (!store) throw new Error("Store not found.");
