@@ -533,7 +533,7 @@ export const getProducts = async (
   // Construct the base query
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wherClause: any = {
-    AND: [],
+    AND: [{ status: "APPROVED" } as any],
   };
 
   // Apply store filter (using store URL)
@@ -814,10 +814,11 @@ export const retrieveProductDetails = async (
   productSlug: string,
   variantSlug: string
 ) => {
-  const product = await db.product.findUnique({
+  const product = await db.product.findFirst({
     where: {
       slug: productSlug,
-    },
+      status: "APPROVED",
+    } as any,
     include: {
       category: true,
       subCategory: true,

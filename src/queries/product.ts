@@ -547,7 +547,7 @@ export const getProducts = async (
 
   // Construct the base query
   const wherClause: Prisma.ProductWhereInput = {
-    AND: [],
+    AND: [{ status: "APPROVED" } as any],
   };
   const andConditions = wherClause.AND as Prisma.ProductWhereInput[];
 
@@ -840,10 +840,11 @@ export const retrieveProductDetails = async (
   productSlug: string,
   variantSlug: string
 ) => {
-  const product = await db.product.findUnique({
+  const product = await db.product.findFirst({
     where: {
       slug: productSlug,
-    },
+      status: "APPROVED",
+    } as any,
     include: {
       category: true,
       subCategory: true,
@@ -1406,11 +1407,14 @@ export const getProductsByIds = async (
 
   try {
     // Query the database for products with the specified ids
-    const variants = await db.productVariant.findMany({
+    const variants: any = await db.productVariant.findMany({
       where: {
         id: {
           in: ids, // Filter products whose idds are in the provided array
         },
+        product: {
+          status: "APPROVED",
+        } as any,
       },
       select: {
         id: true,
@@ -1436,7 +1440,7 @@ export const getProductsByIds = async (
       skip: skip,
     });
 
-    const new_products = variants.map((variant) => ({
+    const new_products = variants.map((variant: any) => ({
       id: variant.product.id,
       slug: variant.product.slug,
       name: variant.product.name,
@@ -1466,7 +1470,10 @@ export const getProductsByIds = async (
         id: {
           in: ids,
         },
-      },
+        product: {
+          status: "APPROVED",
+        },
+      } as any,
     });
 
     const totalPages = Math.ceil(allProducts / pageSize);
@@ -2968,6 +2975,6 @@ export const updateProductStatus = async (
 
   await db.product.update({
     where: { id: productId },
-    data: { status },
+    data: { status } as any,
   });
 };

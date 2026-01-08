@@ -3,7 +3,7 @@ import Image, { type StaticImageData } from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import Img1 from "@/public/assets/images/swiper/new-hero.png"
-import Img2 from "@/public/assets/images/swiper/slider4.png"
+import Img2 from "@/public/assets/images/swiper/new-slider.png"
 import Img3 from "@/public/assets/images/swiper/slider5.png"
 import { useState, useEffect } from "react"
 

@@ -128,14 +128,17 @@ export const getHomeDataDynamic = async (
     const dbField = mapProperty(property);
 
     // Construct the 'where' clause based on the dbField
-    const whereClause =
-      dbField === "offerTag.url"
-        ? { offerTag: { url: value } }
-        : dbField === "category.url"
-        ? { category: { url: value } }
-        : dbField === "subCategory.url"
-        ? { subCategory: { url: value } }
-        : {};
+    const whereClause: any = {
+      status: "APPROVED",
+    };
+
+    if (dbField === "offerTag.url") {
+      whereClause.offerTag = { url: value };
+    } else if (dbField === "category.url") {
+      whereClause.category = { url: value };
+    } else if (dbField === "subCategory.url") {
+      whereClause.subCategory = { url: value };
+    }
 
     // Query products based on the constructed where clause
     const products = await db.product.findMany({
