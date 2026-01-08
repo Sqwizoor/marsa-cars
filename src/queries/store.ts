@@ -186,11 +186,18 @@ export const updateStoreDefaultShippingDetails = async (
     if (!details) {
       throw new Error("No shipping details provided to update.");
     }
+    // Check DB user for role as fallback
+    const dbUser = await db.user.findUnique({
+      where: { id: user.id },
+      select: { role: true },
+    });
+    const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
+
     // Make sure seller is updating their own store
     const check_ownership = await db.store.findFirst({
       where: {
         url: storeUrl,
-        ...(user.privateMetadata.role !== "ADMIN" && {
+        ...(!isAdmin && {
           OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
         }),
       },
@@ -243,11 +250,18 @@ export const getStoreShippingRates = async (storeUrl: string) => {
     // Ensure the store URL is provided
     if (!storeUrl) throw new Error("Store URL is required.");
 
+    // Check DB user for role as fallback
+    const dbUserRole = await db.user.findUnique({
+      where: { id: user.id },
+      select: { role: true },
+    });
+    const isAdminUser = user.privateMetadata?.role === "ADMIN" || dbUserRole?.role === "ADMIN";
+
     // Make sure seller is updating their own store
     const check_ownership = await db.store.findFirst({
       where: {
         url: storeUrl,
-        ...(user.privateMetadata.role !== "ADMIN" && {
+        ...(!isAdminUser && {
           OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
         }),
       },
@@ -262,7 +276,7 @@ export const getStoreShippingRates = async (storeUrl: string) => {
     const store = await db.store.findFirst({
       where: {
         url: storeUrl,
-        ...(user.privateMetadata.role !== "ADMIN" && {
+        ...(!isAdminUser && {
           OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
         }),
       },
@@ -330,11 +344,18 @@ export const upsertShippingRate = async (
 
     await ensureSellerSubscription(user.id);
 
+    // Check DB user for role as fallback
+    const dbUser = await db.user.findUnique({
+      where: { id: user.id },
+      select: { role: true },
+    });
+    const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
+
     // Make sure seller is updating their own store
     const check_ownership = await db.store.findFirst({
       where: {
         url: storeUrl,
-        ...(user.privateMetadata.role !== "ADMIN" && {
+        ...(!isAdmin && {
           OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
         }),
       },
@@ -416,7 +437,12 @@ export const getStoreOrders = async (storeUrl: string) => {
 
     // Verify ownership or membership
     const isMember = store.members.some((m) => m.id === user.id);
-    const isAdmin = user.privateMetadata.role === "ADMIN";
+    const dbUser = await db.user.findUnique({
+      where: { id: user.id },
+      select: { role: true },
+    });
+    const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
+    
     if (user.id !== store.userId && !isMember && !isAdmin) {
       throw new Error("You don't have persmission to access this store.");
     }
@@ -733,10 +759,17 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
     const user = await currentUser();
     if (!user) throw new Error("Unauthenticated.");
 
+    // Check DB user for role as fallback
+    const dbUser = await db.user.findUnique({
+      where: { id: user.id },
+      select: { role: true },
+    });
+    const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
+
     const store = await db.store.findFirst({
       where: {
         url: storeUrl,
-        ...(user.privateMetadata.role !== "ADMIN" && {
+        ...(!isAdmin && {
           OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
         }),
       },

@@ -60,10 +60,16 @@ export const upsertProduct = async (
     if (!product) throw new Error("Please provide product data.");
 
     // Find the store by URL
+    const dbUser = await db.user.findUnique({
+      where: { id: user.id },
+      select: { role: true },
+    });
+    const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
+
     const store = await db.store.findFirst({
       where: {
         url: storeUrl,
-        ...(user.privateMetadata.role !== "ADMIN" && {
+        ...(!isAdmin && {
           OR: [
             { userId: user.id },
             { members: { some: { id: user.id } } },
