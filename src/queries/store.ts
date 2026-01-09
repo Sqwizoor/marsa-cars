@@ -127,9 +127,12 @@ export const getStoreDefaultShippingDetails = async (storeUrl: string) => {
     if (!storeUrl) throw new Error("Store URL is required.");
 
     // Fetch the store and its default shipping details
-    const store = await db.store.findUnique({
+    const store = await db.store.findFirst({
       where: {
-        url: storeUrl,
+        url: {
+          equals: storeUrl,
+          mode: "insensitive",
+        },
       },
       select: {
         defaultShippingService: true,
@@ -196,7 +199,10 @@ export const updateStoreDefaultShippingDetails = async (
     // Make sure seller is updating their own store
     const check_ownership = await db.store.findFirst({
       where: {
-        url: storeUrl,
+        url: {
+          equals: storeUrl,
+          mode: "insensitive",
+        },
         ...(!isAdmin && {
           OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
         }),
@@ -209,9 +215,22 @@ export const updateStoreDefaultShippingDetails = async (
       );
 
     // Find and update the store based on storeUrl
+    // We first find the ID to ensure we update the correct record regardless of URL casing
+    const storeToUpdate = await db.store.findFirst({
+      where: {
+        url: {
+          equals: storeUrl,
+          mode: "insensitive",
+        },
+      },
+      select: { id: true },
+    });
+
+    if (!storeToUpdate) throw new Error("Store not found.");
+
     const updatedStore = await db.store.update({
       where: {
-        url: storeUrl,
+        id: storeToUpdate.id,
       },
       data: details,
     });
@@ -260,7 +279,10 @@ export const getStoreShippingRates = async (storeUrl: string) => {
     // Make sure seller is updating their own store
     const check_ownership = await db.store.findFirst({
       where: {
-        url: storeUrl,
+        url: {
+          equals: storeUrl,
+          mode: "insensitive",
+        },
         ...(!isAdminUser && {
           OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
         }),
@@ -275,7 +297,10 @@ export const getStoreShippingRates = async (storeUrl: string) => {
     // Get store details
     const store = await db.store.findFirst({
       where: {
-        url: storeUrl,
+        url: {
+          equals: storeUrl,
+          mode: "insensitive",
+        },
         ...(!isAdminUser && {
           OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
         }),
@@ -374,9 +399,12 @@ export const upsertShippingRate = async (
       throw new Error("Please provide a valid country ID.");
 
     // Get store id
-    const store = await db.store.findUnique({
+    const store = await db.store.findFirst({
       where: {
-        url: storeUrl,
+        url: {
+          equals: storeUrl,
+          mode: "insensitive",
+        },
       },
     });
     if (!store) throw new Error("Please provide a valid store URL.");
@@ -731,9 +759,12 @@ export const deleteStore = async (storeId: string) => {
 
 export const getStorePageDetails = async (storeUrl: string) => {
   // Fetch the store details from the database
-  const store = await db.store.findUnique({
+  const store = await db.store.findFirst({
     where: {
-      url: storeUrl,
+      url: {
+        equals: storeUrl,
+        mode: "insensitive",
+      },
       status: "ACTIVE",
     },
     select: {

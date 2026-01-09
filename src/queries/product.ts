@@ -66,9 +66,12 @@ export const upsertProduct = async (
     });
     const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
 
-    const store = await db.store.findUnique({
+    const store = await db.store.findFirst({
       where: {
-        url: storeUrl,
+        url: {
+          equals: storeUrl,
+          mode: "insensitive",
+        },
       },
       select: {
         id: true,
@@ -581,8 +584,13 @@ export const getProducts = async (
 
   // Apply store filter (using store URL)
   if (filters.store) {
-    const store = await db.store.findUnique({
-      where: { url: filters.store },
+    const store = await db.store.findFirst({
+      where: {
+        url: {
+          equals: filters.store,
+          mode: "insensitive",
+        },
+      },
       select: { id: true },
     });
     if (store) {

@@ -5,27 +5,8 @@ import { usePathname } from "next/navigation";
 
 export default function ProfileSidebar() {
   const pathname = usePathname();
-  const path = pathname.split("/profile/")[1];
-  const path_trim = path ? path.split("/")[0] : null;
   return (
     <div>
-      <div className="w-full p-4 text-xs text-[#999]">
-        <span>
-          <Link href="/">Home</Link>
-          <span className="mx-2">&gt;</span>
-        </span>
-        <span>
-          <Link href="/profile">Account</Link>
-          {pathname !== "/profile" && <span className="mx-2">&gt;</span>}
-        </span>
-        {path && (
-          <span>
-            <Link href={pathname} className="capitalize">
-              {path_trim || path}
-            </Link>
-          </span>
-        )}
-      </div>
       <div className="bg-white rounded-lg shadow-sm">
         <div className="py-3 w-full md:w-[296px] min-h-72">
           <div className="font-bold text-main-primary flex h-9 items-center px-4">
