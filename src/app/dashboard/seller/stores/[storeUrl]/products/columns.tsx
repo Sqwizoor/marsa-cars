@@ -33,7 +33,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useModal } from "@/app/providers/modal-provider"
 
 // Lucide icons
-import { CopyPlus, FilePenLine, MoreHorizontal, Trash } from "lucide-react"
+import { CopyPlus, Edit, FilePenLine, MoreHorizontal, Trash } from "lucide-react"
 
 // Queries
 import { deleteProduct } from "@/queries/product"
@@ -151,7 +151,7 @@ export const columns: ColumnDef<StoreProductType>[] = [
     cell: ({ row }) => {
       const rowData = row.original
 
-      return <CellActions productId={rowData.id} />
+      return <CellActions productId={rowData.id} storeUrl={rowData.store?.url || ""} />
     },
   },
 ]
@@ -159,10 +159,11 @@ export const columns: ColumnDef<StoreProductType>[] = [
 // Define props interface for CellActions component
 interface CellActionsProps {
   productId: string
+  storeUrl: string
 }
 
 // CellActions component definition
-const CellActions: React.FC<CellActionsProps> = ({ productId }) => {
+const CellActions: React.FC<CellActionsProps> = ({ productId, storeUrl }) => {
   // Hooks
   const { setClose } = useModal()
   const [loading, setLoading] = useState(false)
@@ -183,6 +184,11 @@ const CellActions: React.FC<CellActionsProps> = ({ productId }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <Link href={`/dashboard/seller/stores/${storeUrl}/products/${productId}`}>
+            <DropdownMenuItem className="cursor-pointer">
+              <Edit className="mr-2 h-4 w-4" /> Edit product
+            </DropdownMenuItem>
+          </Link>
           <AlertDialogTrigger asChild>
             <DropdownMenuItem className="flex gap-2" onClick={() => {}}>
               <Trash size={15} /> Delete product

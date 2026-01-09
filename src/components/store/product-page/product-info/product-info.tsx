@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Dispatch, FC, SetStateAction } from "react";
 import { CopyIcon } from "@/components/store/icons";
+import { Badge } from "@/components/ui/badge";
 import toast from "react-hot-toast";
 import ProductPrice from "./product-price";
 import Countdown from "../../shared/countdown";
@@ -51,6 +52,7 @@ const ProductInfo: FC<Props> = ({
     store,
     rating,
     reviewsStatistics,
+    approvalStatus,
   } = productData;
 
   const { totalReviews } = reviewsStatistics;
@@ -67,6 +69,16 @@ const ProductInfo: FC<Props> = ({
 
   return (
     <div className="relative w-full xl:w-[540px]">
+      {approvalStatus === "PENDING" && (
+        <div className="mb-2">
+          <Badge
+            variant="secondary"
+            className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200"
+          >
+            On Review
+          </Badge>
+        </div>
+      )}
       {/* Title */}
       <div>
         <h1 className="text-main-primary inline font-bold leading-5">

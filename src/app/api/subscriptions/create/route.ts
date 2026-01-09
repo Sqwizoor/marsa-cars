@@ -8,19 +8,19 @@ import { PayFastPaymentRequest } from "@/lib/payfast/types";
 // Subscription tier pricing and limits
 const SUBSCRIPTION_PLANS = {
   BRONZE: {
-    price: 199,
-    adLimit: 10,
+    price: 499,
+    adLimit: 100,
     name: "Bronze Plan",
-    description: "10 ads per month",
+    description: "100 ads per month",
   },
   SILVER: {
-    price: 399,
-    adLimit: 30,
+    price: 699,
+    adLimit: 250,
     name: "Silver Plan",
-    description: "30 ads per month",
+    description: "250 ads per month",
   },
   GOLD: {
-    price: 599,
+    price: 1399,
     adLimit: -1, // unlimited
     name: "Gold Plan",
     description: "Unlimited ads",

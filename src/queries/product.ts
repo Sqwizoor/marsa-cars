@@ -66,18 +66,40 @@ export const upsertProduct = async (
     });
     const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
 
-    const store = await db.store.findFirst({
+    const store = await db.store.findUnique({
       where: {
         url: storeUrl,
-        ...(!isAdmin && {
-          OR: [
-            { userId: user.id },
-            { members: { some: { id: user.id } } },
-          ],
-        }),
+      },
+      select: {
+        id: true,
+        userId: true,
       },
     });
+
     if (!store) throw new Error("Store not found.");
+
+    // Check permissions
+    if (!isAdmin) {
+      if (store.userId !== user.id) {
+        // Check if member
+        const isMember = await db.store.findFirst({
+          where: {
+            id: store.id,
+            members: {
+              some: {
+                id: user.id,
+              },
+            },
+          },
+        });
+
+        if (!isMember) {
+          throw new Error(
+            "Unauthorized Access: You are not a member of this store."
+          );
+        }
+      }
+    }
 
     // Check if the product already exists
     const existingProduct = await db.product.findUnique({
@@ -849,7 +871,6 @@ export const retrieveProductDetails = async (
   const product = await db.product.findFirst({
     where: {
       slug: productSlug,
-      status: "APPROVED",
     } as any,
     include: {
       category: true,
@@ -956,6 +977,7 @@ const formatProductResponse = (
 
   return {
     productId: product.id,
+    approvalStatus: product.status,
     variantId: variant.id,
     productSlug: product.slug,
     variantSlug: variant.slug,
