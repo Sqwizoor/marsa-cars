@@ -59,21 +59,34 @@ export const upsertProduct = async (
     if (!product) throw new Error("Please provide product data.");
 
     // Find the store by URL
+    const store = await db.store.findFirst({
+      where: {
+        url: {
+          equals: storeUrl,
+          mode: "insensitive",
+        },
+      },
+      include: {
+        members: true,
+      },
+    });
+
+    if (!store) throw new Error("Store not found.");
+
+    // Check permissions
     const dbUser = await db.user.findUnique({
       where: { id: user.id },
       select: { role: true },
     });
-    const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
+    
+    const isOwner = store.userId === user.id;
+    const isMember = store.members.some((member) => member.userId === user.id);
+    const isAdmin =
+      user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
 
-    const store = await db.store.findFirst({
-      where: {
-        url: storeUrl,
-        ...(!isAdmin && {
-          userId: user.id,
-        }),
-      },
-    });
-    if (!store) throw new Error("Store not found.");
+    if (!isOwner && !isMember && !isAdmin) {
+      throw new Error("Unauthorized Access: You do not have permission to manage products for this store.");
+    }
 
     // Check if the product already exists
     const existingProduct = await db.product.findUnique({
@@ -455,7 +468,14 @@ export const getProductMainInfo = async (productId: string) => {
 // Returns: Array of products from the specified store, including category, subcategory, and variant details.
 export const getAllStoreProducts = async (storeUrl: string) => {
   // Retrieve store details from the database using the store URL
-  const store = await db.store.findUnique({ where: { url: storeUrl } });
+  const store = await db.store.findFirst({
+    where: {
+      url: {
+        equals: storeUrl,
+        mode: "insensitive",
+      },
+    },
+  });
   if (!store) throw new Error("Please provide a valid store URL.");
 
   // Retrieve all products associated with the store
@@ -544,9 +564,12 @@ export const getProducts = async (
 
   // Apply store filter (using store URL)
   if (filters.store) {
-    const store = await db.store.findUnique({
+    const store = await db.store.findFirst({
       where: {
-        url: filters.store,
+        url: {
+          equals: filters.store,
+          mode: "insensitive",
+        },
       },
       select: { id: true },
     });

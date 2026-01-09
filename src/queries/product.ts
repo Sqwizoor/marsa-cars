@@ -66,10 +66,12 @@ export const upsertProduct = async (
     });
     const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
 
+    console.log("Upserting product for storeUrl:", storeUrl);
+
     const store = await db.store.findFirst({
       where: {
         url: {
-          equals: storeUrl,
+          equals: storeUrl?.trim(),
           mode: "insensitive",
         },
       },
@@ -79,7 +81,10 @@ export const upsertProduct = async (
       },
     });
 
-    if (!store) throw new Error("Store not found.");
+    if (!store) {
+      console.error(`Store not found for url: ${storeUrl}`);
+      throw new Error("Store not found.");
+    }
 
     // Check permissions
     if (!isAdmin) {
