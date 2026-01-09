@@ -80,7 +80,7 @@ export const upsertProduct = async (
     });
     
     const isOwner = store.userId === user.id;
-    const isMember = store.members.some((member) => member.userId === user.id);
+    const isMember = store.members.some((member) => member.id === user.id);
     const isAdmin =
       user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
 
