@@ -120,36 +120,36 @@ export default async function HomeUserCard({
                 </Button>
               ) : (
                 <>
-                <SubscriptionBadge />
                 {role === "SELLER" ? (
-                <Button
-                 
-                
-                  className="rounded-md bg-[#F2F2F2] text-black w-full shadow-sm hover:shadow hover:bg-gray-200 transition-all duration-300"
-                >
-                  <Link href={"/dashboard/seller"} className="w-full">
-                    Switch to Seller Dashboard
-                  </Link>
-                </Button>
-              ) : role === "ADVERTISER" ? (
-                <Button
-                  variant="orange-gradient"
-                  className="rounded-md w-full shadow-sm hover:shadow transition-all duration-300"
-                >
-                  <Link href={"/dashboard/advertiser"} className="w-full">
-                    Switch to Advertiser Dashboard
-                  </Link>
-                </Button>
-              ) : (
-                <Button
-                  variant="orange-gradient"
-                  className="rounded-md w-full shadow-sm hover:shadow transition-all duration-300"
-                >
-                  <Link href={"/subscriptions"} className="w-full">
-                    Apply to become a seller
-                  </Link>
-                </Button>
-              )}
+                  <>
+                    {hasActiveSubscription && <SubscriptionBadge />}
+                    <Button
+                      className="rounded-md bg-[#F2F2F2] text-black w-full shadow-sm hover:shadow hover:bg-gray-200 transition-all duration-300"
+                    >
+                      <Link href={"/dashboard/seller"} className="w-full">
+                        Switch to Seller Dashboard
+                      </Link>
+                    </Button>
+                  </>
+                ) : role === "ADVERTISER" ? (
+                  <Button
+                    variant="orange-gradient"
+                    className="rounded-md w-full shadow-sm hover:shadow transition-all duration-300"
+                  >
+                    <Link href={"/dashboard/advertiser"} className="w-full">
+                      Switch to Advertiser Dashboard
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    variant="orange-gradient"
+                    className="rounded-md w-full shadow-sm hover:shadow transition-all duration-300"
+                  >
+                    <Link href={"/subscriptions"} className="w-full">
+                      Apply to become a seller
+                    </Link>
+                  </Button>
+                )}
                 </>
               )}
             </div>

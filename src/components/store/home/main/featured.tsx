@@ -84,8 +84,8 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
                     }
               }
               breakpoints={{
-                320: { slidesPerView: 2, spaceBetween: 5 },
-                420: { slidesPerView: 2, spaceBetween: 6 },
+                320: { slidesPerView: 3, spaceBetween: 5 },
+                420: { slidesPerView: 3, spaceBetween: 6 },
                 520: { slidesPerView: 3, spaceBetween: 6 },
                 640: { slidesPerView: 3, spaceBetween: 5 },
                 768: { slidesPerView: 4, spaceBetween: 10 },
