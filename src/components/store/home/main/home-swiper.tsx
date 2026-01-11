@@ -89,7 +89,7 @@ export default function HomeMainSwiper() {
   }
 
   return (
-    <div className="relative w-full overflow-hidden rounded-lg shadow-lg group">
+    <div className="relative w-full max-w-full overflow-hidden rounded-lg shadow-lg group">
       {/* Slides */}
       <div
         className="relative w-full h-[310px] sm:h-[350px] md:h-[400px]"

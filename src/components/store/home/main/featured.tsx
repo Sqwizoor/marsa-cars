@@ -17,7 +17,7 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
   const shouldAutoScroll = products.length >= 5;
 
   return (
-    <div className="relative rounded-md overflow-hidden">
+    <div className="relative rounded-md overflow-hidden w-full max-w-full">
       <div
         className="w-full flex flex-col items-center bg-cover bg-yellow-600 bg-center bg-no-repeat gap-1 py-1"
         // style={{ backgroundImage: "url(/assets/images/ads/featured.webp)" }}
@@ -36,29 +36,29 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
           </div>
         </div>
         {/* Product swiper or Marquee */}
-        <div className="flex-1 min-w-0 w-full px-2 md:px-4">
+        <div className="flex-1 min-w-0 w-full max-w-full px-2 md:px-4">
           {mounted && isLargeDevice && shouldAutoScroll ? (
-            <div className="w-full max-w-full overflow-hidden relative pb-4 pt-2 mask-linear-fade">
+            <div className="w-full overflow-x-hidden overflow-y-visible relative pb-4 pt-2">
               {/* Left/Right Fade Gradients */}
-              <div className="absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-yellow-600 to-transparent pointer-events-none" />
-              <div className="absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l from-yellow-600 to-transparent pointer-events-none" />
+              <div className="absolute left-0 top-0 bottom-0 w-12 md:w-16 z-10 bg-gradient-to-r from-yellow-600 to-transparent pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-12 md:w-16 z-10 bg-gradient-to-l from-yellow-600 to-transparent pointer-events-none" />
 
-              <div
-                className="flex gap-4 animate-marquee pause-on-hover w-max"
-              >
-                {/* 
-                  Create enough groups to ensure seamless scrolling.
-                  We need to animate from 0% to -50%.
-                */}
-                {[...Array(6)].map((_, groupIndex) => (
-                  <div key={groupIndex} className="flex gap-4 shrink-0">
-                     {products.map((product, i) => (
+              <div className="relative w-full overflow-hidden">
+                <div
+                  className="flex gap-4 animate-marquee pause-on-hover will-change-transform"
+                  style={{ display: 'flex', width: 'max-content' }}
+                >
+                  {/* Create enough duplicates for seamless infinite scroll */}
+                  {[...Array(6)].map((_, groupIndex) => (
+                    <div key={groupIndex} className="flex gap-4 shrink-0">
+                      {products.map((product, i) => (
                         <div key={`${groupIndex}-${product.slug || i}`} className="shrink-0 w-[140px]">
                           <ProductCardSimple product={product} />
                         </div>
-                     ))}
-                  </div>
-                ))}
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ) : (
