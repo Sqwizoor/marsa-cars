@@ -14,6 +14,7 @@ import ProductCardModern from "../cards/product/modern-card";
 import ProductCardDeal from "../cards/product/deal-card";
 import ProductCardMini from "../cards/product/mini-card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { FreeMode } from "swiper/modules";
 
 interface Props {
   children?: ReactNode;
@@ -24,6 +25,9 @@ interface Props {
   spaceBetween?: number;
   withScrollbar?: boolean;
   autoplay?: boolean | { delay: number; disableOnInteraction: boolean };
+  loop?: boolean;
+  speed?: number;
+  freeMode?: boolean;
 }
 
 const MainSwiper: FC<Props> = ({
@@ -41,6 +45,9 @@ const MainSwiper: FC<Props> = ({
   spaceBetween = 30,
   withScrollbar = false,
   autoplay = false,
+  loop = false,
+  speed,
+  freeMode = false,
 }) => {
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -70,12 +77,15 @@ const MainSwiper: FC<Props> = ({
       )}
 
       <Swiper
-        modules={[Navigation, Pagination, Scrollbar, Autoplay]}
+        modules={[Navigation, Pagination, Scrollbar, Autoplay, FreeMode]}
         navigation={{
           prevEl: prevRef.current,
           nextEl: nextRef.current,
         }}
         autoplay={autoplay}
+        loop={loop}
+        speed={speed}
+        freeMode={freeMode}
         onBeforeInit={(swiper) => {
           // @ts-ignore
           swiper.params.navigation.prevEl = prevRef.current;

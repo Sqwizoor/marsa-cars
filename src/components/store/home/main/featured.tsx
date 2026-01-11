@@ -4,6 +4,8 @@ import MainSwiper from "../../shared/swiper";
 import { SimpleProduct } from "@/lib/types";
 
 export default function Featured({ products }: { products: SimpleProduct[] }) {
+  const shouldAutoScroll = products.length > 5;
+
   return (
     <div className="relative rounded-md overflow-hidden">
       <div
@@ -43,10 +45,21 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
             slidesPerView={1}
             spaceBetween={8}
             withScrollbar={false}
-            autoplay={{
-              delay: 2000,
-              disableOnInteraction: false,
-            }}
+            loop={shouldAutoScroll}
+            freeMode={shouldAutoScroll}
+            speed={shouldAutoScroll ? 9000 : undefined}
+            autoplay={
+              shouldAutoScroll
+                ? {
+                    delay: 0,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true,
+                  }
+                : {
+                    delay: 2000,
+                    disableOnInteraction: false,
+                  }
+            }
             breakpoints={{
               320: { slidesPerView: 2, spaceBetween: 5 },
               420: { slidesPerView: 2, spaceBetween: 6 },
