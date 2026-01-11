@@ -799,7 +799,10 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
 
     const store = await db.store.findFirst({
       where: {
-        url: storeUrl,
+        url: {
+          equals: storeUrl,
+          mode: "insensitive",
+        },
         ...(!isAdmin && {
           OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
         }),
