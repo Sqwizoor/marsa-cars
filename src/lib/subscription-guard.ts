@@ -147,7 +147,7 @@ async function tryRecoverSubscription(userId: string) {
           trialEndsAt: newTrialEnd,
           isTrial: true,
           tier: "BRONZE", // Ensure it has a valid tier
-          adLimit: 10     // Ensure it has limits
+          adLimit: 100     // Ensure it has limits
         }
       });
       return updated;
@@ -162,7 +162,7 @@ async function tryRecoverSubscription(userId: string) {
           trialEndsAt: newTrialEnd,
           amount: 10,
           currency: "ZAR",
-          adLimit: 10,
+          adLimit: 100,
           adsUsed: 0,
         }
       });

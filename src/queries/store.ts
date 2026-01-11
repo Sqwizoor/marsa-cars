@@ -147,7 +147,10 @@ export const getStoreDefaultShippingDetails = async (storeUrl: string) => {
     });
 
     // Throw an error if the store is not found
-    if (!store) throw new Error("Store not found.");
+    if (!store) {
+      console.log(`Store not found for url: ${storeUrl}`);
+      throw new Error("Store not found.");
+    }
 
     return store;
   } catch (error) {
@@ -461,7 +464,10 @@ export const getStoreOrders = async (storeUrl: string) => {
     })) as (Store & { members: { id: string }[] }) | null;
 
     // Ensure store existence
-    if (!store) throw new Error("Store not found.");
+    if (!store) {
+      console.log(`Store not found for url: ${storeUrl}`);
+      throw new Error("Store not found.");
+    }
 
     // Verify ownership or membership
     const isMember = store.members.some((m) => m.id === user.id);
@@ -809,7 +815,10 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
       },
     });
 
-    if (!store) throw new Error("Store not found.");
+    if (!store) {
+      console.log(`Store not found for url: ${storeUrl}`);
+      throw new Error("Store not found.");
+    }
 
     // Check permissions
     const isOwner = store.userId === user.id;
