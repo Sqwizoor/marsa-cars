@@ -803,13 +803,21 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
           equals: storeUrl,
           mode: "insensitive",
         },
-        ...(!isAdmin && {
-          OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
-        }),
+      },
+      include: {
+        members: true,
       },
     });
 
     if (!store) throw new Error("Store not found.");
+
+    // Check permissions
+    const isOwner = store.userId === user.id;
+    const isMember = store.members.some((member) => member.id === user.id);
+
+    if (!isOwner && !isMember && !isAdmin) {
+      throw new Error("Unauthorized Access: You do not have permission to view this store dashboard.");
+    }
 
     // 1. Total Revenue (from paid orders)
     const revenueResult = await db.orderGroup.aggregate({
