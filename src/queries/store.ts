@@ -15,6 +15,14 @@ import { currentUser } from "@clerk/nextjs/server";
 // Prisma models
 import { ShippingRate, Store } from "@prisma/client";
 
+const normalizeStoreUrl = (storeUrl: string) => {
+  try {
+    return decodeURIComponent(storeUrl).trim();
+  } catch {
+    return storeUrl.trim();
+  }
+};
+
 // Function: upsertStore
 // Description: Upserts store details into the database, ensuring uniqueness of name,url, email, and phone number.
 // Access Level: Seller Only
@@ -125,12 +133,13 @@ export const getStoreDefaultShippingDetails = async (storeUrl: string) => {
   try {
     // Ensure the store URL is provided
     if (!storeUrl) throw new Error("Store URL is required.");
+    const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
 
     // Fetch the store and its default shipping details
     const store = await db.store.findFirst({
       where: {
         url: {
-          equals: storeUrl,
+          equals: normalizedStoreUrl,
           mode: "insensitive",
         },
       },
@@ -147,10 +156,7 @@ export const getStoreDefaultShippingDetails = async (storeUrl: string) => {
     });
 
     // Throw an error if the store is not found
-    if (!store) {
-      console.log(`Store not found for url: ${storeUrl}`);
-      throw new Error("Store not found.");
-    }
+    if (!store) throw new Error("Store not found.");
 
     return store;
   } catch (error) {
@@ -187,6 +193,7 @@ export const updateStoreDefaultShippingDetails = async (
 
     // Ensure the store URL is provided
     if (!storeUrl) throw new Error("Store URL is required.");
+    const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
 
     // Ensure at least one detail is provided for update
     if (!details) {
@@ -203,7 +210,7 @@ export const updateStoreDefaultShippingDetails = async (
     const check_ownership = await db.store.findFirst({
       where: {
         url: {
-          equals: storeUrl,
+          equals: normalizedStoreUrl,
           mode: "insensitive",
         },
         ...(!isAdmin && {
@@ -222,7 +229,7 @@ export const updateStoreDefaultShippingDetails = async (
     const storeToUpdate = await db.store.findFirst({
       where: {
         url: {
-          equals: storeUrl,
+          equals: normalizedStoreUrl,
           mode: "insensitive",
         },
       },
@@ -271,6 +278,7 @@ export const getStoreShippingRates = async (storeUrl: string) => {
 
     // Ensure the store URL is provided
     if (!storeUrl) throw new Error("Store URL is required.");
+    const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
 
     // Check DB user for role as fallback
     const dbUserRole = await db.user.findUnique({
@@ -283,7 +291,7 @@ export const getStoreShippingRates = async (storeUrl: string) => {
     const check_ownership = await db.store.findFirst({
       where: {
         url: {
-          equals: storeUrl,
+          equals: normalizedStoreUrl,
           mode: "insensitive",
         },
         ...(!isAdminUser && {
@@ -301,7 +309,7 @@ export const getStoreShippingRates = async (storeUrl: string) => {
     const store = await db.store.findFirst({
       where: {
         url: {
-          equals: storeUrl,
+          equals: normalizedStoreUrl,
           mode: "insensitive",
         },
         ...(!isAdminUser && {
@@ -378,11 +386,15 @@ export const upsertShippingRate = async (
       select: { role: true },
     });
     const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
+    const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
 
     // Make sure seller is updating their own store
     const check_ownership = await db.store.findFirst({
       where: {
-        url: storeUrl,
+        url: {
+          equals: normalizedStoreUrl,
+          mode: "insensitive",
+        },
         ...(!isAdmin && {
           OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
         }),
@@ -405,7 +417,7 @@ export const upsertShippingRate = async (
     const store = await db.store.findFirst({
       where: {
         url: {
-          equals: storeUrl,
+          equals: normalizedStoreUrl,
           mode: "insensitive",
         },
       },
@@ -453,10 +465,13 @@ export const getStoreOrders = async (storeUrl: string) => {
 
     await ensureSellerSubscription(user.id);
 
-    // Get store id using url
-    const store = (await db.store.findUnique({
+    const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
+    const store = (await db.store.findFirst({
       where: {
-        url: storeUrl,
+        url: {
+          equals: normalizedStoreUrl,
+          mode: "insensitive",
+        },
       },
       include: {
         members: true,
@@ -464,10 +479,7 @@ export const getStoreOrders = async (storeUrl: string) => {
     })) as (Store & { members: { id: string }[] }) | null;
 
     // Ensure store existence
-    if (!store) {
-      console.log(`Store not found for url: ${storeUrl}`);
-      throw new Error("Store not found.");
-    }
+    if (!store) throw new Error("Store not found.");
 
     // Verify ownership or membership
     const isMember = store.members.some((m) => m.id === user.id);
@@ -764,11 +776,12 @@ export const deleteStore = async (storeId: string) => {
 };
 
 export const getStorePageDetails = async (storeUrl: string) => {
+  const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
   // Fetch the store details from the database
   const store = await db.store.findFirst({
     where: {
       url: {
-        equals: storeUrl,
+        equals: normalizedStoreUrl,
         mode: "insensitive",
       },
       status: "ACTIVE",
@@ -795,6 +808,7 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
   try {
     const user = await currentUser();
     if (!user) throw new Error("Unauthenticated.");
+    const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
 
     // Check DB user for role as fallback
     const dbUser = await db.user.findUnique({
@@ -806,7 +820,7 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
     const store = await db.store.findFirst({
       where: {
         url: {
-          equals: storeUrl,
+          equals: normalizedStoreUrl,
           mode: "insensitive",
         },
       },
@@ -815,10 +829,7 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
       },
     });
 
-    if (!store) {
-      console.log(`Store not found for url: ${storeUrl}`);
-      throw new Error("Store not found.");
-    }
+    if (!store) throw new Error("Store not found.");
 
     // Check permissions
     const isOwner = store.userId === user.id;

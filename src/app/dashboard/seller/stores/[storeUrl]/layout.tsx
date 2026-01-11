@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import React from "react";
 import DashboardTour from "@/components/dashboard/dashboard-tour";
 import SidebarWrapper from "@/components/dashboard/siderbar/sidebar-wrapper";
+import { currentUser } from "@clerk/nextjs/server";
 
 interface SellerStoreDashboardLayoutProps {
   children: React.ReactNode;
@@ -18,10 +19,30 @@ const SellerStoreDashboardLayout = async ({
   params,
 }: SellerStoreDashboardLayoutProps) => {
   const { storeUrl } = await params;
+  const normalizedStoreUrl = (() => {
+    try {
+      return decodeURIComponent(storeUrl).trim();
+    } catch {
+      return storeUrl.trim();
+    }
+  })();
+
+  const user = await currentUser();
+  if (!user) redirect("/sign-in");
+
+  const dbUser = await db.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+  const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
+
   // Get the store
-  const store = await db.store.findUnique({
+  const store = await db.store.findFirst({
     where: {
-      url: storeUrl,
+      url: {
+        equals: normalizedStoreUrl,
+        mode: "insensitive",
+      },
     },
   });
 
@@ -31,6 +52,11 @@ const SellerStoreDashboardLayout = async ({
 
   // Get all stores
   const stores = await db.store.findMany({
+    where: isAdmin
+      ? undefined
+      : {
+          OR: [{ userId: user.id }, { members: { some: { id: user.id } } }],
+        },
     orderBy: {
       createdAt: "desc",
     },

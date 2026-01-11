@@ -51,7 +51,7 @@ const StoreSwitcher: FC<StoreSwitcherProps> = ({ stores, className }) => {
 
   const onStoreSelect = (store: { label: string; value: string }) => {
     setOpen(false);
-    router.push(`/dashboard/seller/stores/${store.value}`);
+    router.push(`/dashboard/seller/stores/${encodeURIComponent(store.value)}`);
   };
   return (
     <Popover open={open} onOpenChange={setOpen}>
