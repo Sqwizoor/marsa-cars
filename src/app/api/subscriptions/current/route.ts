@@ -12,11 +12,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ subscription: null });
     }
 
+    const paidStatuses = ["COMPLETE", "PAID", "Paid"];
+
     let subscription = await db.subscription.findFirst({
       where: {
         userId,
         status: "ACTIVE",
-        paymentStatus: "COMPLETE",
+        OR: [
+          { paymentStatus: { in: paidStatuses } },
+          { paymentId: { not: null } },
+          { startDate: { not: null } },
+        ],
       },
       orderBy: { createdAt: "desc" },
     });

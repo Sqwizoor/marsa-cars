@@ -41,7 +41,7 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
             products={products}
             type="simple"
             slidesPerView={1}
-            spaceBetween={0}
+            spaceBetween={8}
             withScrollbar={false}
             autoplay={{
               delay: 2000,
@@ -49,12 +49,13 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
             }}
             breakpoints={{
               320: { slidesPerView: 2, spaceBetween: 5 },
-              420: { slidesPerView: 2.5, spaceBetween: 5 },
-              520: { slidesPerView: 2.8, spaceBetween: 5 },
+              420: { slidesPerView: 2, spaceBetween: 6 },
+              520: { slidesPerView: 3, spaceBetween: 6 },
               640: { slidesPerView: 3, spaceBetween: 5 },
-              768: { slidesPerView: 3.5, spaceBetween: 10 },
-              1024: { slidesPerView: 4, spaceBetween: 10 },
-              1280: { slidesPerView: 4.5, spaceBetween: 10 },
+              768: { slidesPerView: 4, spaceBetween: 10 },
+              1024: { slidesPerView: 4, spaceBetween: 12 },
+              1280: { slidesPerView: 5, spaceBetween: 12 },
+              1536: { slidesPerView: 6, spaceBetween: 12 },
             }}
           />
         </div>
