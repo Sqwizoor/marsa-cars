@@ -62,7 +62,7 @@
     "dotenv": "^16.4.7",
     "embla-carousel-react": "^8.5.2",
     "flag-icons": "^7.3.2",
-    "framer-motion": "^12.5.0",
+    "framer-motion": "^12.25.0",
     "i": "^0.3.7",
     "input-otp": "^1.4.2",
     "jodit-react": "^5.2.15",

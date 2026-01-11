@@ -24,7 +24,7 @@ interface Props {
   breakpoints?: SwiperProps["breakpoints"];
   spaceBetween?: number;
   withScrollbar?: boolean;
-  autoplay?: boolean | { delay: number; disableOnInteraction: boolean };
+  autoplay?: boolean | { delay: number; disableOnInteraction: boolean; pauseOnMouseEnter?: boolean };
   loop?: boolean;
   speed?: number;
   freeMode?: boolean;

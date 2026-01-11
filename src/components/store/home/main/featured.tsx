@@ -2,9 +2,19 @@
 import Link from "next/link";
 import MainSwiper from "../../shared/swiper";
 import { SimpleProduct } from "@/lib/types";
+import ProductCardSimple from "../../cards/product/simple-card";
+import { useEffect, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 
 export default function Featured({ products }: { products: SimpleProduct[] }) {
-  const shouldAutoScroll = products.length > 5;
+  const [mounted, setMounted] = useState(false);
+  const isLargeDevice = useMediaQuery({ minWidth: 1024 });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const shouldAutoScroll = products.length >= 5;
 
   return (
     <div className="relative rounded-md overflow-hidden">
@@ -23,54 +33,72 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
                 Top Quality • Best Prices
               </p>
             </div>
-            {/* <div
-              className="w-full h-12 md:h-14 pl-3 md:pl-4 text-white overflow-hidden pr-10 md:pr-12
-              text-left bg-contain bg-no-repeat mx-auto md:mx-0 mt-2 md:mt-1"
-              style={{ backgroundImage: "url(/assets/images/ads/coupon.gif)" }}
-            >
-              <h3 className="text-base md:text-lg font-bold leading-5 md:leading-6 mt-1 md:mt-1.5 text-white w-full whitespace-nowrap">
-                use &apos;SACARS&apos;
-              </h3>
-              <p className="text-xs md:text-sm leading-4 text-white font-semibold">
-                17% OFF
-              </p>
-            </div> */}
           </div>
         </div>
-        {/* Product swiper */}
+        {/* Product swiper or Marquee */}
         <div className="flex-1 min-w-0 w-full px-2 md:px-4">
-          <MainSwiper
-            products={products}
-            type="simple"
-            slidesPerView={1}
-            spaceBetween={8}
-            withScrollbar={false}
-            loop={shouldAutoScroll}
-            freeMode={shouldAutoScroll}
-            speed={shouldAutoScroll ? 9000 : undefined}
-            autoplay={
-              shouldAutoScroll
-                ? {
-                    delay: 0,
-                    disableOnInteraction: false,
-                    pauseOnMouseEnter: true,
-                  }
-                : {
-                    delay: 2000,
-                    disableOnInteraction: false,
-                  }
-            }
-            breakpoints={{
-              320: { slidesPerView: 2, spaceBetween: 5 },
-              420: { slidesPerView: 2, spaceBetween: 6 },
-              520: { slidesPerView: 3, spaceBetween: 6 },
-              640: { slidesPerView: 3, spaceBetween: 5 },
-              768: { slidesPerView: 4, spaceBetween: 10 },
-              1024: { slidesPerView: 4, spaceBetween: 12 },
-              1280: { slidesPerView: 5, spaceBetween: 12 },
-              1536: { slidesPerView: 6, spaceBetween: 12 },
-            }}
-          />
+          {mounted && isLargeDevice && shouldAutoScroll ? (
+            <div className="w-full overflow-hidden flex pb-4 pt-2">
+              <div
+                className="flex gap-4 animate-marquee pause-on-hover"
+                style={{ width: "fit-content" }}
+              >
+                {/* 
+                  Create enough groups to ensure seamless scrolling.
+                  We need to animate from 0% to -50%.
+                  So we need 2 halves. Each half needs to be wider than the viewport.
+                  If viewport is ~1200px (standard large), and cards are ~140px + gap.
+                  5 cards ~ 800px.
+                  So we need at least 2 sets of products to fill screen + buffer.
+                  And since we kill half, the remaining half must still fill screen.
+                  So the 'half' must be > viewport.
+                  6 copies of products guarantees plenty of width.
+                */}
+                {[...Array(6)].map((_, groupIndex) => (
+                  <div key={groupIndex} className="flex gap-4 shrink-0">
+                     {products.map((product, i) => (
+                        <div key={`${groupIndex}-${product.slug || i}`} className="shrink-0">
+                          <ProductCardSimple product={product} />
+                        </div>
+                     ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <MainSwiper
+              products={products}
+              type="simple"
+              slidesPerView={1}
+              spaceBetween={8}
+              withScrollbar={false}
+              loop={shouldAutoScroll}
+              freeMode={shouldAutoScroll}
+              speed={shouldAutoScroll ? 9000 : undefined}
+              autoplay={
+                shouldAutoScroll
+                  ? {
+                      delay: 0,
+                      disableOnInteraction: false,
+                      pauseOnMouseEnter: true,
+                    }
+                  : {
+                      delay: 2000,
+                      disableOnInteraction: false,
+                    }
+              }
+              breakpoints={{
+                320: { slidesPerView: 2, spaceBetween: 5 },
+                420: { slidesPerView: 2, spaceBetween: 6 },
+                520: { slidesPerView: 3, spaceBetween: 6 },
+                640: { slidesPerView: 3, spaceBetween: 5 },
+                768: { slidesPerView: 4, spaceBetween: 10 },
+                1024: { slidesPerView: 4, spaceBetween: 12 },
+                1280: { slidesPerView: 5, spaceBetween: 12 },
+                1536: { slidesPerView: 6, spaceBetween: 12 },
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
