@@ -253,7 +253,17 @@ export const ProductFormSchema = z.object({
     })
     .array()
     .optional()
-    .default([]),
+    .default([])
+    .refine(
+      (product_specs) =>
+        product_specs.every((s) => 
+          (s.name.length === 0 && s.value.length === 0) || 
+          (s.name.length > 0 && s.value.length > 0)
+        ),
+      {
+        message: "Please fill both name and value for specs, or leave both empty.",
+      }
+    ),
   variant_specs: z
     .object({
       name: z.string(),

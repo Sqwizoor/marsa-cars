@@ -121,16 +121,15 @@ export default function UserMenu() {
                 {user && !subLoading && subscription && (
                   <>
                     <div className="my-2 flex items-center justify-center">
-                      <Link
-                        href="/dashboard/advertiser/manage"
-                        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500/80 to-purple-600/80 px-3 py-1 text-xs font-semibold text-white shadow hover:from-indigo-500 hover:to-purple-600 transition"
+                      <div
+                        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500/80 to-purple-600/80 px-3 py-1 text-xs font-semibold text-white shadow"
                         title="View subscription details"
                       >
                         <span>{subscription.tier}</span>
                         <span className="rounded bg-white/20 px-2 py-0.5">
                           {subscription.remainingAds === -1 ? "∞" : `${subscription.remainingAds} left`}
                         </span>
-                      </Link>
+                      </div>
                     </div>
                   </>
                 )}

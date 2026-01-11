@@ -132,17 +132,21 @@ const handleProductUpdate = async (product: ProductWithVariantType) => {
       // Update specs, questions (delete and recreate)
       specs: {
         deleteMany: {},
-        create: product.product_specs.map((spec) => ({
-          name: spec.name,
-          value: spec.value,
-        })),
+        create: product.product_specs
+          .filter((spec) => spec.name.trim() !== "" && spec.value.trim() !== "")
+          .map((spec) => ({
+            name: spec.name,
+            value: spec.value,
+          })),
       },
       questions: {
         deleteMany: {},
-        create: product.questions.map((q) => ({
-          question: q.question,
-          answer: q.answer,
-        })),
+        create: product.questions
+          .filter((q) => q.question.trim() !== "" && q.answer.trim() !== "")
+          .map((q) => ({
+            question: q.question,
+            answer: q.answer,
+          })),
       },
     },
   });
@@ -183,10 +187,12 @@ const handleProductUpdate = async (product: ProductWithVariantType) => {
       },
       specs: {
         deleteMany: {},
-        create: (product.variant_specs || []).map((spec) => ({
-          name: spec.name,
-          value: spec.value,
-        })),
+        create: (product.variant_specs || [])
+          .filter((spec) => spec.name.trim() !== "" && spec.value.trim() !== "")
+          .map((spec) => ({
+            name: spec.name,
+            value: spec.value,
+          })),
       },
     },
   });
@@ -215,7 +221,12 @@ const handleProductCreate = async (
     "productVariant"
   );
 
-  const productData = {
+    // Filter out empty specs
+    const validSpecs = product.product_specs.filter(
+      (spec) => spec.name.trim() !== "" && spec.value.trim() !== ""
+    );
+
+    const productData = {
     id: product.productId,
     name: product.name,
     description: product.description,
@@ -226,13 +237,18 @@ const handleProductCreate = async (
     offerTag: { connect: { id: product.offerTagId } },
     brand: product.brand,
     specs: {
-      create: product.product_specs.map((spec) => ({
+      create: validSpecs.map((spec) => ({
         name: spec.name,
         value: spec.value,
       })),
     },
+    // Filter out empty questions
+    const validQuestions = product.questions.filter(
+      (q) => q.question.trim() !== "" && q.answer.trim() !== ""
+    );
+
     questions: {
-      create: product.questions.map((q) => ({
+      create: validQuestions.map((q) => ({
         question: q.question,
         answer: q.answer,
       })),
@@ -268,12 +284,17 @@ const handleProductCreate = async (
               discount: size.discount,
             })),
           },
-          specs: {
-            create: (product.variant_specs || []).map((spec) => ({
-              name: spec.name,
-              value: spec.value,
-            })),
-          },
+      // Filter out empty variant specs
+      const validVariantSpecs = (product.variant_specs || []).filter(
+        (spec) => spec.name.trim() !== "" && spec.value.trim() !== ""
+      );
+
+      specs: {
+        create: validVariantSpecs.map((spec) => ({
+          name: spec.name,
+          value: spec.value,
+        })),
+      },
           createdAt: product.createdAt,
           updatedAt: product.updatedAt,
         },

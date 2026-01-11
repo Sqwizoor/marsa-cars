@@ -123,6 +123,7 @@ export async function POST(req: NextRequest) {
     const plan = SUBSCRIPTION_PLANS[tier as keyof typeof SUBSCRIPTION_PLANS];
 
     // If user never had a trial, start it automatically
+    /*
     const existingTrial = await subscriptionModel.findFirst({
       where: {
         userId,
@@ -156,6 +157,7 @@ export async function POST(req: NextRequest) {
         trialEndsAt,
       });
     }
+    */
 
     // Create subscription record for paid plan
     const subscription = await subscriptionModel.create({

@@ -156,17 +156,17 @@ const ProductDetails = ({
   // State for product specs
   const [productSpecs, setProductSpecs] = useState<
     { name: string; value: string }[]
-  >(data?.product_specs || []);
+  >(data?.product_specs || [{ name: "", value: "" }]);
 
   // State for product variant specs
   const [variantSpecs, setVariantSpecs] = useState<
     { name: string; value: string }[]
-  >(data?.variant_specs || []);
+  >(data?.variant_specs || [{ name: "", value: "" }]);
 
   // State for questions
   const [questions, setQuestions] = useState<
     { question: string; answer: string }[]
-  >(data?.questions || []);
+  >(data?.questions || [{ question: "", answer: "" }]);
 
   // Form hook for managing form state and validation
   const form = useForm<z.infer<typeof ProductFormSchema>>({
