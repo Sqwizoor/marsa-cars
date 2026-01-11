@@ -226,6 +226,16 @@ const handleProductCreate = async (
       (spec) => spec.name.trim() !== "" && spec.value.trim() !== ""
     );
 
+    // Filter out empty questions
+    const validQuestions = product.questions.filter(
+      (q) => q.question.trim() !== "" && q.answer.trim() !== ""
+    );
+
+    // Filter out empty variant specs
+    const validVariantSpecs = (product.variant_specs || []).filter(
+      (spec) => spec.name.trim() !== "" && spec.value.trim() !== ""
+    );
+
     const productData = {
     id: product.productId,
     name: product.name,
@@ -242,11 +252,6 @@ const handleProductCreate = async (
         value: spec.value,
       })),
     },
-    // Filter out empty questions
-    const validQuestions = product.questions.filter(
-      (q) => q.question.trim() !== "" && q.answer.trim() !== ""
-    );
-
     questions: {
       create: validQuestions.map((q) => ({
         question: q.question,
@@ -284,17 +289,12 @@ const handleProductCreate = async (
               discount: size.discount,
             })),
           },
-      // Filter out empty variant specs
-      const validVariantSpecs = (product.variant_specs || []).filter(
-        (spec) => spec.name.trim() !== "" && spec.value.trim() !== ""
-      );
-
-      specs: {
-        create: validVariantSpecs.map((spec) => ({
-          name: spec.name,
-          value: spec.value,
-        })),
-      },
+          specs: {
+            create: validVariantSpecs.map((spec) => ({
+              name: spec.name,
+              value: spec.value,
+            })),
+          },
           createdAt: product.createdAt,
           updatedAt: product.updatedAt,
         },
