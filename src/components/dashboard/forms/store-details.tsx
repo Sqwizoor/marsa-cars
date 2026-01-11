@@ -63,7 +63,7 @@ const StoreDetails = ({ data }: StoreDetailsProps) => {
 
   const handleSubmit = async (values: z.infer<typeof StoreFormSchema>) => {
     try {
-      const response = await upsertStore({
+      const result = await upsertStore({
         id: data?.id || v4(),
         name: values.name,
         description: values.description || "",
@@ -88,6 +88,17 @@ const StoreDetails = ({ data }: StoreDetailsProps) => {
         defaultDeliveryTimeMax: 0,
         userId: data?.userId || ""
       })
+
+      if ("error" in result) {
+        toast({
+          variant: "destructive",
+          title: "Oops!",
+          description: result.error,
+        })
+        return
+      }
+
+      const response = result.store
 
       toast({
         title: data?.id ? "Store has been updated." : `Congratulations! '${response?.name}' is now created.`,

@@ -12,162 +12,20 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ subscription: null });
     }
 
-    // 1. Try to find a valid active/trialing subscription first
     let subscription = await db.subscription.findFirst({
       where: {
         userId,
-        status: { in: ["ACTIVE", "TRIALING"] },
+        status: "ACTIVE",
+        paymentStatus: "COMPLETE",
       },
       orderBy: { createdAt: "desc" },
     });
 
-    // 2. If not found, check if we have a recently expired or pending one that we can fix
-    if (!subscription) {
-       // Fetch ALL subscriptions for this user, not just the latest one
-       const recentSubs = await db.subscription.findMany({
-          where: { userId },
-          orderBy: { createdAt: "desc" },
-          take: 5 // Check the last 5 attempts
-       });
+    if (!subscription) return NextResponse.json({ subscription: null });
 
-       const sevenDaysAgo = new Date();
-       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-       // Find the best candidate to restore
-       let candidateToRestore = null;
-
-       for (const sub of recentSubs) {
-          let isCandidate = false;
-
-          // Check if it's recent enough
-          if (sub.createdAt > sevenDaysAgo) {
-             // Restore if it was working but expired prematurely
-             if (sub.status === "EXPIRED") isCandidate = true;
-             
-             // Restore if it was a trial attempt that got stuck in PENDING
-             if (sub.status === "PENDING" && sub.isTrial) isCandidate = true;
-             
-             // Restore if it was a trial attempt that got stuck in PENDING (even if isTrial is false, if it's the only one)
-             // Sometimes isTrial might not be set correctly on older migrations
-             if (sub.status === "PENDING" && sub.amount === 10) isCandidate = true; 
-          }
-          
-          // Restore if it's TRIALING but broken (missing date)
-          if (sub.status === "TRIALING" && !sub.trialEndsAt) isCandidate = true;
-
-          if (isCandidate) {
-             candidateToRestore = sub;
-             break; // Found one, stop looking
-          }
-       }
-
-       if (candidateToRestore) {
-          const newTrialEnd = new Date();
-          newTrialEnd.setDate(newTrialEnd.getDate() + 30); // Give them 30 days from NOW
-
-          await db.subscription.update({
-            where: { id: candidateToRestore.id },
-            data: { 
-              status: "TRIALING", 
-              trialEndsAt: newTrialEnd,
-              isTrial: true
-            }
-          });
-          
-          // Use this fixed subscription
-          subscription = {
-             ...candidateToRestore,
-             status: "TRIALING",
-             trialEndsAt: newTrialEnd,
-             isTrial: true
-          } as any;
-       }
-    }
-
-    // 3. SELLER/ADVERTISER GUARANTEE: If still no subscription found, but user is a SELLER or ADVERTISER, force create/restore one
-    if (!subscription) {
-       const dbUser = await db.user.findUnique({
-          where: { id: userId },
-          select: { role: true, stores: { take: 1 }, ads: { take: 1 } }
-       });
-
-       // Check if user should be a SELLER (has a store) or ADVERTISER (has ads) but role is wrong
-       const hasStore = dbUser?.stores && dbUser.stores.length > 0;
-       const hasAds = dbUser?.ads && dbUser.ads.length > 0;
-       const isSellerOrAdvertiser = dbUser?.role === 'SELLER' || dbUser?.role === 'ADVERTISER';
-
-       if (isSellerOrAdvertiser || hasStore || hasAds) {
-          // Fix role if needed
-          if (hasStore && dbUser?.role !== 'SELLER') {
-             await db.user.update({
-                where: { id: userId },
-                data: { role: 'SELLER' }
-             });
-          } else if (hasAds && dbUser?.role !== 'ADVERTISER' && !hasStore) {
-             await db.user.update({
-                where: { id: userId },
-                data: { role: 'ADVERTISER' }
-             });
-          }
-
-          // Try to find ANY subscription to restore
-          const anySub = await db.subscription.findFirst({
-             where: { userId },
-             orderBy: { createdAt: "desc" }
-          });
-
-          const newTrialEnd = new Date();
-          newTrialEnd.setDate(newTrialEnd.getDate() + 30);
-
-          if (anySub) {
-             // Restore the latest one found
-             await db.subscription.update({
-                where: { id: anySub.id },
-                data: { 
-                   status: "TRIALING", 
-                   trialEndsAt: newTrialEnd,
-                   isTrial: true,
-                   tier: "BRONZE", // Ensure it has a valid tier
-                   adLimit: 10     // Ensure it has limits
-                }
-             });
-             subscription = {
-                ...anySub,
-                status: "TRIALING",
-                trialEndsAt: newTrialEnd,
-                isTrial: true,
-                tier: "BRONZE",
-                adLimit: 10
-             } as any;
-          } else {
-             // Create a brand new one if absolutely nothing exists
-             subscription = await db.subscription.create({
-                data: {
-                   userId,
-                   tier: "BRONZE",
-                   status: "TRIALING",
-                   isTrial: true,
-                   trialEndsAt: newTrialEnd,
-                   amount: 10,
-                   currency: "ZAR",
-                   adLimit: 10,
-                   adsUsed: 0,
-                }
-             });
-          }
-       }
-    }
-
-    if (!subscription) {
-      return NextResponse.json({ subscription: null });
-    }
-
-    // Double check expiration for the found subscription
     const now = new Date();
     const expiresAt =
-      subscription.status === "TRIALING"
-        ? subscription.trialEndsAt
-        : subscription.endDate;
+      subscription.endDate;
 
     // Check if subscription has expired
     if (expiresAt && now > new Date(expiresAt)) {
@@ -181,43 +39,45 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ subscription: null });
     }
 
-    // Get remaining ads
-    // Calculate actual usage based on products and ads
-    const userStore = await db.store.findFirst({
-      where: { userId },
-      include: {
-        _count: {
-          select: { products: true }
-        }
-      }
-    });
+    const planMinLimit =
+      subscription.tier === "BRONZE"
+        ? 100
+        : subscription.tier === "SILVER"
+        ? 250
+        : subscription.tier === "GOLD"
+        ? -1
+        : subscription.adLimit;
 
-    const userAdsCount = await db.advertisement.count({
-      where: { userId }
-    });
-
-    const productsCount = userStore?._count.products || 0;
-    const totalUsage = productsCount + userAdsCount;
-
-    // Update the subscription with the actual usage
-    if (subscription.adsUsed !== totalUsage) {
+    if (planMinLimit !== -1 && subscription.adLimit !== planMinLimit) {
       await db.subscription.update({
         where: { id: subscription.id },
-        data: { adsUsed: totalUsage }
+        data: { adLimit: planMinLimit },
       });
-      subscription.adsUsed = totalUsage;
+      subscription.adLimit = planMinLimit;
+    }
+
+    const activeAdsCount = await db.advertisement.count({
+      where: { userId, isActive: true },
+    });
+
+    if (subscription.adsUsed !== activeAdsCount) {
+      await db.subscription.update({
+        where: { id: subscription.id },
+        data: { adsUsed: activeAdsCount },
+      });
+      subscription.adsUsed = activeAdsCount;
     }
 
     const remaining =
       subscription.adLimit === -1
         ? -1
-        : Math.max(0, subscription.adLimit - totalUsage);
+        : Math.max(0, subscription.adLimit - subscription.adsUsed);
 
     return NextResponse.json({
       subscription: {
         ...subscription,
         remainingAds: remaining,
-        phase: subscription.status === "TRIALING" ? "TRIAL" : "PAID",
+        phase: "PAID",
         expiresAt: expiresAt ?? null,
       },
     });

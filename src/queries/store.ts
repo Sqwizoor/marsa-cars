@@ -23,19 +23,23 @@ const normalizeStoreUrl = (storeUrl: string) => {
   }
 };
 
+export type UpsertStoreResult =
+  | { store: Store; error?: undefined }
+  | { store?: undefined; error: string };
+
 // Function: upsertStore
 // Description: Upserts store details into the database, ensuring uniqueness of name,url, email, and phone number.
 // Access Level: Seller Only
 // Parameters:
 //   - store: Partial store object containing details of the store to be upserted.
 // Returns: Updated or newly created store details.
-export const upsertStore = async (store: Store) => {
+export const upsertStore = async (store: Store): Promise<UpsertStoreResult> => {
   try {
     // Get current user
     const user = await currentUser();
 
     // Ensure user is authenticated
-    if (!user) throw new Error("Unauthenticated.");
+    if (!user) return { error: "Unauthenticated." };
 
     // Verify seller permission
     // if (user.privateMetadata.role !== "SELLER")
@@ -46,7 +50,7 @@ export const upsertStore = async (store: Store) => {
     await ensureSellerSubscription(user.id);
 
     // Ensure store data is provided
-    if (!store) throw new Error("Please provide store data.");
+    if (!store) return { error: "Please provide store data." };
 
     // Ensure user exists in database (sync from Clerk if needed)
     let dbUser = await db.user.findUnique({
@@ -99,7 +103,7 @@ export const upsertStore = async (store: Store) => {
       } else if (existingStore.url === store.url) {
         errorMessage = "A store with the same URL already exists";
       }
-      throw new Error(errorMessage);
+      return { error: errorMessage };
     }
 
     // Upsert store details into the database
@@ -117,10 +121,13 @@ export const upsertStore = async (store: Store) => {
       },
     });
 
-    return storeDetails;
+    return { store: storeDetails };
   } catch (error) {
-    console.log(error);
-    throw error;
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Could not create the store. Please try again.";
+    return { error: message };
   }
 };
 

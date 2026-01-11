@@ -37,8 +37,6 @@ interface Subscription {
   expiresAt?: string | null;
 }
 
-const TRIAL_DAYS = 60;
-
 interface Advertisement {
   id: string;
   title: string;
@@ -101,7 +99,7 @@ export default function AdvertiserDashboard() {
               </div>
               <CardTitle className="text-2xl">No Active Subscription</CardTitle>
               <CardDescription>
-                Start your {TRIAL_DAYS}-day free trial to unlock the advertiser dashboard
+                Subscribe and complete payment to unlock the advertiser dashboard
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -129,8 +127,6 @@ export default function AdvertiserDashboard() {
       ? 0
       : (subscription.adsUsed / subscription.adLimit) * 100;
 
-  const isTrial =
-    subscription.phase === "TRIAL" || subscription.status === "TRIALING";
   const expirationDate = subscription.expiresAt || subscription.endDate;
   const expirationLabel = expirationDate
     ? new Date(expirationDate).toLocaleDateString()
@@ -174,12 +170,11 @@ export default function AdvertiserDashboard() {
                   {subscription.tier} Plan
                 </CardTitle>
                 <CardDescription className="text-white/80">
-                  {isTrial ? "Trial ends" : "Renews"} {" "}
-                  {expirationLabel}
+                  Renews {expirationLabel}
                 </CardDescription>
               </div>
               <Badge variant="secondary" className="bg-white/20 text-white">
-                {isTrial ? "Trial • " : ""}R{subscription.amount}/month
+                R{subscription.amount}/month
               </Badge>
             </div>
           </CardHeader>
@@ -197,23 +192,6 @@ export default function AdvertiserDashboard() {
               {subscription.adLimit !== -1 && (
                 <Progress value={usagePercentage} className="bg-white/30" />
               )}
-                {isTrial && (
-                  <div className="mt-4 p-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-gradient-to-br from-pink-400 to-rose-500 rounded-lg shadow-md">
-                        <Calendar className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-white mb-1">
-                          Trial Period Active
-                        </p>
-                        <p className="text-xs text-white/90">
-                          Your free trial ends on <span className="font-bold">{expirationLabel}</span>. Upgrade any time to keep ads running without interruption.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
             </div>
           </CardContent>
         </Card>
