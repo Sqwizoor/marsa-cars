@@ -226,10 +226,8 @@ export const ProductFormSchema = z.object({
   colors: z
     .object({ color: z.string() })
     .array()
-    .min(1, "Please provide at least one color.")
-    .refine((colors) => colors.every((c) => c.color.length > 0), {
-      message: "All color inputs must be filled.",
-    }),
+    .optional()
+    .default([]),
   sizes: z
     .object({
       size: z.string(),
@@ -254,14 +252,8 @@ export const ProductFormSchema = z.object({
       value: z.string(),
     })
     .array()
-    .min(1, "Please provide at least one product spec.")
-    .refine(
-      (product_specs) =>
-        product_specs.every((s) => s.name.length > 0 && s.value.length > 0),
-      {
-        message: "All product specs inputs must be filled correctly.",
-      }
-    ),
+    .optional()
+    .default([]),
   variant_specs: z
     .object({
       name: z.string(),

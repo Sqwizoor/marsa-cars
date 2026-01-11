@@ -67,8 +67,6 @@ const ClickToAddInputs = <T extends DetailRecord>({
 
   // Function to handle removal of a detail
   const handleRemove = (index: number) => {
-    // We must atleast keep one detail we can't delete if it's the only detail available
-    if (details.length === 1) return;
     // Filter out the detail at the specified index
     const updatedDetails = details.filter((_, i) => i !== index);
     setDetails(updatedDetails); // Update the state with the filtered details

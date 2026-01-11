@@ -142,7 +142,7 @@ const ProductDetails = ({
 
   // State for colors
   const [colors, setColors] = useState<{ color: string }[]>(
-    data?.colors || [{ color: "" }]
+    data?.colors || []
   );
 
   // Temporary state for images
@@ -156,17 +156,17 @@ const ProductDetails = ({
   // State for product specs
   const [productSpecs, setProductSpecs] = useState<
     { name: string; value: string }[]
-  >(data?.product_specs || [{ name: "", value: "" }]);
+  >(data?.product_specs || []);
 
   // State for product variant specs
   const [variantSpecs, setVariantSpecs] = useState<
     { name: string; value: string }[]
-  >(data?.variant_specs || [{ name: "", value: "" }]);
+  >(data?.variant_specs || []);
 
-  // State for product variant specs
+  // State for questions
   const [questions, setQuestions] = useState<
     { question: string; answer: string }[]
-  >(data?.questions || [{ question: "", answer: "" }]);
+  >(data?.questions || []);
 
   // Form hook for managing form state and validation
   const form = useForm<z.infer<typeof ProductFormSchema>>({
