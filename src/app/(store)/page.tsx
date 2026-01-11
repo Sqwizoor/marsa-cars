@@ -43,7 +43,7 @@ export default async function HomePage() {
         <div className="relative w-full md:w-[calc(100%-40px)] h-full bg-[#e3e3e3]">
           <div className="max-w-[1600px] mx-auto min-h-screen p-2 sm:p-3 md:p-4">
             {/* Main */}
-            <div className="w-full grid gap-2 grid-cols-1 min-[915px]:grid-cols-[1fr_350px] min-[1465px]:grid-cols-[200px_1fr_350px]">
+            <div className="w-full min-w-0 grid gap-2 grid-cols-1 min-[915px]:grid-cols-[minmax(0,1fr)_350px] min-[1465px]:grid-cols-[200px_minmax(0,1fr)_350px]">
               {/* Left */}
               <div
                 className="cursor-pointer hidden min-[1465px]:block bg-cover bg-center bg-no-repeat rounded-md h-[400px] sm:h-[500px] min-[1465px]:h-auto w-full"
@@ -53,7 +53,7 @@ export default async function HomePage() {
                 }}
               />
               {/* Middle */}
-              <div className="space-y-2 h-fit">
+              <div className="space-y-2 h-fit min-w-0 w-full max-w-full overflow-hidden">
                 {/* Main swiper */}
                 <HomeMainSwiper />
                 {/* Featured card */}

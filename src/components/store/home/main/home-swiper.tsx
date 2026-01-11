@@ -119,9 +119,8 @@ export default function HomeMainSwiper() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent sm:bg-gradient-to-r sm:from-black/80 sm:via-transparent sm:to-transparent" />
 
             {/* Content */}
-            <div className="absolute inset-0 flex flex-col justify-end p-6 pb-16 sm:justify-center sm:items-start sm:p-12 md:p-16">
-              <div className={`transform transition-all duration-700 ease-out flex flex-col items-start ${index === currentSlide ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}>
-                <span className="inline-block px-3 py-1 mb-3 text-xs font-bold tracking-wider text-white uppercase bg-pink-primary/90 rounded-full backdrop-blur-sm">
+            <div className="absolute inset-0 flex flex-col justify-end p-6 pb-16 sm:justify-center sm:items-start sm:p-12 md:p-16 max-w-full">
+              <div className={`transform transition-all duration-700 ease-out flex flex-col items-start max-w-full ${index === currentSlide ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}>                <span className="inline-block px-3 py-1 mb-3 text-xs font-bold tracking-wider text-white uppercase bg-pink-primary/90 rounded-full backdrop-blur-sm">
                   Featured
                 </span>
                 <h2 className="text-white text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter mb-3 drop-shadow-xl leading-none">
@@ -130,7 +129,7 @@ export default function HomeMainSwiper() {
                 <p className="text-gray-200 text-sm sm:text-lg mb-6 max-w-md font-medium drop-shadow-md leading-relaxed">
                   {img.subtitle}
                 </p>
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full max-w-full">
                   <Button 
                     asChild 
                     size="lg"
