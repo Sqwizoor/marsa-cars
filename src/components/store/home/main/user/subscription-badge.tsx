@@ -27,14 +27,7 @@ export default function SubscriptionBadge() {
   }
 
   if (!subscription) {
-    return (
-      <Link
-        href="/subscriptions"
-        className="block text-center rounded-md bg-gradient-to-r from-orange-primary to-orange-hover text-white px-3 py-2 text-xs font-bold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 mb-2 shadow-md"
-      >
-        Subscribe Now
-      </Link>
-    );
+    return null;
   }
 
   /* const isTrial = subscription.phase === "TRIAL"; */
