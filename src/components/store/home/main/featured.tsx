@@ -38,26 +38,22 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
         {/* Product swiper or Marquee */}
         <div className="flex-1 min-w-0 w-full px-2 md:px-4">
           {mounted && isLargeDevice && shouldAutoScroll ? (
-            <div className="w-full overflow-hidden flex pb-4 pt-2">
+            <div className="w-full max-w-full overflow-hidden relative pb-4 pt-2 mask-linear-fade">
+              {/* Left/Right Fade Gradients */}
+              <div className="absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-yellow-600 to-transparent pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l from-yellow-600 to-transparent pointer-events-none" />
+
               <div
-                className="flex gap-4 animate-marquee pause-on-hover"
-                style={{ width: "fit-content" }}
+                className="flex gap-4 animate-marquee pause-on-hover w-max"
               >
                 {/* 
                   Create enough groups to ensure seamless scrolling.
                   We need to animate from 0% to -50%.
-                  So we need 2 halves. Each half needs to be wider than the viewport.
-                  If viewport is ~1200px (standard large), and cards are ~140px + gap.
-                  5 cards ~ 800px.
-                  So we need at least 2 sets of products to fill screen + buffer.
-                  And since we kill half, the remaining half must still fill screen.
-                  So the 'half' must be > viewport.
-                  6 copies of products guarantees plenty of width.
                 */}
                 {[...Array(6)].map((_, groupIndex) => (
                   <div key={groupIndex} className="flex gap-4 shrink-0">
                      {products.map((product, i) => (
-                        <div key={`${groupIndex}-${product.slug || i}`} className="shrink-0">
+                        <div key={`${groupIndex}-${product.slug || i}`} className="shrink-0 w-[140px]">
                           <ProductCardSimple product={product} />
                         </div>
                      ))}
