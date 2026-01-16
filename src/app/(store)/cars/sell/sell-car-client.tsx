@@ -89,14 +89,57 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
     const files = e.target.files;
     if (!files) return;
 
-    // For now, we'll use placeholder URLs - in production, upload to Cloudinary
+    // Compress and resize images before processing
     Array.from(files).forEach((file) => {
+      // Create an image element to load the file
+      const img = document.createElement("img");
       const reader = new FileReader();
+
       reader.onload = (e) => {
-        if (e.target?.result) {
-          setImages((prev) => [...prev, e.target!.result as string]);
-        }
+        img.src = e.target?.result as string;
+        
+        img.onload = () => {
+          // Create canvas for resizing
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          
+          if (!ctx) return;
+
+          // Max dimensions
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate new dimensions
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          // Set canvas dimensions
+          canvas.width = width;
+          canvas.height = height;
+
+          // Draw and compress
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Convert to base64 with lower quality (0.7) to reduce size significantly
+          // This prevents 413 Payload Too Large errors
+          const optimizedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          
+          setImages((prev) => [...prev, optimizedDataUrl]);
+        };
       };
+      
       reader.readAsDataURL(file);
     });
   };
