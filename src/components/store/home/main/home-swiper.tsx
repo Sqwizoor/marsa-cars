@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import Img1 from "@/public/assets/images/swiper/new-hero.png"
 import Img2 from "@/public/assets/images/swiper/new-slider.png"
 import Img3 from "@/public/assets/images/swiper/interior.png"
+import Img4 from "@/public/assets/images/swiper/websiteslider2.png"
 import { useState, useEffect } from "react"
 
 const images = [
@@ -31,6 +32,14 @@ const images = [
     subtitle: "Upgrade your style with our premium selection",
     buttonText: "View Collection",
     link: "/browse"
+  },
+  { 
+    id: 4, 
+    url: Img4,
+    title: "Sell Your Car",
+    subtitle: "Get the best price for your vehicle today",
+    buttonText: "Sell Now",
+    link: "/cars/sell"
   },
 ]
 
