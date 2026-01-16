@@ -201,12 +201,12 @@ export default function SubscriptionPage() {
                   <div className="flex justify-between text-sm text-gray-600 mb-2">
                     <span>Listings</span>
                     <span className="font-medium">
-                      {plan.maxListings === -1 ? "Unlimited" : plan.maxListings}
+                      {plan.listingLimit === -1 ? "Unlimited" : plan.listingLimit}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Sponsored Ads</span>
-                    <span className="font-medium">{plan.maxSponsoredAds}</span>
+                    <span className="font-medium">{plan.sponsoredLimit}</span>
                   </div>
                 </div>
               </CardContent>
