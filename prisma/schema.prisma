@@ -38,6 +38,8 @@ model User {
   coupons             Coupon[]          @relation("CouponToUser")
   memberOfStores      Store[]           @relation("StoreMembers")
   following           Store[]           @relation("UserFollowingStore")
+  carSubscriptions    CarSubscription[]
+  carListings         CarListing[]
 }
 
 model Category {
@@ -940,4 +942,170 @@ enum ProductApprovalStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum CarSubscriptionTier {
+  INDIVIDUAL
+  PREMIUM
+  DEALER
+}
+
+enum CarSubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING
+}
+
+enum CarListingStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  SOLD
+  EXPIRED
+  REJECTED
+}
+
+enum CarCondition {
+  NEW
+  USED
+  CERTIFIED_PRE_OWNED
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  ELECTRIC
+  HYBRID
+  PLUGIN_HYBRID
+  LPG
+  OTHER
+}
+
+enum TransmissionType {
+  MANUAL
+  AUTOMATIC
+  SEMI_AUTOMATIC
+  CVT
+}
+
+enum CarSellerType {
+  INDIVIDUAL
+  DEALER
+}
+
+model CarSubscription {
+  id              String                @id @default(uuid())
+  tier            CarSubscriptionTier
+  status          CarSubscriptionStatus @default(PENDING)
+  amount          Float
+  currency        String                @default("ZAR")
+  listingLimit    Int
+  listingsUsed    Int                   @default(0)
+  sponsoredLimit  Int
+  sponsoredUsed   Int                   @default(0)
+  sellerType      CarSellerType         @default(INDIVIDUAL)
+  isVerified      Boolean               @default(false)
+  dealerName      String?
+  dealerLicense   String?
+  dealerAddress   String?
+  dealerPhone     String?
+  dealerLogo      String?
+  startDate       DateTime?
+  endDate         DateTime?
+  paymentId       String?
+  paymentStatus   String?               @default("PENDING")
+  userId          String
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  carListings     CarListing[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([sellerType])
+}
+
+model CarListing {
+  id                String           @id @default(uuid())
+  title             String
+  slug              String           @unique
+  description       String
+  make              String
+  model             String
+  year              Int
+  variant           String?
+  price             Float
+  priceNegotiable   Boolean          @default(false)
+  mileage           Int
+  fuelType          FuelType
+  transmission      TransmissionType
+  condition         CarCondition
+  bodyType          String?
+  color             String?
+  engineSize        String?
+  drivetrain        String?
+  doors             Int?
+  seats             Int?
+  vin               String?
+  regNumber         String?
+  province          String
+  city              String
+  features          Json?
+  status            CarListingStatus @default(DRAFT)
+  views             Int              @default(0)
+  inquiries         Int              @default(0)
+  isFeatured        Boolean          @default(false)
+  isSponsored       Boolean          @default(false)
+  sponsoredUntil    DateTime?
+  sponsoredViews    Int              @default(0)
+  sponsoredClicks   Int              @default(0)
+  userId            String
+  carSubscriptionId String
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  carSubscription   CarSubscription  @relation(fields: [carSubscriptionId], references: [id], onDelete: Cascade)
+  images            CarImage[]
+  carInquiries      CarInquiry[]
+
+  @@index([userId])
+  @@index([carSubscriptionId])
+  @@index([status])
+  @@index([make])
+  @@index([model])
+  @@index([year])
+  @@index([price])
+  @@index([isSponsored])
+  @@index([province])
+  @@index([city])
+}
+
+model CarImage {
+  id            String     @id @default(uuid())
+  url           String
+  isPrimary     Boolean    @default(false)
+  order         Int        @default(0)
+  carListingId  String
+  createdAt     DateTime   @default(now())
+  carListing    CarListing @relation(fields: [carListingId], references: [id], onDelete: Cascade)
+
+  @@index([carListingId])
+  @@index([isPrimary])
+}
+
+model CarInquiry {
+  id            String     @id @default(uuid())
+  name          String
+  email         String
+  phone         String?
+  message       String
+  isRead        Boolean    @default(false)
+  carListingId  String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  carListing    CarListing @relation(fields: [carListingId], references: [id], onDelete: Cascade)
+
+  @@index([carListingId])
+  @@index([isRead])
 }
