@@ -138,9 +138,18 @@ export default async function HomePage() {
                 </div>
                 <div className="mt-4 md:mt-7 bg-gradient-to-br from-gray-50 to-white p-2 sm:p-6 rounded-xl md:rounded-2xl shadow-sm">
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1530px]:grid-cols-7 gap-2 md:gap-4">
-                    {products.map((product) => (
+                    {products.slice(0, 8).map((product) => (
                       <ProductCard key={product.id} product={product} />
                     ))}
+                  </div>
+                  <div className="mt-8 flex justify-center">
+                    <Link 
+                      href="/browse"
+                      className="group inline-flex items-center gap-2 px-8 py-3 bg-white border border-gray-200 rounded-full text-foreground/80 font-medium hover:bg-gray-50 hover:text-foreground hover:border-gray-300 transition-all duration-300 shadow-sm hover:shadow"
+                    >
+                      View All Products
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
                   </div>
                 </div>
               </div>
