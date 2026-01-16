@@ -39,6 +39,7 @@ import {
   Clock,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { CarImage } from "@prisma/client";
 import type { CarListingWithImages } from "@/queries/cars";
 
 interface CarDetailClientProps {
@@ -223,7 +224,7 @@ export default function CarDetailClient({ listing }: CarDetailClientProps) {
               {/* Thumbnail Strip */}
               {listing.images.length > 1 && (
                 <div className="p-4 flex gap-2 overflow-x-auto">
-                  {listing.images.map((image, index) => (
+                  {listing.images.map((image: CarImage, index: number) => (
                     <button
                       key={image.id}
                       onClick={() => setCurrentImageIndex(index)}
