@@ -16,6 +16,7 @@ import {
   Settings,
 } from "lucide-react";
 import { getCarSubscriptionPlanByTier, getListingLimitDisplay } from "@/constants/car-subscription-plans";
+import { CarAnalyticsClient } from "./analytics/client";
 import CarListingsTable from "./car-listings-table";
 
 export const metadata: Metadata = {
@@ -52,6 +53,16 @@ export default async function CarsDashboardPage() {
   const totalInquiries = listings.reduce((sum, l) => sum + l.inquiries, 0);
   const activeListings = listings.filter((l) => l.status === "ACTIVE").length;
   const sponsoredListings = listings.filter((l) => l.isSponsored).length;
+  
+  const stats = {
+    subscription,
+    totalListings: listings.length,
+    activeListings,
+    sponsoredListings,
+    totalViews,
+    totalInquiries,
+    unreadInquiries: inquiries,
+  };
 
   const plan = subscription
     ? getCarSubscriptionPlanByTier(subscription.tier)
@@ -62,21 +73,9 @@ export default async function CarsDashboardPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">My Car Listings</h1>
-          <p className="text-gray-500">Manage your vehicle listings and track performance</p>
+          <h1 className="text-3xl font-bold">Details Overview</h1>
         </div>
         <div className="flex gap-3">
-          <Link href="/dashboard/cars/inquiries">
-            <Button variant="outline" className="relative">
-              <MessageSquare className="w-4 h-4 mr-2" />
-              Inquiries
-              {inquiries > 0 && (
-                <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs">
-                  {inquiries}
-                </Badge>
-              )}
-            </Button>
-          </Link>
           <Link href="/cars/sell">
             <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
               <Plus className="w-4 h-4 mr-2" />
@@ -84,6 +83,14 @@ export default async function CarsDashboardPage() {
             </Button>
           </Link>
         </div>
+      </div>
+      
+      {/* Analytics Summary */}
+      <CarAnalyticsClient initialStats={stats} />
+
+      {/* Main Content Title */}
+      <div className="flex items-center justify-between mt-8">
+         <h2 className="text-2xl font-semibold tracking-tight">Your Listings</h2>
       </div>
 
       {/* Subscription Banner */}
@@ -112,78 +119,9 @@ export default async function CarsDashboardPage() {
         </Card>
       )}
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Active Listings</p>
-                <p className="text-3xl font-bold">{activeListings}</p>
-                {subscription && (
-                  <p className="text-xs text-gray-400 mt-1">
-                    of {getListingLimitDisplay(subscription.listingLimit)}
-                  </p>
-                )}
-              </div>
-              <div className="p-3 bg-blue-100 rounded-full">
-                <Car className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Total Views</p>
-                <p className="text-3xl font-bold">{totalViews.toLocaleString()}</p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-full">
-                <Eye className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Inquiries</p>
-                <p className="text-3xl font-bold">{totalInquiries}</p>
-                {inquiries > 0 && (
-                  <p className="text-xs text-red-500 mt-1">
-                    {inquiries} unread
-                  </p>
-                )}
-              </div>
-              <div className="p-3 bg-purple-100 rounded-full">
-                <MessageSquare className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Sponsored Ads</p>
-                <p className="text-3xl font-bold">{sponsoredListings}</p>
-                {subscription && (
-                  <p className="text-xs text-gray-400 mt-1">
-                    of {subscription.sponsoredLimit}
-                  </p>
-                )}
-              </div>
-              <div className="p-3 bg-amber-100 rounded-full">
-                <Sparkles className="w-6 h-6 text-amber-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Main Content Title */}
+      <div className="flex items-center justify-between mt-8">
+         <h2 className="text-2xl font-semibold tracking-tight">Your Listings</h2>
       </div>
 
       {/* Subscription Info */}

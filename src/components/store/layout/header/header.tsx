@@ -8,7 +8,7 @@ import CountryLanguageCurrencySelector from "./country-lang-curr-selector";
 import Logo from "@/components/shared/logo";
 import { getAllOfferTags } from "@/queries/offer-tag";
 import OfferTagsWrapper from "./offer-tags-wrapper";
-import { MessageSquare, Car, DollarSign } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import MobileMenu from "./mobile-menu";
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
@@ -93,18 +93,10 @@ export default async function Header() {
 
           {/* Right: Desktop actions */}
           <div className="hidden items-center gap-2 lg:flex">
-             <Link
-              href="/cars"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-200 text-white font-medium text-sm"
-            >
-              <Car className="h-4 w-4" />
-              <span>Cars</span>
-            </Link> 
             <Link
               href="/cars/sell"
               className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 transition-all duration-200 text-white font-medium text-sm"
             >
-              <DollarSign className="h-4 w-4" />
               <span>Sell Car</span>
             </Link>
             <Link

@@ -22,6 +22,11 @@ export const adminDashboardSidebarOptions: DashboardSidebarMenuInterface[] = [
     link: "/dashboard/admin/products",
   },
   {
+    label: "Car Listings",
+    icon: "car",
+    link: "/dashboard/admin/cars",
+  },
+  {
     label: "Orders",
     icon: "box-list",
     link: "/dashboard/admin/orders",
@@ -88,5 +93,32 @@ export const SellerDashboardSidebarOptions: DashboardSidebarMenuInterface[] = [
     label: "Settings",
     icon: "settings",
     link: "settings",
+  },
+];
+export const CarsDashboardSidebarOptions: DashboardSidebarMenuInterface[] = [
+  {
+    label: "Overview",
+    icon: "dashboard",
+    link: "/dashboard/cars",
+  },
+  {
+    label: "Analytics",
+    icon: "chart",
+    link: "/dashboard/cars/analytics",
+  },
+  {
+    label: "My Listings",
+    icon: "car",
+    link: "/dashboard/cars",
+  },
+  {
+    label: "Inquiries",
+    icon: "box-list",
+    link: "/dashboard/cars/inquiries",
+  },
+  {
+    label: "Subscription",
+    icon: "settings",
+    link: "/dashboard/cars/subscription",
   },
 ];

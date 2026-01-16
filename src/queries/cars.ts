@@ -774,3 +774,64 @@ export const getCarListingStats = async () => {
     return null;
   }
 };
+
+// ==================== ADMIN QUERIES ====================
+
+/**
+ * Get all car listings for admin
+ */
+export const getAdminCarListings = async (
+  status?: CarListingStatus
+): Promise<(CarListingWithImages & { user: { email: string } })[]> => {
+  try {
+    // In a real app, check for admin role here or rely on page protection
+
+    const where: any = {};
+    if (status) {
+      where.status = status;
+    }
+
+    const listings = await db.carListing.findMany({
+      where,
+      include: {
+        images: { orderBy: { order: "asc" } },
+        user: { select: { name: true, picture: true, email: true } },
+        carSubscription: {
+          select: { tier: true, sellerType: true, dealerName: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return listings as any[];
+  } catch (error) {
+    console.error("Error getting admin car listings:", error);
+    return [];
+  }
+};
+
+/**
+ * Update car listing status (Admin)
+ */
+export const updateCarListingStatus = async (
+  listingId: string,
+  status: CarListingStatus
+): Promise<{ success?: boolean; error?: string }> => {
+  try {
+    const listing = await db.carListing.findUnique({ where: { id: listingId } });
+    
+    if (!listing) {
+      return { error: "Listing not found" };
+    }
+
+    await db.carListing.update({
+      where: { id: listingId },
+      data: { status },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating car listing status:", error);
+    return { error: "Failed to update status" };
+  }
+};
