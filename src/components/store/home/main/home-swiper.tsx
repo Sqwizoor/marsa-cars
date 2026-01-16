@@ -6,9 +6,18 @@ import Img1 from "@/public/assets/images/swiper/new-hero.png"
 import Img2 from "@/public/assets/images/swiper/new-slider.png"
 import Img3 from "@/public/assets/images/swiper/interior.png"
 import Img4 from "@/public/assets/images/swiper/websiteslider2.png"
+import Img5 from "@/public/assets/images/swiper/websiteslider.png"
 import { useState, useEffect } from "react"
 
 const images = [
+  { 
+    id: 5, 
+    url: Img5,
+    title: "Sell Your Car Faster",
+    subtitle: "Connect with serious buyers instantly",
+    buttonText: "Start Selling",
+    link: "/cars/sell"
+  },
   { 
     id: 1, 
     url: Img1,
