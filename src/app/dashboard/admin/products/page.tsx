@@ -6,13 +6,23 @@ import { ProductApprovalStatus } from "@prisma/client";
 import ProductFilters from "./product-filters";
 import PaginationControl from "@/components/ui/pagination-control";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminProductsPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const page = Number(searchParams.page) || 1;
-  const status = searchParams.status as ProductApprovalStatus | undefined;
+  
+  // Handle status parameter safely
+  const statusParam = searchParams.status;
+  const status = (typeof statusParam === 'string' && 
+                  statusParam !== "ALL" && 
+                  Object.values(ProductApprovalStatus).includes(statusParam as ProductApprovalStatus))
+                  ? statusParam as ProductApprovalStatus 
+                  : undefined;
+
   const search = typeof searchParams.search === "string" ? searchParams.search : "";
 
   const { products, total } = await getAdminProducts(status, page, 10, search);

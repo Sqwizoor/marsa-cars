@@ -11,7 +11,7 @@ import {
 import { ProductApprovalStatus } from "@prisma/client";
 import { Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function ProductFilters() {
   const searchParams = useSearchParams();
@@ -21,8 +21,14 @@ export default function ProductFilters() {
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [status, setStatus] = useState(searchParams.get("status") || "ALL");
 
+  const initialRender = useRef(true);
+
   // Debounce search
   useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
     const timer = setTimeout(() => {
       handleSearch(search);
     }, 500);
@@ -45,6 +51,10 @@ export default function ProductFilters() {
   };
 
   const handleSearch = (term: string) => {
+    // Only update if the search term is different from current URL param
+    const currentSearch = searchParams.get("search") || "";
+    if (term === currentSearch) return;
+
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", "1"); // Reset page
     if (term) {
@@ -52,7 +62,7 @@ export default function ProductFilters() {
     } else {
       params.delete("search");
     }
-    router.push(`${pathname}?${params.toString()}`);
+    router.replace(`${pathname}?${params.toString()}`); // Use replace instead of push for search typing
   };
 
   const handleStatusChange = (value: string) => {
