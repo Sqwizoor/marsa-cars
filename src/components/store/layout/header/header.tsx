@@ -60,7 +60,9 @@ export default async function Header() {
   }
 
   // Fetch offer tags
-  const offerTags = await getAllOfferTags();
+  const rawOfferTags = await getAllOfferTags();
+  // Filter out "super-deals" from the navbar
+  const offerTags = rawOfferTags.filter(tag => tag.url !== "super-deals");
 
   return (
     <div className="sticky top-0 z-[100] w-full bg-gradient-to-r from-slate-700/80 to-slate-900/70 backdrop-blur-md supports-[backdrop-filter]:bg-slate-900/60">
