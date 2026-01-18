@@ -43,6 +43,8 @@ export default async function AdminProductsPage({
       <DataTable
         columns={columns}
         data={products}
+        filterValue="name"
+        searchPlaceholder="Search products..."
         noHeader={true}
         hideSearch={true}
       />
