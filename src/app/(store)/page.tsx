@@ -1,4 +1,5 @@
 import AnimatedDeals from "@/components/store/home/animated-deals";
+import SponsoredCars from "@/components/store/home/sponsored-cars";
 import Featured from "@/components/store/home/main/featured";
 import HomeMainSwiper from "@/components/store/home/main/home-swiper";
 import HomeUserCard from "@/components/store/home/main/user/user";
@@ -6,6 +7,7 @@ import Sideline from "@/components/store/home/sideline/sideline";
 import MainSwiper from "@/components/store/shared/swiper";
 import { ProductType, SimpleProduct } from "@/lib/types";
 import { getHomeDataDynamic, getHomeFeaturedCategories } from "@/queries/home";
+import { getSponsoredCars } from "@/queries/cars";
 import { getProducts } from "@/queries/product";
 import Image from "next/image";
 import FeaturedCategories from "@/components/store/home/featured-categories";
@@ -16,6 +18,7 @@ import Link from "next/link";
 export default async function HomePage() {
   const productsData = await getProducts({}, "", 1, 100);
   const { products } = productsData;
+  const sponsoredCars = await getSponsoredCars();
 
   const {
     products_super_deals,
@@ -85,7 +88,7 @@ export default async function HomePage() {
             </div>
             {/* Animated deals */}
             <div className="mt-2 hidden min-[915px]:block">
-              <AnimatedDeals />
+              <SponsoredCars cars={sponsoredCars} />
             </div>
             <div className="mt-10 space-y-6">
               {/* Super Deals Section */}

@@ -835,3 +835,30 @@ export const updateCarListingStatus = async (
     return { error: "Failed to update status" };
   }
 };
+
+export const getSponsoredCars = async () => {
+  try {
+    const cars = await db.carListing.findMany({
+      where: {
+        isSponsored: true,
+        status: "ACTIVE",
+      },
+      include: {
+        images: {
+          where: {
+            isPrimary: true,
+          },
+          take: 1,
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 10,
+    });
+    return cars;
+  } catch (error) {
+    console.error("Error getting sponsored cars:", error);
+    return [];
+  }
+};
