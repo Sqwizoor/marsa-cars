@@ -11,7 +11,7 @@ export default async function AdminProductsPage() {
   // Getting all products for admin might be heavy, so let's start with PENDING.
   // If we want tabs, we can add them later.
 
-  const products = await getAdminProducts(ProductApprovalStatus.PENDING);
+  const products = await getAdminProducts();
   
   // Need to map to match AdminProductType strictly if needed, but Prisma type usually matches well enough 
   // except for JSON or weird fields.

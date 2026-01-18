@@ -104,10 +104,8 @@ const MainSwiper: FC<Props> = ({
         className="!pb-8" // Add padding bottom for scrollbar
       >
         {products.map((product) => {
-          // Create a unique key for both SimpleProduct and ProductType
-          const key = 'id' in product 
-            ? product.id 
-            : `${product.slug}-${'variantSlug' in product ? product.variantSlug : ''}`;
+          // Both SimpleProduct and ProductType have id now
+          const key = product.id;
           
           return (
             <SwiperSlide key={key}>
