@@ -97,9 +97,9 @@ export default async function Header() {
           <div className="hidden items-center gap-2 lg:flex">
             <Link
               href="/cars/sell"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 transition-all duration-200 text-white font-medium text-sm"
+              className="flex items-center gap-2 px-4 py-2 mr-4 rounded-full bg-pink-600 hover:bg-pink-700 transition-all duration-200 text-white font-bold text-sm shadow-sm hover:shadow-md"
             >
-              <span>Sell Car</span>
+              <span>Sell Your Car</span>
             </Link>
             <Link
               href="/forum"

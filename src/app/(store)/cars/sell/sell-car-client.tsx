@@ -55,7 +55,6 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
     year: "",
     variant: "",
     price: "",
-    priceNegotiable: false,
     mileage: "",
     fuelType: "",
     transmission: "",
@@ -445,18 +444,16 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
                 </div>
               </div>
 
-              {/* Variant */}
-              <div className="space-y-2">
-                <Label>Variant / Trim</Label>
-                <Input
-                  placeholder="e.g., 1.8 XS CVT"
-                  value={formData.variant}
-                  onChange={(e) => handleInputChange("variant", e.target.value)}
-                />
-              </div>
-
-              {/* Price */}
+              {/* Variant and Price */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Variant / Trim</Label>
+                  <Input
+                    placeholder="e.g., 1.8 XS CVT"
+                    value={formData.variant}
+                    onChange={(e) => handleInputChange("variant", e.target.value)}
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label>Price (ZAR) *</Label>
                   <Input
@@ -465,20 +462,6 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
                     value={formData.price}
                     onChange={(e) => handleInputChange("price", e.target.value)}
                   />
-                </div>
-                <div className="flex items-end">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="negotiable"
-                      checked={formData.priceNegotiable}
-                      onCheckedChange={(checked) =>
-                        handleInputChange("priceNegotiable", !!checked)
-                      }
-                    />
-                    <label htmlFor="negotiable" className="text-sm">
-                      Price is negotiable
-                    </label>
-                  </div>
                 </div>
               </div>
 
@@ -839,11 +822,6 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
                     )}
                     <div className="text-3xl font-bold text-blue-600 mb-4">
                       R{Number(formData.price).toLocaleString()}
-                      {formData.priceNegotiable && (
-                        <Badge variant="secondary" className="ml-2">
-                          Negotiable
-                        </Badge>
-                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 text-sm">
