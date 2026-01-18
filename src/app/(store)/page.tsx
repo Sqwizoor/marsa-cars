@@ -87,22 +87,22 @@ export default async function HomePage() {
               />
             </div>
             {/* Animated deals */}
-            <div className="mt-2 hidden min-[915px]:block">
+            <div className="mt-2">
               <SponsoredCars cars={sponsoredCars} />
             </div>
             <div className="mt-10 space-y-6">
               {/* Super Deals Section */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="bg-pink-500 p-6 text-white relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
-                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl"></div>
+                <div className="bg-white p-6 relative overflow-hidden border-b border-gray-100">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-pink-50 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl opacity-50"></div>
+                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-gray-50 rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl"></div>
                   
                   <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-white/20 shadow-sm">Limited Time Offer</span>
+                        <span className="bg-gray-100 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-gray-900 border border-gray-200">Limited Time Offer</span>
                       </div>
-                      <h2 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter drop-shadow-sm">Super Deals</h2>
+                      <h2 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter text-gray-900">Super Deals</h2>
                     </div>
                   </div>
                 </div>
