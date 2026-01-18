@@ -39,7 +39,7 @@ export default function UserCardProducts({
   const product = products[currentIndex];
   
   return (
-    <div className="relative w-full h-[240px] flex items-center justify-center py-2">
+    <div className="relative w-full h-[320px] flex items-center justify-center py-2">
        {product && (
        <Link 
           key={product.id} 
@@ -51,13 +51,13 @@ export default function UserCardProducts({
         >
           <div className="bg-white/10 backdrop-blur-md rounded-xl overflow-hidden h-full flex flex-col hover:bg-white/20 transition-colors border border-white/20 shadow-xl">
             {/* Image Container with Padding and Rounded Corners */}
-            <div className="p-3 w-full h-[160px]">
+            <div className="p-3 w-full h-[240px]">
                 <div className="relative w-full h-full bg-white rounded-lg overflow-hidden shadow-inner">
                 <Image
                     src={product.images[0]?.url || "/assets/images/placeholder.png"}
                     alt={product.name}
                     fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                    className="object-contain group-hover:scale-110 transition-transform duration-700"
                 />
                 {product.discount > 0 && (
                     <span className="absolute top-2 right-2 bg-pink-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md z-10">

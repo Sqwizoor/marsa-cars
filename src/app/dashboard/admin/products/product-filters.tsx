@@ -11,63 +11,45 @@ import {
 import { ProductApprovalStatus } from "@prisma/client";
 import { Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useTransition } from "react";
 
 export default function ProductFilters() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
 
-  const [search, setSearch] = useState(searchParams.get("search") || "");
-  const [status, setStatus] = useState(searchParams.get("status") || "ALL");
+  // Get values directly from URL (single source of truth)
+  const currentSearch = searchParams.get("search") || "";
+  const currentStatus = searchParams.get("status") || "ALL";
 
-  const initialRender = useRef(true);
-
-  // Debounce search
-  useEffect(() => {
-    if (initialRender.current) {
-      initialRender.current = false;
-      return;
-    }
-    const timer = setTimeout(() => {
-      handleSearch(search);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [search]);
-
-  const createQueryString = (name: string, value: string) => {
+  const updateParams = useCallback((updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
     
-    // Reset page when filter changes
+    // Reset page to 1 when filters change
     params.set("page", "1");
 
-    if (value && value !== "ALL") {
-      params.set(name, value);
-    } else {
-      params.delete(name);
-    }
-    return params.toString();
-  };
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === "" || value === "ALL") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
 
-  const handleSearch = (term: string) => {
-    // Only update if the search term is different from current URL param
-    const currentSearch = searchParams.get("search") || "";
-    if (term === currentSearch) return;
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
+  }, [searchParams, pathname, router]);
 
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", "1"); // Reset page
-    if (term) {
-      params.set("search", term);
-    } else {
-      params.delete("search");
-    }
-    router.replace(`${pathname}?${params.toString()}`); // Use replace instead of push for search typing
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Debounce by using a small delay - but for simplicity, update immediately
+    updateParams({ search: value || null });
   };
 
   const handleStatusChange = (value: string) => {
-    setStatus(value);
-    router.push(`${pathname}?${createQueryString("status", value)}`);
+    updateParams({ status: value === "ALL" ? null : value });
   };
 
   return (
@@ -78,13 +60,13 @@ export default function ProductFilters() {
         </div>
         <Input
           placeholder="Search products..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          defaultValue={currentSearch}
+          onChange={handleSearchChange}
           className="pl-12 h-12"
         />
       </div>
       
-      <Select value={status} onValueChange={handleStatusChange}>
+      <Select value={currentStatus} onValueChange={handleStatusChange}>
         <SelectTrigger className="w-full sm:w-[180px] h-12">
           <SelectValue placeholder="Filter by status" />
         </SelectTrigger>
