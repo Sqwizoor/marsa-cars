@@ -170,8 +170,8 @@ export default async function HomeUserCard({
         </div>
 
         {/* Featured Store Section - Modern Card Design */}
-        <div className="w-full px-4 mt-4 relative z-10 flex-1 flex flex-col">
-          <div className="w-full rounded-xl overflow-hidden shadow-lg relative bg-gradient-to-br from-pink-500 via-pink-600 to-purple-700">
+        <div className="w-full px-4 mt-4 relative z-10 flex-1 flex flex-col pb-4">
+          <div className="w-full rounded-xl overflow-hidden shadow-lg relative bg-gradient-to-br from-pink-500 via-pink-600 to-purple-700 h-full flex flex-col">
             {/* Decorative elements */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-xl"></div>
@@ -191,18 +191,20 @@ export default async function HomeUserCard({
               </p>
             </div>
 
-            {/* Products Grid - Horizontal scroll */}
-            <div className="px-3 pb-4">
+            {/* Products Grid - Horizontal scroll - now a slideshow */}
+            <div className="px-3 pb-2 flex-1 flex flex-col justify-center">
               <UserCardProducts products={products} />
             </div>
             
             {/* Browse All Link */}
-            <Link 
-              href="/browse" 
-              className="block bg-white/10 backdrop-blur-sm text-white text-center text-sm font-medium py-2.5 hover:bg-white/20 transition-colors"
-            >
-              Browse All Deals →
-            </Link>
+            <div className="mt-auto">
+                <Link 
+                  href="/browse" 
+                  className="block bg-white/10 backdrop-blur-sm text-white text-center text-sm font-medium py-3 hover:bg-white/20 transition-colors"
+                >
+                  Browse All Deals →
+                </Link>
+            </div>
           </div>
         </div>
       </div>

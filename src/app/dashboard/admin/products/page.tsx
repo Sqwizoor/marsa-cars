@@ -3,19 +3,19 @@ import { getAdminProducts } from "@/queries/product";
 import DataTable from "@/components/ui/data-table";
 import { columns } from "./columns";
 import { ProductApprovalStatus } from "@prisma/client";
+import ProductFilters from "./product-filters";
+import PaginationControl from "@/components/ui/pagination-control";
 
-export default async function AdminProductsPage() {
-  // Fetch pending products by default, or all if preferred.
-  // Let's fetch PENDING products primarily.
-  // Actually, seeing all might be better, we can filter in the table.
-  // Getting all products for admin might be heavy, so let's start with PENDING.
-  // If we want tabs, we can add them later.
+export default async function AdminProductsPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const page = Number(searchParams.page) || 1;
+  const status = searchParams.status as ProductApprovalStatus | undefined;
+  const search = typeof searchParams.search === "string" ? searchParams.search : "";
 
-  const products = await getAdminProducts();
-  
-  // Need to map to match AdminProductType strictly if needed, but Prisma type usually matches well enough 
-  // except for JSON or weird fields.
-  // Let's rely on Prisma return type.
+  const { products, total } = await getAdminProducts(status, page, 10, search);
   
   return (
     <div className="w-full">
@@ -28,13 +28,18 @@ export default async function AdminProductsPage() {
         </div>
       </div>
       
+      <ProductFilters />
+
       <DataTable
         columns={columns}
-        data={products as any} // Typing loose for now to speed up
+        data={products} 
         filterValue="name"
         searchPlaceholder="Search products..."
         noHeader={true}
+        hideSearch={true}
       />
+
+      <PaginationControl total={total} page={page} pageSize={10} />
     </div>
   );
 }

@@ -2974,34 +2974,57 @@ export const updateProductStock = async (
 
 // Function: getAdminProducts
 // Description: Retrieves products for admin review, filtered by status.
-export const getAdminProducts = async (status?: ProductApprovalStatus) => {
+export const getAdminProducts = async (
+  status?: ProductApprovalStatus,
+  page: number = 1,
+  pageSize: number = 10,
+  search: string = ""
+) => {
   const user = await currentUser();
-  if (!user || user.privateMetadata.role !== "ADMIN") return [];
+  if (!user || user.privateMetadata.role !== "ADMIN") return { products: [], total: 0, totalPages: 0 };
 
   const where: any = {};
+  
   if (status) {
     where.status = status;
   }
 
-  const products = await db.product.findMany({
-    where,
-    include: {
-      store: true,
-      category: true,
-      variants: {
-        take: 1,
-        include: {
-          images: {
-            take: 1,
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { store: { name: { contains: search, mode: "insensitive" } } },
+    ];
+  }
+
+  const skip = (page - 1) * pageSize;
+
+  const [products, total] = await Promise.all([
+    db.product.findMany({
+      where,
+      include: {
+        store: true,
+        category: true,
+        variants: {
+          take: 1,
+          include: {
+            images: {
+              take: 1,
+            },
           },
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-  return products;
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: pageSize,
+    }),
+    db.product.count({ where }),
+  ]);
+
+  const totalPages = Math.ceil(total / pageSize);
+
+  return { products, total, totalPages };
 };
 
 // Function: updateProductStatus

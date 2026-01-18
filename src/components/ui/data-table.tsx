@@ -44,6 +44,7 @@ interface DataTableProps<TData, TValue> {
   heading?: string;
   subheading?: string;
   noHeader?: true;
+  hideSearch?: boolean;
 }
 
 export default function DataTable<TData, TValue>({
@@ -57,6 +58,7 @@ export default function DataTable<TData, TValue>({
   subheading,
   noHeader,
   newTabLink,
+  hideSearch,
 }: DataTableProps<TData, TValue>) {
   // Modal state
   const { setOpen } = useModal();
@@ -86,6 +88,7 @@ export default function DataTable<TData, TValue>({
     <>
       {/* Search input and action button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        {!hideSearch && (
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <div className="bg-pink-500 p-2.5 rounded-lg shadow-sm">
             <Search className="w-5 h-5 text-white" />
@@ -102,7 +105,8 @@ export default function DataTable<TData, TValue>({
             className="h-12 w-full"
           />
         </div>
-        <div className="flex gap-x-2">
+        )}
+        <div className="flex gap-x-2 ml-auto">
           {modalChildren && (
             <Button
               id="tour-table-modal-button"
