@@ -169,35 +169,40 @@ export default async function HomeUserCard({
           )}
         </div>
 
-        {/* Ad swiper with improved styling and dark overlay for better text visibility */}
+        {/* Featured Store Section - Modern Card Design */}
         <div className="w-full px-4 mt-4 relative z-10 flex-1 flex flex-col">
-          <div className="w-full h-full min-h-[300px] rounded-lg overflow-hidden shadow-sm relative flex-1">
-            {/* Background image */}
-            <div className="absolute inset-0 z-0">
-              <Image
-                src="/assets/images/swiper/here-slider3.png"
-                alt="Featured"
-                fill
-                className="object-cover"
-                sizes="(min-width: 1170px) 100vw, 0vw"
-              />
-              {/* Dark overlay for better text visibility */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/30 z-10"></div>
+          <div className="w-full rounded-xl overflow-hidden shadow-lg relative bg-gradient-to-br from-pink-500 via-pink-600 to-purple-700">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-xl"></div>
+            
+            {/* Header */}
+            <div className="p-4 pb-2">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="bg-white/20 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  🔥 Hot Deals
+                </span>
+              </div>
+              <h3 className="text-white font-bold text-lg leading-tight">
+                Your Favorite Store
+              </h3>
+              <p className="text-white/80 text-xs mt-0.5">
+                Check out the latest new deals
+              </p>
             </div>
 
-            <Link href="" className="block relative z-20">
-              <div className="h-24 p-2.5">
-                <div className="mt-2.5 text-white leading-[18px] text-[13px] font-medium">Your favorite store</div>
-                <div className="leading-5 font-bold mt-2.5 text-white text-lg drop-shadow-md">
-                  Check out the latest new deals
-                </div>
-              </div>
-            </Link>
-
-            {/* Products with relative positioning to appear above the background */}
-            <div className="relative z-20 px-2.5 mt-10">
+            {/* Products Grid - Horizontal scroll */}
+            <div className="px-3 pb-4">
               <UserCardProducts products={products} />
             </div>
+            
+            {/* Browse All Link */}
+            <Link 
+              href="/browse" 
+              className="block bg-white/10 backdrop-blur-sm text-white text-center text-sm font-medium py-2.5 hover:bg-white/20 transition-colors"
+            >
+              Browse All Deals →
+            </Link>
           </div>
         </div>
       </div>

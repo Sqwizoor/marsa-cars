@@ -46,6 +46,7 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
+  const [isSponsored, setIsSponsored] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -208,6 +209,7 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
         body: JSON.stringify({
           ...formData,
           features: selectedFeatures,
+          isSponsored: isSponsored,
           images: images.map((url, index) => ({ url, isPrimary: index === 0 })),
         }),
       });
@@ -234,6 +236,10 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
   ];
 
   const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
+
+  const canSponsor = subscription && subscription.sponsoredUsed < subscription.sponsoredLimit;
+  const sponsoredUsed = subscription?.sponsoredUsed || 0;
+  const sponsoredLimit = subscription?.sponsoredLimit || 0;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -878,6 +884,38 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
                     </div>
                   </div>
                 )}
+              </div>
+
+               {/* Sponsorship Option */}
+               <div className="bg-white rounded-xl p-6 border border-amber-200">
+                <div className="flex items-start space-x-3">
+                  <Checkbox 
+                    id="sponsor" 
+                    checked={isSponsored}
+                    onCheckedChange={(checked) => setIsSponsored(!!checked)}
+                    disabled={!canSponsor}
+                    className="mt-1"
+                  />
+                  <div>
+                    <Label htmlFor="sponsor" className="font-semibold text-base flex items-center gap-2">
+                      Promote this listing <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
+                    </Label>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Start your listing as a Featured Ad to get more visibility.
+                    </p>
+                    <div className="mt-2 text-xs font-medium px-2 py-1 bg-gray-100 rounded-md inline-block">
+                      {canSponsor ? (
+                        <span className="text-green-700">
+                          {sponsoredLimit - sponsoredUsed} of {sponsoredLimit} sponsored credits remaining
+                        </span>
+                      ) : (
+                         <span className="text-amber-700">
+                          You have used all {sponsoredLimit} sponsored credits. Upgrade to get more.
+                         </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Submit */}

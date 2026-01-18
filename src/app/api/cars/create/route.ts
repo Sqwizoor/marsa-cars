@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
       city,
       features,
       images,
+      isSponsored,
     } = body;
 
     // Validate required fields
@@ -72,6 +73,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check sponsored limit if requested
+    if (isSponsored) {
+       if (
+          subscription.sponsoredLimit !== -1 &&
+          subscription.sponsoredUsed >= subscription.sponsoredLimit
+        ) {
+          return NextResponse.json(
+            { error: "You have reached your sponsored ad limit. Upgrade your plan to promote more cars." },
+            { status: 403 }
+          );
+        }
+    }
+
     // Generate unique slug
     const baseSlug = `${make}-${model}-${year}`
       .toLowerCase()
@@ -106,9 +120,11 @@ export async function POST(req: NextRequest) {
         province,
         city,
         features: features || [],
-        status: "PENDING",
+        status: "ACTIVE", // Auto-activate for now as per instructions
         userId,
         carSubscriptionId: subscription.id,
+        isSponsored: !!isSponsored,
+        sponsoredUntil: isSponsored ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null,
         images: images?.length > 0
           ? {
               create: images.map((img: { url: string; isPrimary?: boolean }, index: number) => ({
@@ -127,7 +143,10 @@ export async function POST(req: NextRequest) {
     // Increment listings used
     await db.carSubscription.update({
       where: { id: subscription.id },
-      data: { listingsUsed: { increment: 1 } },
+      data: { 
+        listingsUsed: { increment: 1 },
+        sponsoredUsed: isSponsored ? { increment: 1 } : undefined,
+      },
     });
 
     return NextResponse.json({ listing });

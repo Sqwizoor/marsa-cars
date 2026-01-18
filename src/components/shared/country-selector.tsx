@@ -55,14 +55,14 @@ export default function CountrySelector({
           type="button"
           className={`${
             disabled ? "bg-neutral-100" : "bg-white"
-          } relative w-full border border-black/20 rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1  sm:text-sm`}
+          } relative w-full border border-black/20 rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 sm:text-sm text-gray-900`}
           aria-haspopup="listbox"
           aria-expanded="true"
           aria-labelledby="listbox-label"
           onClick={onToggle}
           disabled={disabled}
         >
-          <span className="truncate flex items-center">
+          <span className="truncate flex items-center text-gray-900">
             {selectedValue && selectedValue.code && (
               <Image
                 alt={`${selectedValue.name}`}
@@ -114,7 +114,7 @@ export default function CountrySelector({
                     type="search"
                     name="search"
                     autoComplete={"off"}
-                    className="block w-full sm:text-sm rounded-md bg-white outline-none"
+                    className="block w-full sm:text-sm rounded-md bg-white outline-none text-gray-900 placeholder-gray-500"
                     placeholder={"Search a country"}
                     onChange={(e) => setQuery(e.target.value)}
                   />
