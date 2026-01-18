@@ -10,8 +10,10 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DollarSign, Package, ShoppingCart } from "lucide-react";
+import { DollarSign, Package, ShoppingCart, Car, ArrowRight } from "lucide-react";
 import { OrdersLineChart } from "@/components/dashboard/analytics/orders-line-chart";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function SellerStorePage({
   params,
@@ -27,6 +29,31 @@ export default async function SellerStorePage({
   return (
     <div className="flex flex-col gap-8">
       <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+      
+      {/* Car Sales Promotion Banner */}
+      <Card className="bg-gradient-to-r from-pink-500 via-pink-600 to-purple-600 text-white border-0 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full translate-y-1/2 -translate-x-1/3 blur-2xl"></div>
+        <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <Car className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold">Expand Your Business!</h3>
+              <p className="text-white/80 text-sm">
+                You can now also sell cars on our platform. List your vehicles and reach more buyers.
+              </p>
+            </div>
+          </div>
+          <Link href="/cars/sell">
+            <Button className="bg-white text-pink-600 hover:bg-white/90 font-semibold shadow-lg">
+              Sell a Car
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
       
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

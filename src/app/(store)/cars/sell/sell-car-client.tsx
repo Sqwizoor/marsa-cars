@@ -27,7 +27,7 @@ import {
   CAR_FEATURES,
   getListingLimitDisplay,
 } from "@/constants/car-subscription-plans";
-import { Check, Car, Upload, ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
+import { Check, Car, Upload, ArrowRight, ArrowLeft, Sparkles, PartyPopper } from "lucide-react";
 import toast from "react-hot-toast";
 import { CarSubscription } from "@prisma/client";
 import Image from "next/image";
@@ -36,7 +36,7 @@ interface SellCarClientProps {
   initialSubscription: CarSubscription | null;
 }
 
-type Step = "plan" | "details" | "images" | "review";
+type Step = "plan" | "details" | "images" | "review" | "success";
 
 export default function SellCarClient({ initialSubscription }: SellCarClientProps) {
   const router = useRouter();
@@ -221,7 +221,7 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
       }
 
       toast.success("Car listing created successfully!");
-      router.push("/dashboard/cars");
+      setCurrentStep("success");
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -233,6 +233,7 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
     { id: "details", label: "Car Details" },
     { id: "images", label: "Photos" },
     { id: "review", label: "Review" },
+    { id: "success", label: "Done" },
   ];
 
   const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
@@ -932,6 +933,56 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
                 >
                   {loading ? "Publishing..." : "Publish Listing"}
                   <Car className="w-5 h-5 ml-2" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {currentStep === "success" && (
+          <Card className="text-center">
+            <CardContent className="py-16 space-y-6">
+              <div className="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center">
+                <PartyPopper className="w-10 h-10 text-green-600" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  🎉 Congratulations!
+                </h2>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  Your car listing has been published successfully. It&apos;s now live and visible to thousands of potential buyers!
+                </p>
+              </div>
+              
+              <div className="bg-gray-50 rounded-xl p-6 max-w-sm mx-auto">
+                <h3 className="font-semibold text-gray-800 mb-1">
+                  {formData.year} {formData.make} {formData.model}
+                </h3>
+                <p className="text-2xl font-bold text-pink-600">
+                  R{Number(formData.price).toLocaleString()}
+                </p>
+                {isSponsored && (
+                  <Badge className="mt-2 bg-amber-100 text-amber-700 border-amber-200">
+                    <Sparkles className="w-3 h-3 mr-1" /> Featured Ad
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+                <Button
+                  size="lg"
+                  onClick={() => router.push("/dashboard/cars")}
+                  className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700"
+                >
+                  <Car className="w-5 h-5 mr-2" />
+                  Go to My Dashboard
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => router.push("/cars")}
+                >
+                  Browse All Cars
                 </Button>
               </div>
             </CardContent>

@@ -90,6 +90,11 @@ export const SellerDashboardSidebarOptions: DashboardSidebarMenuInterface[] = [
     link: "shipping",
   },
   {
+    label: "Sell Cars",
+    icon: "car",
+    link: "/cars/sell",
+  },
+  {
     label: "Settings",
     icon: "settings",
     link: "settings",
