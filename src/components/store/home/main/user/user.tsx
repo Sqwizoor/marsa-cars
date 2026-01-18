@@ -200,7 +200,7 @@ export default async function HomeUserCard({
             <div className="mt-auto">
                 <Link 
                   href="/browse" 
-                  className="block bg-white/10 backdrop-blur-sm text-white text-center text-sm font-medium py-3 hover:bg-white/20 transition-colors"
+                  className="block bg-white/10 backdrop-blur-sm text-white text-center text-sm font-medium py-3 hover:bg-white/20 transition-colors rounded-full"
                 >
                   Browse All Deals →
                 </Link>
