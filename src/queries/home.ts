@@ -48,7 +48,7 @@ export const getHomeDataDynamic = async (
   // GetCheapestSize
   const getCheapestSize = (
     sizes: ProductSize[]
-  ): { discountedPrice: number } | undefined => {
+  ): (ProductSize & { discountedPrice: number }) | undefined => {
     const sizesWithDiscount = sizes.map((size) => ({
       ...size,
       discountedPrice: size.price * (1 - size.discount / 100),
@@ -76,12 +76,15 @@ export const getHomeDataDynamic = async (
         if (!image) return;
 
         simpleProducts.push({
+          id: product.id,
           name: product.name,
           slug: product.slug,
           variantName: variant.variantName,
           variantSlug: variant.slug,
           price: cheapestSize.discountedPrice,
           image: image.url,
+          images: variant.images,
+          discount: cheapestSize.discount,
         });
       });
       return simpleProducts;

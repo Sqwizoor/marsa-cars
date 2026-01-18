@@ -27,9 +27,9 @@ export default function SponsoredCars({ cars }: { cars: SponsoredCarParams[] }) 
         </div>
        </div>
 
-      <div className="w-full overflow-hidden bg-white/50 backdrop-blur-sm rounded-xl border border-gray-100/50 shadow-sm py-3 group relative">
-        <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-white to-transparent z-10"></div>
-        <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent z-10"></div>
+      <div className="w-full overflow-hidden bg-gradient-to-r from-pink-500 via-pink-400 to-pink-500 rounded-xl shadow-lg py-4 group relative">
+        <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-pink-500 to-transparent z-10"></div>
+        <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-pink-500 to-transparent z-10"></div>
         
         <div className="flex animate-marquee hover:pause w-max">
           <div className="flex gap-4 pr-4">

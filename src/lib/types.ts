@@ -360,12 +360,15 @@ export type ProductWithVariants = {
 };
 
 export type SimpleProduct = {
+  id: string;
   name: string;
   slug: string;
   variantName: string | null;
   variantSlug: string;
   price: number;
   image: string;
+  images: { url: string }[];
+  discount: number;
 };
 
 export type FeaturedCategoryType = Prisma.PromiseReturnType<
