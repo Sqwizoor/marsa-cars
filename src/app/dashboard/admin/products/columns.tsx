@@ -25,7 +25,6 @@ export type AdminProductType = {
   name: string;
   slug: string;
   status: ProductApprovalStatus;
-  images: { url: string }[];
   store: {
     id: string;
     name: string;
