@@ -11,7 +11,7 @@ async function fetchProducts({ status, page, search }: { status: string; page: n
   const params = new URLSearchParams();
   if (status && status !== "ALL") params.set("status", status);
   if (search) params.set("search", search);
-  params.set("page", page);
+  params.set("page", String(page));
   const res = await fetch(`/api/admin/products?${params.toString()}`);
   if (!res.ok) throw new Error("Failed to fetch products");
   return res.json();
