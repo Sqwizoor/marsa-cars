@@ -18,6 +18,7 @@ interface PaginationControlProps {
   onPageChange?: (page: number) => void;
 }
 
+function PaginationControl({
   total,
   page,
   pageSize = 10,
