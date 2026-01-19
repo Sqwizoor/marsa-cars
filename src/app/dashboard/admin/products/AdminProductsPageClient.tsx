@@ -36,7 +36,7 @@ export default function AdminProductsPageClient() {
     return () => { ignore = true; };
   }, [searchParams]);
 
-  const handleFilterChange = (updates) => {
+  const handleFilterChange = (updates: Partial<{ status: string; page: number; search: string }>) => {
     setSearchParams((prev) => ({ ...prev, ...updates, page: 1 }));
   };
 
