@@ -13,43 +13,17 @@ import { Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useTransition } from "react";
 
-export default function ProductFilters() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  const [isPending, startTransition] = useTransition();
-
-  // Get values directly from URL (single source of truth)
-  const currentSearch = searchParams.get("search") || "";
-  const currentStatus = searchParams.get("status") || "ALL";
-
-  const updateParams = useCallback((updates: Record<string, string | null>) => {
-    const params = new URLSearchParams(searchParams.toString());
-    
-    // Reset page to 1 when filters change
-    params.set("page", "1");
-
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === null || value === "" || value === "ALL") {
-        params.delete(key);
-      } else {
-        params.set(key, value);
-      }
-    });
-
-    startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`);
-    });
-  }, [searchParams, pathname, router]);
-
+export default function ProductFilters({ status, search, onChange }: {
+  status: string;
+  search: string;
+  onChange: (updates: Record<string, string>) => void;
+}) {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Debounce by using a small delay - but for simplicity, update immediately
-    updateParams({ search: value || null });
+    onChange({ search: e.target.value });
   };
 
   const handleStatusChange = (value: string) => {
-    updateParams({ status: value === "ALL" ? null : value });
+    onChange({ status: value });
   };
 
   return (
@@ -60,13 +34,12 @@ export default function ProductFilters() {
         </div>
         <Input
           placeholder="Search products..."
-          defaultValue={currentSearch}
+          value={search}
           onChange={handleSearchChange}
           className="pl-12 h-12"
         />
       </div>
-      
-      <Select value={currentStatus} onValueChange={handleStatusChange}>
+      <Select value={status} onValueChange={handleStatusChange}>
         <SelectTrigger className="w-full sm:w-[180px] h-12">
           <SelectValue placeholder="Filter by status" />
         </SelectTrigger>

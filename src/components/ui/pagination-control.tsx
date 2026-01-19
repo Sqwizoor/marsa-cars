@@ -15,43 +15,33 @@ interface PaginationControlProps {
   total: number;
   page: number;
   pageSize?: number;
+  onPageChange?: (page: number) => void;
 }
 
-export default function PaginationControl({
   total,
   page,
   pageSize = 10,
+  onPageChange,
 }: PaginationControlProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-
   const totalPages = Math.ceil(total / pageSize);
-
-  // Don't show pagination if there's only 1 page
   if (totalPages <= 1) return null;
 
-  const createPageUrl = (pageNumber: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", pageNumber.toString());
-    return `${pathname}?${params.toString()}`;
+  const handlePageClick = (pageNumber: number) => {
+    if (onPageChange) onPageChange(pageNumber);
   };
 
   const renderPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
-
     let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-
     if (startPage > 1) {
       pages.push(
         <PaginationItem key={1}>
-          <PaginationLink href={createPageUrl(1)}>1</PaginationLink>
+          <button onClick={() => handlePageClick(1)} className="px-3 py-1 rounded hover:bg-gray-200">1</button>
         </PaginationItem>
       );
       if (startPage > 2) {
@@ -62,21 +52,22 @@ export default function PaginationControl({
         );
       }
     }
-
     for (let i = startPage; i <= endPage; i++) {
       pages.push(
         <PaginationItem key={i}>
-          <PaginationLink 
-            href={createPageUrl(i)} 
-            isActive={i === page}
-            className={i === page ? "bg-pink-600 hover:bg-pink-700 text-white hover:text-white" : ""}
+          <button
+            onClick={() => handlePageClick(i)}
+            className={
+              "px-3 py-1 rounded " +
+              (i === page ? "bg-pink-600 text-white" : "hover:bg-gray-200")
+            }
+            disabled={i === page}
           >
             {i}
-          </PaginationLink>
+          </button>
         </PaginationItem>
       );
     }
-
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         pages.push(
@@ -87,13 +78,10 @@ export default function PaginationControl({
       }
       pages.push(
         <PaginationItem key={totalPages}>
-          <PaginationLink href={createPageUrl(totalPages)}>
-            {totalPages}
-          </PaginationLink>
+          <button onClick={() => handlePageClick(totalPages)} className="px-3 py-1 rounded hover:bg-gray-200">{totalPages}</button>
         </PaginationItem>
       );
     }
-
     return pages;
   };
 
@@ -101,19 +89,23 @@ export default function PaginationControl({
     <Pagination className="mt-8 justify-end">
       <PaginationContent>
         <PaginationItem>
-          <PaginationPrevious 
-            href={createPageUrl(Math.max(1, page - 1))}
-            className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-          />
+          <button
+            onClick={() => handlePageClick(Math.max(1, page - 1))}
+            className={page <= 1 ? "pointer-events-none opacity-50 px-3 py-1" : "cursor-pointer px-3 py-1 hover:bg-gray-200"}
+            disabled={page <= 1}
+          >
+            Prev
+          </button>
         </PaginationItem>
-        
         {renderPageNumbers()}
-
         <PaginationItem>
-          <PaginationNext 
-            href={createPageUrl(Math.min(totalPages, page + 1))}
-            className={page >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-          />
+          <button
+            onClick={() => handlePageClick(Math.min(totalPages, page + 1))}
+            className={page >= totalPages ? "pointer-events-none opacity-50 px-3 py-1" : "cursor-pointer px-3 py-1 hover:bg-gray-200"}
+            disabled={page >= totalPages}
+          >
+            Next
+          </button>
         </PaginationItem>
       </PaginationContent>
     </Pagination>
