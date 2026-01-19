@@ -40,7 +40,7 @@ export default function AdminProductsPageClient() {
     setSearchParams((prev) => ({ ...prev, ...updates, page: 1 }));
   };
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     setSearchParams((prev) => ({ ...prev, page }));
   };
 
