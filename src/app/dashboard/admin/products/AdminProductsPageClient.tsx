@@ -7,7 +7,7 @@ import { columns } from "./columns";
 import ProductFilters from "./product-filters";
 import PaginationControl from "@/components/ui/pagination-control";
 
-async function fetchProducts({ status, page, search }) {
+async function fetchProducts({ status, page, search }: { status: string; page: number; search: string }) {
   const params = new URLSearchParams();
   if (status && status !== "ALL") params.set("status", status);
   if (search) params.set("search", search);
