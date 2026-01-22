@@ -1,5 +1,4 @@
-import AnimatedDeals from "@/components/store/home/animated-deals";
-import SponsoredCars from "@/components/store/home/sponsored-cars";
+import ProductCard from "@/components/store/cards/product/product-card";
 import Featured from "@/components/store/home/main/featured";
 import HomeMainSwiper from "@/components/store/home/main/home-swiper";
 import HomeUserCard from "@/components/store/home/main/user/user";
@@ -7,18 +6,25 @@ import Sideline from "@/components/store/home/sideline/sideline";
 import MainSwiper from "@/components/store/shared/swiper";
 import { ProductType, SimpleProduct } from "@/lib/types";
 import { getHomeDataDynamic, getHomeFeaturedCategories } from "@/queries/home";
-import { getSponsoredCars } from "@/queries/cars";
-import { getProducts } from "@/queries/product";
-import Image from "next/image";
-import FeaturedCategories from "@/components/store/home/featured-categories";
-import ProductCard from "@/components/store/cards/product/product-card";
-import { ArrowRight, Flame, Star } from "lucide-react";
+// import { getSponsoredCars } from "@/queries/cars"; // Commented out as per request
+// import { getProducts } from "@/queries/product"; // Replaced by randomized
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { getOrCreateSessionId } from "@/lib/session";
+import { getRandomizedProducts, getFairSponsoredProducts } from "@/queries/randomized-products";
+import FeaturedCategories from "@/components/store/home/featured-categories";
 
 export default async function HomePage() {
-  const productsData = await getProducts({}, "", 1, 100);
+  const sessionId = await getOrCreateSessionId();
+
+  // Randomized products for "More to love"
+  const productsData = await getRandomizedProducts({ sessionId, limit: 100, page: 1 });
   const { products } = productsData;
-  const sponsoredCars = await getSponsoredCars();
+
+  // Fairly distributed sponsored products
+  const sponsoredProducts = await getFairSponsoredProducts({ sessionId, limit: 10 });
+
+  // const sponsoredCars = await getSponsoredCars(); // Commented out
 
   const {
     products_super_deals,
@@ -31,10 +37,6 @@ export default async function HomePage() {
     { property: "offer", value: "user-card", type: "simple" },
     { property: "offer", value: "featured", type: "simple" },
   ]);
-
- 
-
-
 
   const featuredCategories = await getHomeFeaturedCategories();
   return (
@@ -60,7 +62,8 @@ export default async function HomePage() {
                 {/* Main swiper */}
                 <HomeMainSwiper />
                 {/* Featured card */}
-             <Featured
+                {/* We could also randomize this if needed, but keeping logic for now */}
+                <Featured
                   products={products_featured.filter(
                     (product): product is SimpleProduct =>
                       "variantSlug" in product
@@ -86,10 +89,39 @@ export default async function HomePage() {
                 )}
               />
             </div>
-            {/* Animated deals */}
-            <div className="mt-2">
+            
+            {/* Sponsored Products Section (Replacing Cars) */}
+            {sponsoredProducts.length > 0 && (
+               <div className="mt-4 space-y-2">
+                <div className="flex items-center gap-2 px-1">
+                   {/* <Flame className="w-5 h-5 text-orange-500 fill-orange-500" /> */}
+                   <h3 className="text-xl font-bold text-gray-800">Sponsored Products</h3>
+                </div>
+                <div className="bg-white p-4 rounded-xl shadow-sm">
+                   <MainSwiper 
+                     products={sponsoredProducts} 
+                     type="curved"
+                     autoplay={{
+                       delay: 3000,
+                       disableOnInteraction: false,
+                     }}
+                     breakpoints={{
+                       0: { slidesPerView: 2, spaceBetween: 10 },
+                       640: { slidesPerView: 3, spaceBetween: 15 },
+                       1024: { slidesPerView: 4, spaceBetween: 20 },
+                       1280: { slidesPerView: 5, spaceBetween: 20 },
+                     }}
+                   >
+                     <div className="hidden"></div>
+                   </MainSwiper>
+                </div>
+               </div>
+            )}
+
+            {/* <div className="mt-2">
               <SponsoredCars cars={sponsoredCars} />
-            </div>
+            </div> */}
+
             <div className="mt-10 space-y-6">
               {/* Super Deals Section */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -132,6 +164,8 @@ export default async function HomePage() {
 
               
               <FeaturedCategories categories={featuredCategories} />
+              
+              {/* More to Love - Randomized */}
               <div>
                 {/* Header */}
                 <div className="text-center h-[32px] leading-[32px] text-[24px] font-extrabold text-[#222] flex justify-center">

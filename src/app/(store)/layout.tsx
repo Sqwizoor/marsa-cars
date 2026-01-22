@@ -8,6 +8,7 @@ import Footer from "@/components/store/layout/footer/footer";
 // Toaster
 import { Toaster } from "react-hot-toast";
 import ForceLightTheme from "@/components/force-light";
+import SessionProvider from "@/components/store/session-provider";
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,7 @@ export default function StoreLayout({ children }: { children: ReactNode }) {
   return (
     <div>
       <ForceLightTheme />
+      <SessionProvider />
       <Header />
       <div>
         {children}
