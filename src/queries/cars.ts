@@ -742,13 +742,22 @@ export const getCarListingStats = async () => {
 
     if (!user) return null;
 
-    const [subscription, listings, inquiries] = await Promise.all([
+    const [subscription, listings, inquiriesCount] = await Promise.all([
       db.carSubscription.findFirst({
         where: { userId: user.id, status: "ACTIVE" },
       }),
       db.carListing.findMany({
         where: { userId: user.id },
-        select: { views: true, inquiries: true, status: true, isSponsored: true },
+        select: {
+          id: true,
+          title: true,
+          views: true,
+          inquiries: true,
+          status: true,
+          isSponsored: true,
+          createdAt: true,
+        },
+        orderBy: { views: "desc" },
       }),
       db.carInquiry.count({
         where: { carListing: { userId: user.id }, isRead: false },
@@ -760,6 +769,50 @@ export const getCarListingStats = async () => {
     const activeListings = listings.filter((l) => l.status === "ACTIVE").length;
     const sponsoredListings = listings.filter((l) => l.isSponsored).length;
 
+    // 1. Top Cars by Views
+    const topCars = listings.slice(0, 5).map((car) => ({
+      name: car.title.length > 25 ? car.title.substring(0, 25) + "..." : car.title,
+      views: car.views,
+      inquiries: car.inquiries,
+    }));
+
+    // 2. Status Distribution
+    const statusMap: Record<string, number> = {};
+    listings.forEach((car) => {
+      statusMap[car.status] = (statusMap[car.status] || 0) + 1;
+    });
+    const statusDistribution = Object.keys(statusMap).map((key) => ({
+      name: key,
+      value: statusMap[key],
+    }));
+
+    // 3. Monthly Growth (Last 6 Months)
+    const growthMap: Record<string, number> = {};
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const today = new Date();
+    
+    // Initialize chart keys for last 6 months to ensure order
+    const growthData: { name: string; value: number; fullDate: Date }[] = [];
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const name = `${months[d.getMonth()]}`;
+        growthData.push({ name, value: 0, fullDate: d }); // value to be filled
+    }
+
+    listings.forEach((car) => {
+        const d = new Date(car.createdAt);
+        // Find matching month bin
+        const bin = growthData.find(g => 
+            g.fullDate.getMonth() === d.getMonth() && 
+            g.fullDate.getFullYear() === d.getFullYear()
+        );
+        if (bin) {
+            bin.value++;
+        }
+    });
+
+    const listingsGrowth = growthData.map(({ name, value }) => ({ name, value }));
+
     return {
       subscription,
       totalListings: listings.length,
@@ -767,7 +820,10 @@ export const getCarListingStats = async () => {
       sponsoredListings,
       totalViews,
       totalInquiries,
-      unreadInquiries: inquiries,
+      unreadInquiries: inquiriesCount,
+      topCars,
+      statusDistribution,
+      listingsGrowth,
     };
   } catch (error) {
     console.error("Error getting stats:", error);
