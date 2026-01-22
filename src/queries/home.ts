@@ -16,6 +16,7 @@ type Param = {
   property: "category" | "subCategory" | "offer";
   value: string;
   type: FormatType;
+  limit?: number;
 };
 
 type PropertyMapping = {
@@ -127,7 +128,7 @@ export const getHomeDataDynamic = async (
   };
 
   const results = [];
-  for (const { property, value, type } of params) {
+  for (const { property, value, type, limit } of params) {
     const dbField = mapProperty(property);
 
     // Construct the 'where' clause based on the dbField
@@ -146,6 +147,8 @@ export const getHomeDataDynamic = async (
     // Query products based on the constructed where clause
     const products = await db.product.findMany({
       where: whereClause,
+      take: limit || 20, // Default limit to 20 for performance
+      orderBy: { createdAt: "desc" },
       select: {
         id: true,
         slug: true,

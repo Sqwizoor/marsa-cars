@@ -103,7 +103,7 @@ export default async function Header() {
             </Link>
             <Link
               href="/forum"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-pink-500 hover:bg-pink-600 transition-all duration-200 text-white font-medium text-sm"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-pink-600 hover:bg-pink-700 transition-all duration-200 text-white font-bold text-sm shadow-sm hover:shadow-md"
             >
               <MessageSquare className="h-4 w-4" />
               <span>Forum</span>

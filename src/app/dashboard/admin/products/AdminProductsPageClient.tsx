@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useTransition } from "react";
+import React, { useEffect, useState, useTransition, useCallback } from "react";
 import { ProductApprovalStatus } from "@prisma/client";
 import DataTable from "@/components/ui/data-table";
 import { columns } from "./columns";
 import ProductFilters from "./product-filters";
 import PaginationControl from "@/components/ui/pagination-control";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 async function fetchProducts({ status, page, search }: { status: string; page: number; search: string }) {
   const params = new URLSearchParams();
@@ -18,30 +19,83 @@ async function fetchProducts({ status, page, search }: { status: string; page: n
 }
 
 export default function AdminProductsPageClient() {
-  const [searchParams, setSearchParams] = useState({
-    page: 1,
-    status: "ALL",
-    search: "",
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Read initial state from URL params
+  const getInitialPage = () => {
+    const pageParam = searchParams.get("page");
+    return pageParam ? parseInt(pageParam, 10) : 1;
+  };
+
+  const getInitialStatus = () => {
+    return searchParams.get("status") || "ALL";
+  };
+
+  const getInitialSearch = () => {
+    return searchParams.get("search") || "";
+  };
+
+  const [filterState, setFilterState] = useState({
+    page: getInitialPage(),
+    status: getInitialStatus(),
+    search: getInitialSearch(),
   });
+
   const [data, setData] = useState({ products: [], total: 0 });
   const [isPending, startTransition] = useTransition();
 
+  // Update URL when filter state changes
+  const updateURL = useCallback((newState: { page: number; status: string; search: string }) => {
+    const params = new URLSearchParams();
+    if (newState.status && newState.status !== "ALL") {
+      params.set("status", newState.status);
+    }
+    if (newState.search) {
+      params.set("search", newState.search);
+    }
+    if (newState.page > 1) {
+      params.set("page", String(newState.page));
+    }
+    const queryString = params.toString();
+    router.push(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false });
+  }, [pathname, router]);
+
+  // Sync URL changes back to state (for browser back/forward navigation)
+  useEffect(() => {
+    const pageParam = searchParams.get("page");
+    const statusParam = searchParams.get("status");
+    const searchParam = searchParams.get("search");
+
+    setFilterState({
+      page: pageParam ? parseInt(pageParam, 10) : 1,
+      status: statusParam || "ALL",
+      search: searchParam || "",
+    });
+  }, [searchParams]);
+
+  // Fetch data when filter state changes
   useEffect(() => {
     let ignore = false;
     startTransition(() => {
-      fetchProducts(searchParams).then((res) => {
+      fetchProducts(filterState).then((res) => {
         if (!ignore) setData(res);
       });
     });
     return () => { ignore = true; };
-  }, [searchParams]);
+  }, [filterState]);
 
   const handleFilterChange = (updates: Partial<{ status: string; page: number; search: string }>) => {
-    setSearchParams((prev) => ({ ...prev, ...updates, page: 1 }));
+    const newState = { ...filterState, ...updates, page: 1 }; // Reset to page 1 on filter change
+    setFilterState(newState);
+    updateURL(newState);
   };
 
   const handlePageChange = (page: number) => {
-    setSearchParams((prev) => ({ ...prev, page }));
+    const newState = { ...filterState, page };
+    setFilterState(newState);
+    updateURL(newState);
   };
 
   return (
@@ -55,8 +109,8 @@ export default function AdminProductsPageClient() {
         </div>
       </div>
       <ProductFilters
-        status={searchParams.status}
-        search={searchParams.search}
+        status={filterState.status}
+        search={filterState.search}
         onChange={handleFilterChange}
       />
       <DataTable
@@ -69,7 +123,7 @@ export default function AdminProductsPageClient() {
       />
       <PaginationControl
         total={data.total}
-        page={searchParams.page}
+        page={filterState.page}
         pageSize={10}
         onPageChange={handlePageChange}
       />

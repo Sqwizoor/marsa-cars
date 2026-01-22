@@ -32,10 +32,10 @@ export default async function HomePage() {
     products_user_card,
     products_featured,
   } = await getHomeDataDynamic([
-    { property: "offer", value: "best-deals", type: "full" },
-    { property: "offer", value: "super-deals", type: "full" },
-    { property: "offer", value: "user-card", type: "simple" },
-    { property: "offer", value: "featured", type: "simple" },
+    { property: "offer", value: "best-deals", type: "full", limit: 10 },
+    { property: "offer", value: "super-deals", type: "full", limit: 10 },
+    { property: "offer", value: "user-card", type: "simple", limit: 6 },
+    { property: "offer", value: "featured", type: "simple", limit: 12 },
   ]);
 
   const featuredCategories = await getHomeFeaturedCategories();
