@@ -54,6 +54,50 @@ export default async function CarsDashboardPage() {
   const activeListings = listings.filter((l) => l.status === "ACTIVE").length;
   const sponsoredListings = listings.filter((l) => l.isSponsored).length;
   
+  // 1. Top Cars
+  const topCars = [...listings]
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 5)
+      .map((car) => ({
+        name: car.title.length > 25 ? car.title.substring(0, 25) + "..." : car.title,
+        views: car.views,
+        inquiries: car.inquiries,
+      }));
+
+  // 2. Status Distribution
+  const statusMap: Record<string, number> = {};
+  listings.forEach((car) => {
+    statusMap[car.status] = (statusMap[car.status] || 0) + 1;
+  });
+  const statusDistribution = Object.keys(statusMap).map((key) => ({
+    name: key,
+    value: statusMap[key],
+  }));
+
+  // 3. Monthly Growth
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const today = new Date();
+  
+  const growthData: { name: string; value: number; fullDate: Date }[] = [];
+  for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const name = `${months[d.getMonth()]}`;
+      growthData.push({ name, value: 0, fullDate: d }); 
+  }
+
+  listings.forEach((car) => {
+      const d = new Date(car.createdAt);
+      const bin = growthData.find(g => 
+          g.fullDate.getMonth() === d.getMonth() && 
+          g.fullDate.getFullYear() === d.getFullYear()
+      );
+      if (bin) {
+          bin.value++;
+      }
+  });
+
+  const listingsGrowth = growthData.map(({ name, value }) => ({ name, value }));
+
   const stats = {
     subscription,
     totalListings: listings.length,
@@ -62,6 +106,9 @@ export default async function CarsDashboardPage() {
     totalViews,
     totalInquiries,
     unreadInquiries: inquiries,
+    topCars,
+    statusDistribution,
+    listingsGrowth
   };
 
   const plan = subscription
