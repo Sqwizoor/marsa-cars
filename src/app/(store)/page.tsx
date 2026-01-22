@@ -3,10 +3,11 @@ import Featured from "@/components/store/home/main/featured";
 import HomeMainSwiper from "@/components/store/home/main/home-swiper";
 import HomeUserCard from "@/components/store/home/main/user/user";
 import Sideline from "@/components/store/home/sideline/sideline";
+import SponsoredCars from "@/components/store/home/sponsored-cars";
 import MainSwiper from "@/components/store/shared/swiper";
 import { ProductType, SimpleProduct } from "@/lib/types";
 import { getHomeDataDynamic, getHomeFeaturedCategories } from "@/queries/home";
-// import { getSponsoredCars } from "@/queries/cars"; // Commented out as per request
+import { getSponsoredCars } from "@/queries/cars";
 // import { getProducts } from "@/queries/product"; // Replaced by randomized
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -24,7 +25,8 @@ export default async function HomePage() {
   // Fairly distributed sponsored products
   const sponsoredProducts = await getFairSponsoredProducts({ sessionId, limit: 10 });
 
-  // const sponsoredCars = await getSponsoredCars(); // Commented out
+  // Randomized sponsored cars (limited to 8)
+  const sponsoredCars = await getSponsoredCars(sessionId, 8);
 
   const {
     products_super_deals,
@@ -118,9 +120,10 @@ export default async function HomePage() {
                </div>
             )}
 
-            {/* <div className="mt-2">
+            {/* Sponsored Cars Section */}
+            <div className="mt-2">
               <SponsoredCars cars={sponsoredCars} />
-            </div> */}
+            </div>
 
             <div className="mt-10 space-y-6">
               {/* Super Deals Section */}

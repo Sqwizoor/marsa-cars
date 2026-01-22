@@ -836,12 +836,43 @@ export const updateCarListingStatus = async (
   }
 };
 
-export const getSponsoredCars = async () => {
+export const getSponsoredCars = async (sessionId?: string, limit: number = 8) => {
   try {
-    const cars = await db.carListing.findMany({
+    // First, get all IDs of sponsored cars
+    const allSponsoredIds = await db.carListing.findMany({
       where: {
         isSponsored: true,
         status: "ACTIVE",
+      },
+      select: { id: true },
+    });
+
+    if (allSponsoredIds.length === 0) return [];
+
+    // Shuffle IDs using session-based seed for consistency per user
+    const seed = sessionId || Math.random().toString();
+    const shuffled = [...allSponsoredIds];
+    
+    // Simple seeded shuffle
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+      hash = hash & hash;
+    }
+    
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      hash = (hash * 1103515245 + 12345) & 0x7fffffff;
+      const j = hash % (i + 1);
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // Take only the limited number of IDs
+    const selectedIds = shuffled.slice(0, limit).map(c => c.id);
+
+    // Fetch full car data for selected IDs
+    const cars = await db.carListing.findMany({
+      where: {
+        id: { in: selectedIds },
       },
       include: {
         images: {
@@ -851,12 +882,15 @@ export const getSponsoredCars = async () => {
           take: 1,
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 10,
     });
-    return cars;
+
+    // Maintain the shuffled order
+    const carsMap = new Map(cars.map(c => [c.id, c]));
+    const orderedCars = selectedIds
+      .map(id => carsMap.get(id))
+      .filter((c): c is typeof cars[0] => !!c);
+
+    return orderedCars;
   } catch (error) {
     console.error("Error getting sponsored cars:", error);
     return [];

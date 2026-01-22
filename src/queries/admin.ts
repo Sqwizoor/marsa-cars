@@ -369,3 +369,87 @@ export const getAllAdminOrders = async () => {
 
   return orders;
 };
+
+/**
+ * Get paginated orders for admin view with filtering
+ * @param status - Filter by payment status (Pending, Paid, Failed, etc.)
+ * @param page - Page number (1-indexed)
+ * @param pageSize - Number of items per page
+ * @param search - Search by customer name, email, or order ID
+ * @returns Paginated orders with total count
+ */
+export const getAdminOrders = async (
+  status?: string,
+  page: number = 1,
+  pageSize: number = 10,
+  search: string = ""
+) => {
+  const user = await currentUser();
+
+  if (!user || user.privateMetadata.role !== "ADMIN") {
+    throw new Error("Unauthorized: Admin access required");
+  }
+
+  // Build where clause
+  const where: any = {};
+
+  if (status) {
+    where.paymentStatus = status;
+  }
+
+  if (search) {
+    where.OR = [
+      { id: { contains: search, mode: "insensitive" } },
+      { user: { name: { contains: search, mode: "insensitive" } } },
+      { user: { email: { contains: search, mode: "insensitive" } } },
+    ];
+  }
+
+  const [orders, total] = await Promise.all([
+    db.order.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        groups: {
+          include: {
+            store: {
+              select: {
+                id: true,
+                name: true,
+                url: true,
+              },
+            },
+            _count: {
+              select: {
+                items: true,
+              },
+            },
+          },
+        },
+        shippingAddress: {
+          include: {
+            country: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    db.order.count({ where }),
+  ]);
+
+  return { orders, total };
+};
