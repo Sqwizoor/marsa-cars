@@ -746,7 +746,7 @@ export const updateStoreStatus = async (
 };
 
 // Function: deleteStore
-// Description: Deletes a store from the database.
+// Description: Permanently deletes a store and all related data from the database.
 // Permission Level: Admin only
 // Parameters:
 //   - storeId: The ID of the store to be deleted.
@@ -768,16 +768,137 @@ export const deleteStore = async (storeId: string) => {
     // Ensure store ID is provided
     if (!storeId) throw new Error("Please provide store ID.");
 
-    // Delete store from the database
-    const response = await db.store.delete({
-      where: {
-        id: storeId,
+    // Verify store exists
+    const store = await db.store.findUnique({
+      where: { id: storeId },
+      include: {
+        products: {
+          select: { id: true },
+        },
       },
     });
 
+    if (!store) throw new Error("Store not found.");
+
+    // Use a transaction to ensure all deletions succeed or none
+    const response = await db.$transaction(async (tx) => {
+      // 1. Delete all product-related data first
+      for (const product of store.products) {
+        // Delete product variants and their related data
+        const variants = await tx.productVariant.findMany({
+          where: { productId: product.id },
+          select: { id: true },
+        });
+
+        for (const variant of variants) {
+          // Delete sizes
+          await tx.size.deleteMany({
+            where: { productVariantId: variant.id },
+          });
+
+          // Delete images
+          await tx.productVariantImage.deleteMany({
+            where: { productVariantId: variant.id },
+          });
+
+          // Delete colors
+          await tx.color.deleteMany({
+            where: { productVariantId: variant.id },
+          });
+
+          // Delete specs
+          await tx.spec.deleteMany({
+            where: { variantId: variant.id },
+          });
+
+          // Delete wishlist entries for this variant
+          await tx.wishlist.deleteMany({
+            where: { variantId: variant.id },
+          });
+        }
+
+        // Delete all variants
+        await tx.productVariant.deleteMany({
+          where: { productId: product.id },
+        });
+
+        // Delete product questions
+        await tx.question.deleteMany({
+          where: { productId: product.id },
+        });
+
+        // Delete product reviews
+        await tx.review.deleteMany({
+          where: { productId: product.id },
+        });
+
+        // Delete product specs
+        await tx.spec.deleteMany({
+          where: { productId: product.id },
+        });
+
+        // Delete product wishlist entries
+        await tx.wishlist.deleteMany({
+          where: { productId: product.id },
+        });
+
+        // Delete free shipping config if exists
+        await tx.freeShipping.deleteMany({
+          where: { productId: product.id },
+        });
+      }
+
+      // Delete all products
+      await tx.product.deleteMany({
+        where: { storeId },
+      });
+
+      // 2. Delete order-related data
+      // First get all order groups for this store
+      const orderGroups = await tx.orderGroup.findMany({
+        where: { storeId },
+        select: { id: true },
+      });
+
+      // Delete order items
+      for (const group of orderGroups) {
+        await tx.orderItem.deleteMany({
+          where: { orderGroupId: group.id },
+        });
+      }
+
+      // Delete order groups
+      await tx.orderGroup.deleteMany({
+        where: { storeId },
+      });
+
+      // 3. Delete cart items for this store
+      await tx.cartItem.deleteMany({
+        where: { storeId },
+      });
+
+      // 4. Delete coupons for this store
+      await tx.coupon.deleteMany({
+        where: { storeId },
+      });
+
+      // 5. Delete shipping rates for this store
+      await tx.shippingRate.deleteMany({
+        where: { storeId },
+      });
+
+      // 6. Finally, delete the store itself
+      const deletedStore = await tx.store.delete({
+        where: { id: storeId },
+      });
+
+      return deletedStore;
+    });
+
+    console.log("Store and all related data deleted successfully:", storeId);
     return response;
   } catch (error) {
-    console.log(error);
+    console.error("Error deleting store:", error);
     throw error;
   }
 };

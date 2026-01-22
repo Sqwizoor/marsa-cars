@@ -4,6 +4,7 @@ import ProductList from "@/components/store/shared/product-list";
 import { FiltersQueryType } from "@/lib/types";
 import { getProducts } from "@/queries/product";
 import { getFilteredSizes } from "@/queries/size";
+import MobileFilters from "@/components/store/browse-page/mobile-filters";
 
 export default async function BrowsePage({
   searchParams,
@@ -34,7 +35,14 @@ export default async function BrowsePage({
       {/* <Header /> */}
       <div className="max-w-[95%] mx-auto pb-20">
         <h1 className="sr-only">Browse Products</h1>
-        <div className="flex flex-col lg:flex-row mt-5 gap-x-5">
+        
+        {/* Mobile Filters */}
+        <div className="lg:hidden mt-4 mb-4">
+          <MobileFilters queries={params} />
+        </div>
+        
+        <div className="flex flex-col lg:flex-row mt-2 lg:mt-5 gap-x-5">
+          {/* Desktop Filters */}
           <div className="hidden lg:block">
             <ProductFilters queries={params} />
           </div>

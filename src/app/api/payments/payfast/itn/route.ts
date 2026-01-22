@@ -11,47 +11,72 @@ export async function POST(req: NextRequest) {
     const itn: Record<string, any> = {};
     params.forEach((v, k) => (itn[k] = v));
 
-    // Verify signature
+    // Log ITN receipt
+    console.log("PayFast Order ITN received:", {
+      payment_status: itn["payment_status"],
+      m_payment_id: itn["m_payment_id"],
+      amount: itn["amount_gross"],
+    });
+
+    // 1. Verify signature
     const sigOk = verifyITNSignature(itn);
-    if (!sigOk) return new NextResponse("Invalid signature", { status: 400 });
+    if (!sigOk) {
+      console.warn("Invalid PayFast ITN signature");
+      return new NextResponse("OK", { status: 200 });
+    }
 
-    // Validate with PayFast servers
+    // 2. Validate with PayFast servers
     const isValid = await validateITNWithPayFast(raw);
-    if (!isValid) return new NextResponse("Invalid ITN", { status: 400 });
+    if (!isValid) {
+      console.warn("PayFast ITN validation failed");
+      return new NextResponse("OK", { status: 200 });
+    }
 
-    const status = itn["payment_status"]; // COMPLETE or FAILED
-    const orderId = itn["m_payment_id"]; // our ID
-
-    if (!orderId) return new NextResponse("Missing order id", { status: 400 });
-
-    // Optional: basic source IP check (skip strict check in sandbox)
+    // 3. Get config and validate IP in live mode
     let cfg;
     try {
       cfg = getPayFastConfig();
     } catch (error) {
       console.error("PayFast config error in ITN:", error);
-      return new NextResponse("Payment gateway configuration error", { status: 503 });
+      return new NextResponse("OK", { status: 200 });
     }
     
     if (cfg.mode === "live") {
       const fwd = req.headers.get("x-forwarded-for");
-      const clientIp = fwd ? fwd.split(",")[0].trim() : (req.headers.get("x-real-ip") || null);
+      const clientIp = fwd ? fwd.split(",")[0].trim() : req.headers.get("x-real-ip");
       if (!isFromPayFast(clientIp)) {
-        return new NextResponse("Invalid source IP", { status: 400 });
+        console.warn("Order ITN from invalid IP:", clientIp);
+        return new NextResponse("OK", { status: 200 });
       }
     }
 
-    // Compare amount (tolerance 0.01)
-    const order = await db.order.findUnique({ where: { id: orderId } });
-    if (!order) return new NextResponse("Order not found", { status: 404 });
-    const expected = Number(order.total);
-    const gross = parseFloat(itn["amount_gross"] || "0");
-    if (Math.abs(expected - gross) > 0.01) {
-      return new NextResponse("Amount mismatch", { status: 400 });
+    const status = itn["payment_status"]; // COMPLETE or FAILED
+    const orderId = itn["m_payment_id"]; // our ID
+
+    if (!orderId) {
+      console.warn("Missing order ID in ITN");
+      return new NextResponse("OK", { status: 200 });
     }
 
+    // 4. Verify order exists and amount matches
+    const order = await db.order.findUnique({ where: { id: orderId } });
+    if (!order) {
+      console.warn("Order not found:", orderId);
+      return new NextResponse("OK", { status: 200 });
+    }
+
+    const expected = Number(order.total);
+    const gross = parseFloat(itn["amount_gross"] || "0");
+    
+    // Allow small tolerance for rounding (0.01)
+    if (Math.abs(expected - gross) > 0.01) {
+      console.warn("Amount mismatch:", { expected, received: gross, orderId });
+      return new NextResponse("OK", { status: 200 });
+    }
+
+    // 5. Update order based on payment status
     if (status === "COMPLETE") {
-      // Mark paid
+      console.log("Marking order as paid:", orderId);
       await db.order.update({
         where: { id: orderId },
         data: {
@@ -63,15 +88,15 @@ export async function POST(req: NextRequest) {
                 paymentMethod: "PayFast",
                 paymentInetntId: itn["pf_payment_id"] || "",
                 status: "Completed",
-                amount: parseFloat(itn["amount_gross"] || "0"),
+                amount: gross,
                 currency: "ZAR",
-                user: { connect: { id: (await db.order.findUnique({ where: { id: orderId } }))!.userId } },
+                user: { connect: { id: order.userId } },
               },
               update: {
                 paymentMethod: "PayFast",
                 paymentInetntId: itn["pf_payment_id"] || "",
                 status: "Completed",
-                amount: parseFloat(itn["amount_gross"] || "0"),
+                amount: gross,
                 currency: "ZAR",
               },
             },
@@ -79,15 +104,38 @@ export async function POST(req: NextRequest) {
         },
       });
     } else if (status === "FAILED") {
+      console.log("Marking order as failed:", orderId);
       await db.order.update({
         where: { id: orderId },
-        data: { paymentStatus: "Failed", paymentDetails: { upsert: { create: { paymentMethod: "PayFast", paymentInetntId: itn["pf_payment_id"] || "", status: "Failed", amount: parseFloat(itn["amount_gross"] || "0"), currency: "ZAR", user: { connect: { id: (await db.order.findUnique({ where: { id: orderId } }))!.userId } } }, update: { paymentMethod: "PayFast", paymentInetntId: itn["pf_payment_id"] || "", status: "Failed", amount: parseFloat(itn["amount_gross"] || "0"), currency: "ZAR" } } } },
+        data: {
+          paymentStatus: "Failed",
+          paymentDetails: {
+            upsert: {
+              create: {
+                paymentMethod: "PayFast",
+                paymentInetntId: itn["pf_payment_id"] || "",
+                status: "Failed",
+                amount: gross,
+                currency: "ZAR",
+                user: { connect: { id: order.userId } },
+              },
+              update: {
+                paymentMethod: "PayFast",
+                paymentInetntId: itn["pf_payment_id"] || "",
+                status: "Failed",
+                amount: gross,
+                currency: "ZAR",
+              },
+            },
+          },
+        },
       });
     }
 
     return new NextResponse("OK", { status: 200 });
   } catch (e: any) {
-    console.error("PayFast ITN error", e);
-    return new NextResponse("Server error", { status: 500 });
+    console.error("PayFast ITN error:", e);
+    // Always return 200 to prevent PayFast from retrying
+    return new NextResponse("OK", { status: 200 });
   }
 }

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateITNWithPayFast, verifyITNSignature } from "@/lib/payfast/utils";
+import { validateITNWithPayFast, verifyITNSignature, isFromPayFast } from "@/lib/payfast/utils";
+import { getPayFastConfig } from "@/lib/payfast/config";
 import { activateSellerTrial } from "@/lib/store-activation";
+import { getSubscriptionPlanByTier, type SubscriptionPlanTier } from "@/constants/subscription-plans";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,16 +14,44 @@ export async function POST(req: NextRequest) {
       itn[key] = value;
     });
 
+    // Log ITN receipt for debugging
+    console.log("PayFast Trial ITN received:", {
+      payment_status: itn["payment_status"],
+      m_payment_id: itn["m_payment_id"],
+      amount: itn["amount_gross"],
+    });
+
+    // 1. Verify signature
     const signatureValid = verifyITNSignature(itn);
     if (!signatureValid) {
       console.warn("Invalid PayFast ITN signature for trial");
-      return NextResponse.json({ status: "invalid signature" });
+      // Return 200 so PayFast stops retrying
+      return new NextResponse("OK", { status: 200 });
     }
 
+    // 2. Validate with PayFast servers
     const validWithPayFast = await validateITNWithPayFast(bodyText);
     if (!validWithPayFast) {
       console.warn("PayFast ITN not validated for trial");
-      return NextResponse.json({ status: "not valid with PayFast" });
+      return new NextResponse("OK", { status: 200 });
+    }
+
+    // 3. IP Validation (critical security check in live mode)
+    let cfg;
+    try {
+      cfg = getPayFastConfig();
+    } catch (error) {
+      console.error("PayFast config error in trial ITN:", error);
+      return new NextResponse("OK", { status: 200 });
+    }
+
+    if (cfg.mode === "live") {
+      const fwd = req.headers.get("x-forwarded-for");
+      const clientIp = fwd ? fwd.split(",")[0].trim() : req.headers.get("x-real-ip");
+      if (!isFromPayFast(clientIp)) {
+        console.warn("Trial ITN from invalid IP:", clientIp);
+        return new NextResponse("OK", { status: 200 });
+      }
     }
 
     const paymentStatus = itn["payment_status"];
@@ -30,12 +60,28 @@ export async function POST(req: NextRequest) {
     // Accept both old trial_ and new sub_ prefixes
     if (!mPaymentId || (!mPaymentId.startsWith("trial_") && !mPaymentId.startsWith("sub_"))) {
       console.warn("ITN is not a trial/subscription payment", mPaymentId);
-      return NextResponse.json({ status: "ignored" });
+      return new NextResponse("OK", { status: 200 });
     }
 
     if (paymentStatus !== "COMPLETE") {
       console.warn("Payment not complete", paymentStatus);
-      return NextResponse.json({ status: "pending" });
+      return new NextResponse("OK", { status: 200 });
+    }
+
+    // 4. Amount Validation - verify paid amount matches expected plan price
+    const planTier = (itn["custom_str1"] || "BRONZE") as SubscriptionPlanTier;
+    const selectedPlan = getSubscriptionPlanByTier(planTier);
+    const expectedAmount = selectedPlan?.price || 0;
+    const paidAmount = parseFloat(itn["amount_gross"] || "0");
+
+    // Allow small tolerance (1 ZAR) for rounding differences
+    if (expectedAmount > 0 && Math.abs(expectedAmount - paidAmount) > 1) {
+      console.warn("Trial ITN amount mismatch:", { 
+        expected: expectedAmount, 
+        paid: paidAmount,
+        plan: planTier 
+      });
+      return new NextResponse("OK", { status: 200 });
     }
 
     // sub_TIER_USERID_TIMESTAMP
@@ -44,17 +90,17 @@ export async function POST(req: NextRequest) {
     
     if (!userId) {
       console.error("No userId in m_payment_id");
-      return NextResponse.json({ status: "error" });
+      return new NextResponse("OK", { status: 200 });
     }
 
-    const planTier = itn["custom_str1"] || "BRONZE";
-    const amount = parseFloat(itn["amount_gross"] || "0");
+    // All validations passed - activate the subscription
+    console.log("Activating seller trial for user:", userId, "plan:", planTier);
+    await activateSellerTrial(userId, planTier, paidAmount);
 
-    await activateSellerTrial(userId, planTier, amount);
-
-    return NextResponse.json({ status: "ok" });
+    return new NextResponse("OK", { status: 200 });
   } catch (e: any) {
     console.error("Error in PayFast trial ITN", e);
-    return NextResponse.json({ status: "error" });
+    // Always return 200 to prevent PayFast from retrying
+    return new NextResponse("OK", { status: 200 });
   }
 }

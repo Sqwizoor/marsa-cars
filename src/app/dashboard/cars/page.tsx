@@ -76,7 +76,7 @@ export default async function CarsDashboardPage() {
           <h1 className="text-3xl font-bold">Details Overview</h1>
         </div>
         <div className="flex gap-3">
-          <Link href="/cars/sell">
+          <Link href="/dashboard/cars/new">
             <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
               <Plus className="w-4 h-4 mr-2" />
               New Listing
@@ -210,7 +210,7 @@ export default async function CarsDashboardPage() {
               <p className="text-gray-500 mb-6">
                 Create your first car listing and start selling!
               </p>
-              <Link href="/cars/sell">
+              <Link href="/dashboard/cars/new">
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
                   Create Listing

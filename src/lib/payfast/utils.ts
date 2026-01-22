@@ -81,9 +81,26 @@ export function verifyITNSignature(itn: Record<string, any>): boolean {
 }
 
 export function isFromPayFast(ip: string | null): boolean {
-  // Basic allowlist per docs (can be expanded with DNS checks). Keep lenient in sandbox.
-  // PayFast publishes IP ranges; here we just check common prefixes.
+  // PayFast server IP ranges (official)
+  // Updated list from PayFast documentation
   if (!ip) return false;
-  const allowPrefixes = ["196.33.", "41.74.", "41.79.", "197.97."]; // Not exhaustive
-  return allowPrefixes.some((p) => ip.startsWith(p));
+  
+  const PAYFAST_IP_RANGES = [
+    // Primary PayFast IPs
+    "197.97.145.",
+    "41.74.179.",
+    "41.79.173.",
+    "196.33.227.",
+    // Additional PayFast IPs
+    "102.216.36.",
+    "102.216.38.",
+    "102.216.39.",
+    "196.21.252.",
+    "41.74.178.",
+    // Sandbox IPs (for testing)
+    "197.85.225.",
+    "41.76.209.",
+  ];
+  
+  return PAYFAST_IP_RANGES.some((prefix) => ip.startsWith(prefix));
 }
