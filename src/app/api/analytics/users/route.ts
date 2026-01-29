@@ -3,9 +3,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
 
-// Cache for 5 minutes
-export const revalidate = 300 
-
 export async function GET(request: NextRequest) {
   try {
     const { userId } = await auth()
@@ -16,140 +13,183 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams
     const range = searchParams.get('range') || '7d'
-    // Convert '7d' -> '-7d' for PostHog API
-    const dateFrom = `-${range}`
     
+    const days = range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : 7
+    const startDate = new Date()
+    startDate.setDate(startDate.getDate() - days)
+    startDate.setHours(0, 0, 0, 0)
+    
+    const endDate = new Date()
+    endDate.setHours(23, 59, 59, 999)
+
     const personalApiKey = process.env.POSTHOG_PERSONAL_API_KEY
     const projectId = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID || '301224'
+    
+    // Get real signups from database
+    const signups = await db.user.groupBy({
+      by: ['createdAt'],
+      where: {
+        createdAt: {
+          gte: startDate,
+          lte: endDate
+        }
+      },
+      _count: { id: true }
+    })
 
+    // Create signup map by date
+    const signupsByDate = new Map<string, number>()
+    signups.forEach(s => {
+      const dateStr = new Date(s.createdAt).toISOString().split('T')[0]
+      signupsByDate.set(dateStr, (signupsByDate.get(dateStr) || 0) + s._count.id)
+    })
+    
     if (!personalApiKey) {
-        return NextResponse.json({ 
-            error: 'Configuration missing', 
-            details: 'POSTHOG_PERSONAL_API_KEY missing' 
-        })
+      return NextResponse.json({
+        dailyMetrics: [],
+        totals: { pageviews: 0, visitors: 0, signups: 0, sessions: 0 },
+        averages: { pageviewsPerDay: 0, visitorsPerDay: 0, pageviewsPerSession: 0 },
+        topPages: [],
+        error: 'POSTHOG_PERSONAL_API_KEY not configured'
+      })
     }
 
-    const headers = {
+    // Fetch ALL events from PostHog
+    // Using simple event query which we know sends data correctly
+    const eventsUrl = `https://us.posthog.com/api/projects/${projectId}/events/?after=${startDate.toISOString()}&limit=1000`
+    
+    const response = await fetch(eventsUrl, {
+      headers: {
         'Authorization': `Bearer ${personalApiKey}`,
         'Content-Type': 'application/json'
-    }
-
-    // Define PostHog API URLs
-    // 1. Daily Trend (Access & Usage)
-    const trendUrl = `https://us.posthog.com/api/projects/${projectId}/insights/trend/?events=[{"id":"$pageview"}]&display=ActionsLineGraph&date_from=${dateFrom}`
-    
-    // 2. Unique Visitors (DAU)
-    const visitorsUrl = `https://us.posthog.com/api/projects/${projectId}/insights/trend/?events=[{"id":"$pageview","math":"dau"}]&display=ActionsLineGraph&date_from=${dateFrom}`
-
-    // 3. Top Pages
-    const topPagesUrl = `https://us.posthog.com/api/projects/${projectId}/insights/trend/?events=[{"id":"$pageview"}]&breakdown=$current_url&limit=10&date_from=${dateFrom}`
-
-    // Parallel Fetch (Fast)
-    const [trendRes, visitorsRes, topPagesRes, signupsDB] = await Promise.all([
-        fetch(trendUrl, { headers, next: { revalidate: 300 } }),
-        fetch(visitorsUrl, { headers, next: { revalidate: 300 } }),
-        fetch(topPagesUrl, { headers, next: { revalidate: 300 } }),
-        // Get real signups from DB
-        db.user.groupBy({
-            by: ['createdAt'],
-            where: {
-                createdAt: {
-                    gte: new Date(Date.now() - (parseInt(range) * 24 * 60 * 60 * 1000))
-                }
-            },
-            _count: { id: true }
-        })
-    ])
-
-    if (!trendRes.ok) {
-        throw new Error(`PostHog Trend API Error: ${trendRes.status}`)
-    }
-
-    const pageviewData = await trendRes.json()
-    const visitorData = await visitorsRes.json()
-    const topPagesData = await topPagesRes.json()
-
-    // Process PostHog Data
-    // They return { result: [{ data: [], labels: [], days: [] }] }
-    const dates = pageviewData.result?.[0]?.labels || []
-    const pageviewsRaw = pageviewData.result?.[0]?.data || []
-    const visitorsRaw = visitorData.result?.[0]?.data || []
-
-    // Process Signups
-    const signupMap = new Map<string, number>()
-    signupsDB.forEach(s => {
-        const d = new Date(s.createdAt).toISOString().split('T')[0]
-        signupMap.set(d, (signupMap.get(d) || 0) + s._count.id)
+      },
+      cache: 'no-store'
     })
 
-    // Combine into Daily Metrics
-    const dailyMetrics = dates.map((label: string, i: number) => {
-        // Calculate date object for chart sorting/display
-        // PostHog labels are usually "6-Feb", need ISO for mapping matches if needed
-        // We assume index mapping matches reverse chronological or chronological order provided by API
-        // Typically PostHog returns chronological.
-        
-        // Reconstruct date string for DB lookup (approximate logic: today - offset)
-        const d = new Date()
-        const dayOffset = dates.length - 1 - i
-        d.setDate(d.getDate() - dayOffset)
-        const isoDate = d.toISOString().split('T')[0]
+    if (!response.ok) {
+      const errorText = await response.text()
+      return NextResponse.json({
+        dailyMetrics: [],
+        totals: { pageviews: 0, visitors: 0, signups: 0, sessions: 0 },
+        averages: { pageviewsPerDay: 0, visitorsPerDay: 0, pageviewsPerSession: 0 },
+        topPages: [],
+        error: `PostHog API Error: ${response.status}`,
+        details: errorText
+      })
+    }
 
-        const pageviews = pageviewsRaw[i] || 0
-        const visitors = visitorsRaw[i] || 0
+    const data = await response.json()
+    const allEvents = data.results || []
+
+    // Initialize daily metrics for ALL days in range (including today)
+    interface DailyMetric { pageviews: number; visitors: Set<string>; sessions: Set<string>; signups: number }
+    const metricsMap = new Map<string, DailyMetric>()
+    
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today)
+      date.setDate(date.getDate() - i)
+      const dateStr = date.toISOString().split('T')[0]
+      metricsMap.set(dateStr, { 
+        pageviews: 0, 
+        visitors: new Set(), 
+        sessions: new Set(),
+        signups: signupsByDate.get(dateStr) || 0
+      })
+    }
+
+    // Track totals
+    const urlCounts = new Map<string, number>()
+    const allVisitors = new Set<string>()
+    const allSessions = new Set<string>()
+    let totalPageviews = 0
+
+    // Process events
+    allEvents.forEach((event: any) => {
+      // Extract date from timestamp (handle timezone)
+      let eventDate: string | null = null
+      if (event.timestamp) {
+        const eventTime = new Date(event.timestamp)
+        eventDate = eventTime.toISOString().split('T')[0]
+      }
+      
+      // Track all visitors and sessions from ANY event (not just pageview)
+      if (event.distinct_id) allVisitors.add(event.distinct_id)
+      if (event.properties?.$session_id) allSessions.add(event.properties.$session_id)
+      
+      // Only count pageviews for pageview metric
+      if (event.event === '$pageview') {
+        totalPageviews++
         
-        return {
-            date: isoDate, // e.g. "2024-02-06"
-            label: label,  // e.g. "6 Feb"
-            pageviews,
-            visitors,
-            sessions: Math.ceil(visitors * 1.0), // Simplified session estimate
-            signups: signupMap.get(isoDate) || 0
+        // Add to daily metric
+        if (eventDate && metricsMap.has(eventDate)) {
+          const metric = metricsMap.get(eventDate)!
+          metric.pageviews++
+          if (event.distinct_id) metric.visitors.add(event.distinct_id)
+          if (event.properties?.$session_id) metric.sessions.add(event.properties.$session_id)
         }
+        
+        // Count URLs
+        const url = event.properties?.$pathname || event.properties?.$current_url || '/'
+        const cleanUrl = url.split('?')[0] // Simple URL cleaning
+        urlCounts.set(cleanUrl, (urlCounts.get(cleanUrl) || 0) + 1)
+      }
     })
 
-    // Calculate Totals using PostHog's "count" property which is often the aggregate
-    interface DailyMetric { pageviews: number; visitors: number; }
-    const totalPageviews = pageviewData.result?.[0]?.count || dailyMetrics.reduce((a: number, b: DailyMetric) => a + b.pageviews, 0)
-    const totalVisitors = visitorData.result?.[0]?.count || dailyMetrics.reduce((a: number, b: DailyMetric) => a + b.visitors, 0) // Sum of DAU
-    
-    interface SignupRecord { _count: { id: number } }
-    const totalSignups = signupsDB.reduce((a: number, b: SignupRecord) => a + b._count.id, 0)
-    const totalSessions = Math.ceil(totalPageviews / 2.5) // Estimate
+    // Convert to array and calculate final metrics
+    const dailyMetrics = Array.from(metricsMap.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, m]) => ({
+        date,
+        pageviews: m.pageviews,
+        visitors: m.visitors.size,
+        // Sessions: if set is empty, estimate from visitors
+        sessions: m.sessions.size > 0 ? m.sessions.size : (m.visitors.size > 0 ? Math.ceil(m.visitors.size * 1.1) : 0),
+        signups: m.signups
+      }))
 
-    // Top Pages
-    const topPages = topPagesData.result?.map((item: any) => ({
-        url: item.label,
-        views: item.count || (Array.isArray(item.data) ? item.data.reduce((a: number, b: number) => a + b, 0) : 0)
-    })).sort((a: any, b: any) => b.views - a.views).slice(0, 10) || []
+    // Calculate total signups
+    const totalSignups = dailyMetrics.reduce((sum, d) => sum + d.signups, 0)
 
-    const daysCount = dates.length || 1
+    // Top pages
+    const topPages = Array.from(urlCounts.entries())
+      .map(([url, views]) => ({ url, views }))
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 10)
 
     return NextResponse.json({
-        dailyMetrics,
-        totals: {
-            pageviews: totalPageviews,
-            visitors: totalVisitors,
-            signups: totalSignups,
-            sessions: totalSessions
-        },
-        averages: {
-            pageviewsPerDay: Math.round(totalPageviews / daysCount),
-            visitorsPerDay: Math.round(totalVisitors / daysCount),
-            pageviewsPerSession: totalSessions > 0 ? parseFloat((totalPageviews / totalSessions).toFixed(1)) : 0
-        },
-        topPages,
-        _source: 'PostHog Insights (Cached)'
+      dailyMetrics,
+      totals: {
+        pageviews: totalPageviews,
+        visitors: allVisitors.size,
+        signups: totalSignups,
+        sessions: allSessions.size
+      },
+      averages: {
+        pageviewsPerDay: Math.round(totalPageviews / days),
+        visitorsPerDay: Math.round(allVisitors.size / days),
+        pageviewsPerSession: allSessions.size > 0 ? parseFloat((totalPageviews / allSessions.size).toFixed(1)) : 0
+      },
+      topPages,
+      _source: 'Real PostHog (Raw Events)',
+      _debug: {
+        totalEvents: allEvents.length,
+        pageviews: totalPageviews,
+        daysInRange: days,
+        signupsFromDB: totalSignups
+      }
     })
 
   } catch (error) {
-    console.error('Analytics API Error:', error)
+    console.error('Analytics Error:', error)
     return NextResponse.json({
-        dailyMetrics: [],
-        totals: { pageviews:0, visitors:0, signups:0, sessions:0 },
-        averages: { pageviewsPerDay:0, visitorsPerDay:0, pageviewsPerSession:0 },
-        topPages: [],
-        error: error instanceof Error ? error.message : 'Unknown error'
+      dailyMetrics: [],
+      totals: { pageviews: 0, visitors: 0, signups: 0, sessions: 0 },
+      averages: { pageviewsPerDay: 0, visitorsPerDay: 0, pageviewsPerSession: 0 },
+      topPages: [],
+      error: error instanceof Error ? error.message : 'Unknown error'
     })
   }
 }
