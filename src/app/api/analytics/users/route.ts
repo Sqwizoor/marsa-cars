@@ -79,12 +79,16 @@ export async function GET(request: NextRequest) {
     const data = await response.json()
     const allEvents = data.results || []
 
-    // Initialize daily metrics for ALL days in range
+    // Initialize daily metrics for ALL days in range (including today)
     const metricsMap = new Map<string, { pageviews: number; visitors: Set<string>; sessions: Set<string>; signups: number }>()
     
-    for (let i = 0; i < days; i++) {
-      const date = new Date(startDate)
-      date.setDate(date.getDate() + i)
+    // Start from (days-1) days ago to today
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today)
+      date.setDate(date.getDate() - i)
       const dateStr = date.toISOString().split('T')[0]
       metricsMap.set(dateStr, { 
         pageviews: 0, 
