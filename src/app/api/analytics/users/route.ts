@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+import { db } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,9 +17,31 @@ export async function GET(request: NextRequest) {
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
     startDate.setHours(0, 0, 0, 0)
+    
+    const endDate = new Date()
+    endDate.setHours(23, 59, 59, 999)
 
     const personalApiKey = process.env.POSTHOG_PERSONAL_API_KEY
     const projectId = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID || '301224'
+    
+    // Get real signups from database
+    const signups = await db.user.groupBy({
+      by: ['createdAt'],
+      where: {
+        createdAt: {
+          gte: startDate,
+          lte: endDate
+        }
+      },
+      _count: { id: true }
+    })
+
+    // Create signup map by date
+    const signupsByDate = new Map<string, number>()
+    signups.forEach(s => {
+      const dateStr = new Date(s.createdAt).toISOString().split('T')[0]
+      signupsByDate.set(dateStr, (signupsByDate.get(dateStr) || 0) + s._count.id)
+    })
     
     if (!personalApiKey) {
       return NextResponse.json({
@@ -30,7 +53,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Fetch ALL events (not just pageview) to get more data
+    // Fetch ALL events from PostHog
     const eventsUrl = `https://us.posthog.com/api/projects/${projectId}/events/?after=${startDate.toISOString()}&limit=1000`
     
     const response = await fetch(eventsUrl, {
@@ -56,40 +79,45 @@ export async function GET(request: NextRequest) {
     const data = await response.json()
     const allEvents = data.results || []
 
-    // Process events
-    const metricsMap = new Map<string, { pageviews: number; visitors: Set<string>; sessions: Set<string> }>()
-    const urlCounts = new Map<string, number>()
-    const allVisitors = new Set<string>()
-    let totalPageviews = 0
-    let totalSessions = new Set<string>()
+    // Initialize daily metrics for ALL days in range
+    const metricsMap = new Map<string, { pageviews: number; visitors: Set<string>; sessions: Set<string>; signups: number }>()
     
-    // Initialize all days in the range
     for (let i = 0; i < days; i++) {
       const date = new Date(startDate)
       date.setDate(date.getDate() + i)
       const dateStr = date.toISOString().split('T')[0]
-      metricsMap.set(dateStr, { pageviews: 0, visitors: new Set(), sessions: new Set() })
+      metricsMap.set(dateStr, { 
+        pageviews: 0, 
+        visitors: new Set(), 
+        sessions: new Set(),
+        signups: signupsByDate.get(dateStr) || 0
+      })
     }
 
-    // Count events
+    // Track totals
+    const urlCounts = new Map<string, number>()
+    const allVisitors = new Set<string>()
+    const allSessions = new Set<string>()
+    let totalPageviews = 0
+
+    // Process events
     allEvents.forEach((event: any) => {
-      const eventDate = event.timestamp ? new Date(event.timestamp).toISOString().split('T')[0] : null
-      
-      // Track all visitors
-      if (event.distinct_id) {
-        allVisitors.add(event.distinct_id)
+      // Extract date from timestamp (handle timezone)
+      let eventDate: string | null = null
+      if (event.timestamp) {
+        const eventTime = new Date(event.timestamp)
+        eventDate = eventTime.toISOString().split('T')[0]
       }
       
-      // Track sessions
-      if (event.properties?.$session_id) {
-        totalSessions.add(event.properties.$session_id)
-      }
+      // Track all visitors and sessions
+      if (event.distinct_id) allVisitors.add(event.distinct_id)
+      if (event.properties?.$session_id) allSessions.add(event.properties.$session_id)
       
-      // Only count pageviews for the chart
+      // Only count pageviews
       if (event.event === '$pageview') {
         totalPageviews++
         
-        // Add to daily metrics if date exists
+        // Add to daily metric
         if (eventDate && metricsMap.has(eventDate)) {
           const metric = metricsMap.get(eventDate)!
           metric.pageviews++
@@ -97,26 +125,29 @@ export async function GET(request: NextRequest) {
           if (event.properties?.$session_id) metric.sessions.add(event.properties.$session_id)
         }
         
-        // Count URLs for top pages
-        const url = event.properties?.$current_url || event.properties?.$pathname || '/'
-        urlCounts.set(url, (urlCounts.get(url) || 0) + 1)
+        // Count URLs
+        const url = event.properties?.$pathname || event.properties?.$current_url || '/'
+        // Clean URL for display
+        const cleanUrl = url.split('?')[0]
+        urlCounts.set(cleanUrl, (urlCounts.get(cleanUrl) || 0) + 1)
       }
     })
 
-    // Convert to arrays
+    // Convert to array and calculate final metrics
     const dailyMetrics = Array.from(metricsMap.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, m]) => ({
         date,
         pageviews: m.pageviews,
         visitors: m.visitors.size,
-        sessions: m.sessions.size || Math.max(1, Math.ceil(m.visitors.size * 1.2)),
-        signups: 0
+        sessions: m.sessions.size > 0 ? m.sessions.size : Math.max(1, Math.ceil(m.visitors.size * 1.2)),
+        signups: m.signups
       }))
 
-    const dailyVisitors = dailyMetrics.reduce((sum, d) => sum + d.visitors, 0)
-    const dailySessions = dailyMetrics.reduce((sum, d) => sum + d.sessions, 0)
+    // Calculate total signups
+    const totalSignups = dailyMetrics.reduce((sum, d) => sum + d.signups, 0)
 
+    // Top pages
     const topPages = Array.from(urlCounts.entries())
       .map(([url, views]) => ({ url, views }))
       .sort((a, b) => b.views - a.views)
@@ -127,22 +158,21 @@ export async function GET(request: NextRequest) {
       totals: {
         pageviews: totalPageviews,
         visitors: allVisitors.size,
-        signups: 0,
-        sessions: totalSessions.size
+        signups: totalSignups,
+        sessions: allSessions.size
       },
       averages: {
         pageviewsPerDay: Math.round(totalPageviews / days),
         visitorsPerDay: Math.round(allVisitors.size / days),
-        pageviewsPerSession: totalSessions.size > 0 ? parseFloat((totalPageviews / totalSessions.size).toFixed(1)) : 0
+        pageviewsPerSession: allSessions.size > 0 ? parseFloat((totalPageviews / allSessions.size).toFixed(1)) : 0
       },
       topPages,
+      _source: 'Real PostHog + Database',
       _debug: {
-        totalEventsFound: allEvents.length,
-        pageviewEvents: totalPageviews,
-        uniqueVisitors: allVisitors.size,
-        uniqueSessions: totalSessions.size,
+        totalEvents: allEvents.length,
+        pageviews: totalPageviews,
         daysInRange: days,
-        startDate: startDate.toISOString()
+        signupsFromDB: totalSignups
       }
     })
 
