@@ -17,6 +17,11 @@ export const adminDashboardSidebarOptions: DashboardSidebarMenuInterface[] = [
     link: "/dashboard/admin/users",
   },
   {
+    label: "Traffic & Growth",
+    icon: "activity",
+    link: "/dashboard/admin/traffic",
+  },
+  {
     label: "Stores",
     icon: "store",
     link: "/dashboard/admin/stores",
@@ -68,6 +73,11 @@ export const SellerDashboardSidebarOptions: DashboardSidebarMenuInterface[] = [
     label: "Analytics",
     icon: "chart",
     link: "analytics",
+  },
+  {
+    label: "Visitor Analytics",
+    icon: "activity",
+    link: "visitor-analytics",
   },
   {
     label: "Products",

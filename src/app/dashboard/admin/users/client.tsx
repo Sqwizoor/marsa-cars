@@ -21,7 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Users, 
   Search, 
@@ -31,11 +30,11 @@ import {
   Car,
   ShoppingCart,
   Star,
-  BarChart3,
-  TrendingUp
+  TrendingUp,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import Image from 'next/image'
-import { UserAnalyticsDashboard } from '@/components/analytics/UserAnalyticsDashboard'
 
 interface User {
   id: string
@@ -67,6 +66,14 @@ export default function UsersPageClient({ users, stats }: Props) {
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
   const [roleFilter, setRoleFilter] = useState(searchParams.get('role') || 'all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const usersPerPage = 10
+
+  // Calculate pagination
+  const indexOfLastUser = currentPage * usersPerPage
+  const indexOfFirstUser = indexOfLastUser - usersPerPage
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser)
+  const totalPages = Math.ceil(users.length / usersPerPage)
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -76,6 +83,7 @@ export default function UsersPageClient({ users, stats }: Props) {
     } else {
       params.delete('search')
     }
+    setCurrentPage(1) // Reset to first page
     router.push(`?${params.toString()}`)
   }
 
@@ -87,7 +95,13 @@ export default function UsersPageClient({ users, stats }: Props) {
     } else {
       params.delete('role')
     }
+    setCurrentPage(1) // Reset to first page
     router.push(`?${params.toString()}`)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const getRoleBadgeColor = (role: string) => {
@@ -115,24 +129,11 @@ export default function UsersPageClient({ users, stats }: Props) {
           <Users className="h-8 w-8 text-orange-600" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Users & Analytics</h1>
-          <p className="text-gray-600">Manage users and track website traffic</p>
-        </div>
+          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+        <p className="text-gray-600">Manage all users and view their activity</p>
       </div>
+    </div>
 
-      <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full max-w-lg grid-cols-2">
-          <TabsTrigger value="users" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            User Management
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Traffic & Growth
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="users" className="space-y-6">
           {/* Stats Cards */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-white">
@@ -240,7 +241,7 @@ export default function UsersPageClient({ users, stats }: Props) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => (
+                  {currentUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -293,14 +294,67 @@ export default function UsersPageClient({ users, stats }: Props) {
                   ))}
                 </TableBody>
               </Table>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-6 pt-6 border-t">
+                  <div className="text-sm text-gray-500">
+                    Showing {indexOfFirstUser + 1} to {Math.min(indexOfLastUser, users.length)} of {users.length} users
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Previous
+                    </Button>
+                    
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                        // Show first page, last page, current page, and pages around current
+                        if (
+                          page === 1 ||
+                          page === totalPages ||
+                          (page >= currentPage - 1 && page <= currentPage + 1)
+                        ) {
+                          return (
+                            <Button
+                              key={page}
+                              variant={currentPage === page ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => handlePageChange(page)}
+                              className={currentPage === page ? 'bg-orange-500 hover:bg-orange-600' : ''}
+                            >
+                              {page}
+                            </Button>
+                          )
+                        } else if (
+                          page === currentPage - 2 ||
+                          page === currentPage + 2
+                        ) {
+                          return <span key={page} className="px-2 text-gray-400">...</span>
+                        }
+                        return null
+                      })}
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="analytics" className="space-y-6">
-          <UserAnalyticsDashboard />
-        </TabsContent>
-      </Tabs>
-    </div>
-  )
-}
+        </div>
+      )
+    }
