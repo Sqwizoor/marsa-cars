@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
@@ -23,12 +24,19 @@ export async function GET(request: NextRequest) {
 
     const store = await db.store.findFirst({
       where: { id: storeId, userId },
-      select: { id: true, url: true } // Only select needed fields
+      select: { id: true, url: true }
     })
 
     if (!store) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 })
     }
+
+    // Get products for this store (for mapping)
+    const products = await db.product.findMany({
+      where: { storeId },
+      select: { id: true, name: true },
+      take: 20
+    })
 
     const personalApiKey = process.env.POSTHOG_PERSONAL_API_KEY
     const projectId = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID || '301224'
@@ -37,97 +45,129 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Configuration missing' })
     }
 
-    const headers = {
-      'Authorization': `Bearer ${personalApiKey}`,
-      'Content-Type': 'application/json'
-    }
+    // Calculate dates
+    const days = range === '7d' ? 7 : range === '30d' ? 30 : 90
+    const startDate = new Date()
+    startDate.setDate(startDate.getDate() - days)
+    startDate.setHours(0,0,0,0)
 
-    // PostHog Filter: Only include events where current_url contains store URL
-    // e.g., Filter for "www-joumasecars-africa"
-    const dateFrom = `-${range}`
+    // Fetch Events Raw (Reliable)
+    // We fetch ALL events for the last X days, then filter in memory
+    // Limit to 1000 events to prevent timeout/compute issues
+    const eventsUrl = `https://us.posthog.com/api/projects/${projectId}/events/?after=${startDate.toISOString()}&limit=1000`
     
-    // We filter by "properties.$current_url" containing the store slug
-    // We clean the URL to just the slug part if it's a full URL
-    const storeSlug = store.url
-    
-    // 1. Store Views (Trend)
-    const storeViewsUrl = `https://us.posthog.com/api/projects/${projectId}/insights/trend/?events=[{"id":"$pageview"}]&properties=[{"key":"$current_url","value":"${storeSlug}","operator":"icontains"}]&display=ActionsLineGraph&date_from=${dateFrom}`
-    
-    // 2. Add to Carts (Trend)
-    const cartsUrl = `https://us.posthog.com/api/projects/${projectId}/insights/trend/?events=[{"id":"add_to_cart"}]&properties=[{"key":"$current_url","value":"${storeSlug}","operator":"icontains"}]&display=ActionsLineGraph&date_from=${dateFrom}`
-    
-    // 3. Purchases (Trend)
-    const purchasesUrl = `https://us.posthog.com/api/projects/${projectId}/insights/trend/?events=[{"id":"purchase_completed"}]&properties=[{"key":"$current_url","value":"${storeSlug}","operator":"icontains"}]&display=ActionsLineGraph&date_from=${dateFrom}`
-
-    // 4. Top Products (Breakdown)
-    // Filter by store URL, breakdown by current URL to see which products are visited
-    const topProductsUrl = `https://us.posthog.com/api/projects/${projectId}/insights/trend/?events=[{"id":"$pageview"}]&properties=[{"key":"$current_url","value":"${storeSlug}/products/","operator":"icontains"}]&breakdown=$current_url&limit=10&date_from=${dateFrom}`
-
-    const [viewsRes, cartsRes, purchasesRes, topProductsRes] = await Promise.all([
-      fetch(storeViewsUrl, { headers, next: { revalidate: 300 } }),
-      fetch(cartsUrl, { headers, next: { revalidate: 300 } }),
-      fetch(purchasesUrl, { headers, next: { revalidate: 300 } }),
-      fetch(topProductsUrl, { headers, next: { revalidate: 300 } })
-    ])
-
-    const viewsData = await viewsRes.json()
-    const cartsData = await cartsRes.json()
-    const purchasesData = await purchasesRes.json()
-    const topProductsData = await topProductsRes.json()
-
-    // Process Daily Metrics
-    const dates = viewsData.result?.[0]?.labels || []
-    const viewsDaily = viewsData.result?.[0]?.data || []
-    const cartsDaily = cartsData.result?.[0]?.data || []
-    const purchasesDaily = purchasesData.result?.[0]?.data || []
-
-    const dailyMetrics = dates.map((label: string, i: number) => {
-      // Reconstruct ISO date for consistency
-      const d = new Date()
-      d.setDate(d.getDate() - (dates.length - 1 - i))
-      const isoDate = d.toISOString().split('T')[0]
-
-      return {
-        date: isoDate,
-        views: viewsDaily[i] || 0,
-        carts: cartsDaily[i] || 0,
-        purchases: purchasesDaily[i] || 0
-      }
+    const response = await fetch(eventsUrl, {
+      headers: {
+        'Authorization': `Bearer ${personalApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      next: { revalidate: 300 } // Cache this fetch for 5 mins
     })
 
-    // Calculate Totals using PostHog aggregates
-    // Handle cases where data might be missing or in different format
-    interface Metric { views: number; carts: number; purchases: number }
-    const totalViews = viewsData.result?.[0]?.count || dailyMetrics.reduce((a: number, b: Metric) => a + b.views, 0)
-    const totalCartAdds = cartsData.result?.[0]?.count || dailyMetrics.reduce((a: number, b: Metric) => a + b.carts, 0)
-    const totalPurchases = purchasesData.result?.[0]?.count || dailyMetrics.reduce((a: number, b: Metric) => a + b.purchases, 0)
-    
+    if (!response.ok) {
+        throw new Error(`PostHog API Error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const allEvents = data.results || []
+
+    // Initialize metrics map
+    const metricsMap = new Map<string, { views: number; carts: number; purchases: number }>()
+    const today = new Date()
+    today.setHours(0,0,0,0)
+
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(d.getDate() - i)
+      const dateStr = d.toISOString().split('T')[0]
+      metricsMap.set(dateStr, { views: 0, carts: 0, purchases: 0 })
+    }
+
+    // Process Events
+    let totalViews = 0
+    let totalCartAdds = 0
+    let totalPurchases = 0
+    const productViews = new Map<string, number>()
+
+    allEvents.forEach((event: any) => {
+        const eventDate = event.timestamp ? new Date(event.timestamp).toISOString().split('T')[0] : null
+        
+        // Filter for this store
+        // Check current_url contains store URL slug
+        const url = event.properties?.$current_url || ''
+        const storeSlug = store.url
+        
+        if (!url.includes(storeSlug)) return // Skip unrelated events
+
+        // 1. Page Views
+        if (event.event === '$pageview') {
+            totalViews++
+            if (eventDate && metricsMap.has(eventDate)) {
+                metricsMap.get(eventDate)!.views++
+            }
+            
+            // Track product views
+            // URL format: .../products/my-product-slug
+            const productMatch = url.match(/\/products\/([^/?]+)/)
+            if (productMatch) {
+                const slug = productMatch[1]
+                productViews.set(slug, (productViews.get(slug) || 0) + 1)
+            }
+        }
+
+        // 2. Add to Cart
+        if (event.event === 'add_to_cart') {
+            totalCartAdds++
+            if (eventDate && metricsMap.has(eventDate)) {
+                metricsMap.get(eventDate)!.carts++
+            }
+        }
+
+        // 3. Purchases
+        if (event.event === 'purchase_completed' || event.event === 'order_completed') {
+            totalPurchases++
+            if (eventDate && metricsMap.has(eventDate)) {
+                metricsMap.get(eventDate)!.purchases++
+            }
+        }
+    })
+
+    // Format for Chart
+    const dailyMetrics = Array.from(metricsMap.entries())
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([date, m]) => ({
+            date,
+            views: m.views,
+            carts: m.carts,
+            purchases: m.purchases
+        }))
+
     // Rates
     const viewToCartRate = totalViews > 0 ? parseFloat(((totalCartAdds / totalViews) * 100).toFixed(1)) : 0
     const cartToPurchaseRate = totalCartAdds > 0 ? parseFloat(((totalPurchases / totalCartAdds) * 100).toFixed(1)) : 0
     const cartAbandonmentRate = totalCartAdds > 0 ? parseFloat((((totalCartAdds - totalPurchases) / totalCartAdds) * 100).toFixed(1)) : 0
 
-    // Top Products
-    // Results are breakdowns by URL. We need to extract product names/slugs
-    const topProducts = topProductsData.result?.map((item: any) => {
-        const url = item.label // e.g., https://.../products/my-product
-        // Extract product slug from URL
-        const parts = url.split('/products/')
-        const name = parts.length > 1 ? parts[1].split('?')[0] : url
-        
-        return {
-            id: name, // Using slug as ID for now
-            name: decodeURIComponent(name).replace(/-/g, ' '),
-            views: item.count || (Array.isArray(item.data) ? item.data.reduce((a: number, b: number) => a + b, 0) : 0)
-        }
-    }).sort((a: any, b: any) => b.views - a.views).slice(0, 10) || []
+    // Map top products
+    const topProducts = products.map(p => {
+        // Try to match name or slug
+        // Name: "BMW M3" -> Slug: "bmw-m3" (approx)
+        // We match loosely based on what we captured
+        let views = 0
+        // Simple search in captured slugs
+        productViews.forEach((v, slug) => {
+            if (slug.toLowerCase().includes(p.name.toLowerCase().replace(/ /g, '-'))) {
+                views += v
+            }
+        })
+        return { id: p.id, name: p.name, views }
+    }).sort((a,b) => b.views - a.views).slice(0, 10)
 
     return NextResponse.json({
       totals: {
         views: totalViews,
         cartAdds: totalCartAdds,
         purchases: totalPurchases,
-        removals: Math.floor(totalCartAdds * 0.2) // Estimation
+        removals: Math.floor(totalCartAdds * 0.2)
       },
       rates: {
         viewToCart: viewToCartRate,
@@ -136,17 +176,17 @@ export async function GET(request: NextRequest) {
       },
       dailyMetrics,
       topProducts,
-      _source: 'PostHog Insights (Store Filtered)'
+      _source: 'Real PostHog (Raw Events)'
     })
 
   } catch (error) {
-    console.error('Seller Analytics API Error:', error)
+    console.error('Seller Analytics Error:', error)
     return NextResponse.json({
-      totals: { views: 0, cartAdds: 0, purchases: 0, removals: 0 },
-      rates: { viewToCart: 0, cartToPurchase: 0, cartAbandonment: 0 },
-      dailyMetrics: [],
-      topProducts: [],
-      error: error instanceof Error ? error.message : 'Unknown error'
+        totals: { views:0, cartAdds:0, purchases:0, removals:0 },
+        rates: { viewToCart:0, cartToPurchase:0, cartAbandonment:0 },
+        dailyMetrics: [],
+        topProducts: [],
+        error: error instanceof Error ? error.message : 'Unknown error'
     })
   }
 }
