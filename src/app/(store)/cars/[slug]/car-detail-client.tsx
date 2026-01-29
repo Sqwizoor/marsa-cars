@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import { trackCarView, trackCarInquiry } from "@/lib/posthog-tracking";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -83,6 +84,20 @@ export default function CarDetailClient({ listing }: CarDetailClientProps) {
   const dealerName = listing.carSubscription?.dealerName;
   const features = (listing.features as string[]) || [];
 
+  // Track car view on page load
+  useEffect(() => {
+    trackCarView({
+      id: listing.id,
+      title: listing.title,
+      make: listing.make,
+      model: listing.model,
+      year: listing.year,
+      price: listing.price,
+      condition: listing.condition,
+      userId: listing.userId
+    });
+  }, [listing]);
+
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) =>
       prev === 0 ? listing.images.length - 1 : prev - 1
@@ -109,6 +124,14 @@ export default function CarDetailClient({ listing }: CarDetailClientProps) {
       if (!response.ok) {
         throw new Error("Failed to send inquiry");
       }
+
+      // Track car inquiry
+      trackCarInquiry({
+        id: listing.id,
+        title: listing.title,
+        price: listing.price,
+        sellerId: listing.userId
+      });
 
       toast.success("Inquiry sent successfully! The seller will contact you soon.");
       setShowInquiryForm(false);

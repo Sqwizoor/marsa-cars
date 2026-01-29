@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -143,9 +144,32 @@ export async function POST(req: NextRequest) {
     // Increment listings used
     await db.carSubscription.update({
       where: { id: subscription.id },
-      data: { 
+      data: {
         listingsUsed: { increment: 1 },
         sponsoredUsed: isSponsored ? { increment: 1 } : undefined,
+      },
+    });
+
+    // Track car listing created event
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: userId,
+      event: 'car_listing_created',
+      properties: {
+        listing_id: listing.id,
+        listing_slug: listing.slug,
+        make: make,
+        model: model,
+        year: parseInt(year),
+        price: parseFloat(price),
+        condition: condition,
+        fuel_type: fuelType,
+        transmission: transmission,
+        province: province,
+        city: city,
+        is_sponsored: !!isSponsored,
+        subscription_tier: subscription.tier,
+        images_count: images?.length || 0,
       },
     });
 

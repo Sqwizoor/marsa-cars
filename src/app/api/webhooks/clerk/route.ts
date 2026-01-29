@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { clerkClient, WebhookEvent } from "@clerk/nextjs/server";
 import { User } from "@prisma/client";
 import { db } from "@/lib/db";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function POST(req: Request) {
   const SIGNING_SECRET = process.env.SIGNING_SECRET;
@@ -81,6 +82,26 @@ export async function POST(req: Request) {
         role: dbUser.role || "USER",
       },
     });
+
+    // Track user signed up event and identify user
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: data.id,
+      event: 'user_signed_up',
+      properties: {
+        email: user.email,
+        name: user.name,
+        auth_provider: 'clerk',
+      },
+    });
+    posthog.identify({
+      distinctId: data.id,
+      properties: {
+        email: user.email,
+        name: user.name,
+        created_at: new Date().toISOString(),
+      },
+    });
   }
 
   // When user is updated (role changes, etc.)
@@ -109,6 +130,16 @@ export async function POST(req: Request) {
   if (evt.type === "user.deleted") {
     // Parse the incoming event data to get the user ID
     const userId = JSON.parse(body).data.id;
+
+    // Track user deleted event before deleting
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: userId,
+      event: 'user_deleted',
+      properties: {
+        deletion_source: 'clerk_webhook',
+      },
+    });
 
     // Delete the user from the database based on the user ID
     await db.user.delete({

@@ -9,16 +9,17 @@ import {
   CAR_SUBSCRIPTION_PLANS,
   getListingLimitDisplay,
 } from "@/constants/car-subscription-plans";
-import { 
-  Check, 
-  Car, 
-  ArrowRight, 
-  Sparkles, 
+import {
+  Check,
+  Car,
+  ArrowRight,
+  Sparkles,
   Star,
   ChevronRight
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { CarSubscription } from "@prisma/client";
+import posthog from 'posthog-js';
 
 interface SellCarClientProps {
   initialSubscription: CarSubscription | null;
@@ -37,6 +38,16 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
 
   const handleSelectPlan = async () => {
     setLoading(true);
+
+    // Track subscription plan selection
+    const plan = CAR_SUBSCRIPTION_PLANS.find(p => p.tier === selectedPlan);
+    posthog.capture('subscription_plan_selected', {
+      plan_tier: selectedPlan,
+      plan_name: plan?.name,
+      plan_price: plan?.price,
+      seller_type: selectedPlan === "DEALER" ? "DEALER" : "INDIVIDUAL",
+    });
+
     try {
       const response = await fetch("/api/cars/subscription", {
         method: "POST",
@@ -62,6 +73,7 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
         router.push(`/dashboard/cars/subscription/payment?tier=${selectedPlan}`);
       }
     } catch (error: any) {
+      posthog.captureException(error);
       toast.error(error.message);
     }
     setLoading(false);

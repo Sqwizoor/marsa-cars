@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { getCarSubscriptionPlanByTier, CarSubscriptionTier } from "@/constants/car-subscription-plans";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function GET() {
   try {
@@ -111,6 +112,23 @@ export async function POST(req: NextRequest) {
         endDate,
         paymentStatus: tier === "INDIVIDUAL" ? "COMPLETE" : "PENDING",
         userId,
+      },
+    });
+
+    // Track car subscription started event
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: userId,
+      event: 'car_subscription_started',
+      properties: {
+        subscription_id: subscription.id,
+        tier: tier,
+        seller_type: sellerType,
+        amount: plan.price,
+        currency: 'ZAR',
+        listing_limit: plan.listingLimit,
+        sponsored_limit: plan.sponsoredLimit,
+        is_free_tier: tier === "INDIVIDUAL",
       },
     });
 

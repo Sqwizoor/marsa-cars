@@ -5,6 +5,7 @@ import { getUserShippingAddresses } from "@/queries/user";
 import { currentUser } from "@clerk/nextjs/server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,18 @@ export default async function CheckoutPage() {
   });
 
   if (!cart) redirect("/cart");
+
+  // Track checkout page viewed event (conversion funnel)
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: user.id,
+    event: 'checkout_page_viewed',
+    properties: {
+      cart_id: cart.id,
+      items_count: cart.cartItems.length,
+      has_coupon: !!cart.coupon,
+    },
+  });
 
   // Get user shipping address
   const addresses = await getUserShippingAddresses();

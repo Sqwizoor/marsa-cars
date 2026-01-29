@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getPayFastConfig } from "@/lib/payfast/config";
 import { validateITNWithPayFast, verifyITNSignature, isFromPayFast } from "@/lib/payfast/utils";
+import { BobGoClient } from "@/lib/bobgo/client";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -103,6 +105,80 @@ export async function POST(req: NextRequest) {
           },
         },
       });
+
+      // Submit to BobGo
+      // Fetch full order details
+      const fullOrder = await db.order.findUnique({
+        where: { id: orderId },
+        include: {
+            shippingAddress: { include: { country: true } },
+            user: true,
+            groups: {
+                include: {
+                    items: true
+                }
+            }
+        }
+      });
+
+      if (fullOrder && fullOrder.shippingAddress) {
+          const items = fullOrder.groups.flatMap(g => g.items.map(i => ({
+              name: i.name,
+              quantity: i.quantity,
+              price: i.price,
+              weight: 1, // Placeholder
+          })));
+
+          await BobGoClient.createOrder({
+              order_number: fullOrder.id,
+              payment_status: 'paid',
+              collection_address: {
+                street_address: "123 Main St", // Placeholder
+                local_area: "Sandton",
+                city: "Johannesburg",
+                zone: "Gauteng",
+                country: "South Africa",
+                code: "2196",
+                lat: 0,
+                lng: 0,
+              },
+              delivery_address: {
+                  street_address: fullOrder.shippingAddress.address1,
+                  local_area: fullOrder.shippingAddress.city,
+                  city: fullOrder.shippingAddress.city,
+                  zone: fullOrder.shippingAddress.state,
+                  country: fullOrder.shippingAddress.country.code,
+                  code: fullOrder.shippingAddress.zip_code,
+              },
+              parcels: [{
+                submitted_length_cm: 30,
+                submitted_width_cm: 20,
+                submitted_height_cm: 10,
+                submitted_weight_kg: 1,
+              }],
+              buyer: {
+                  name: `${fullOrder.shippingAddress.firstName} ${fullOrder.shippingAddress.lastName}`,
+                  email: fullOrder.user?.email || "guest@example.com",
+                  phone: fullOrder.shippingAddress.phone,
+              },
+              items: items
+          });
+      }
+
+      // Track order payment completed event
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: order.userId,
+        event: 'order_payment_completed',
+        properties: {
+          order_id: orderId,
+          payment_id: itn["pf_payment_id"],
+          amount: gross,
+          currency: 'ZAR',
+          payment_method: 'PayFast',
+          items_count: fullOrder?.groups.reduce((acc, g) => acc + g.items.length, 0) || 0,
+        },
+      });
     } else if (status === "FAILED") {
       console.log("Marking order as failed:", orderId);
       await db.order.update({
@@ -128,6 +204,20 @@ export async function POST(req: NextRequest) {
               },
             },
           },
+        },
+      });
+
+      // Track order payment failed event
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: order.userId,
+        event: 'order_payment_failed',
+        properties: {
+          order_id: orderId,
+          payment_id: itn["pf_payment_id"],
+          amount: gross,
+          currency: 'ZAR',
+          payment_method: 'PayFast',
         },
       });
     }

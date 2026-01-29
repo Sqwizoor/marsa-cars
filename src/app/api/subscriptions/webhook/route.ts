@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getPayFastConfig } from "@/lib/payfast/config";
 import { generateSignature } from "@/lib/payfast/signature";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -83,6 +84,19 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      // Track subscription payment completed event
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: subscription.userId,
+        event: 'subscription_payment_completed',
+        properties: {
+          subscription_id: subscriptionId,
+          payment_id: paymentId,
+          payment_method: 'PayFast',
+          subscription_tier: subscription.tier,
+        },
+      });
+
       console.log("Subscription activated:", subscriptionId);
     } else {
       await db.subscription.update({
@@ -91,6 +105,20 @@ export async function POST(req: NextRequest) {
           status: "CANCELLED",
           paymentStatus: paymentStatus,
           paymentId: paymentId,
+        },
+      });
+
+      // Track subscription payment failed event
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: subscription.userId,
+        event: 'subscription_payment_failed',
+        properties: {
+          subscription_id: subscriptionId,
+          payment_id: paymentId,
+          payment_status: paymentStatus,
+          payment_method: 'PayFast',
+          subscription_tier: subscription.tier,
         },
       });
 

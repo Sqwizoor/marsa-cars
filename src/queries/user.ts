@@ -385,7 +385,9 @@ export const upsertShippingAddress = async (address: ShippingAddress) => {
 
 export const placeOrder = async (
   shippingAddress: ShippingAddress,
-  cartId: string
+  cartId: string,
+  shippingFeeOverride?: number,
+  shippingServiceOverride?: string
 ): Promise<{ orderId: string }> => {
   // Ensure the user is authenticated
   const user = await currentUser();
@@ -585,6 +587,19 @@ export const placeOrder = async (
     if (check && cartCoupon) {
       discountedAmount = (groupedTotalPrice * cartCoupon.discount) / 100;
     }
+    
+    // Override shipping fees if provided (Logic: Apply override to the first group, or split?
+    // For simplicity, if override exists, we ignore the calculated groupShippingFees for the TOTAL calculation,
+    // but we still need to assign something to the group.
+    // If we assume single-shipment for the whole order, we might assign the fee to the order and 0 to groups unless we want to track it per store.
+    // Let's use the override if it's the ONLY group, or just use the calculated one if override is not passed.
+    // actually, let's respect the override strictly.
+    
+    const finalGroupShippingFee = shippingFeeOverride !== undefined 
+        ? (Object.keys(groupedItems).length === 1 || Object.keys(groupedItems).indexOf(storeId) === 0 ? shippingFeeOverride : 0) // Assign full fee to first group if multiple? This is messy but keeping it simple.
+        : groupShippingFees;
+        
+    const finalShippingService = shippingServiceOverride || shippingService || "International Delivery";
 
     // Calculate the total after applying the discount
     const totalAfterDiscount = groupedTotalPrice - discountedAmount;
@@ -594,10 +609,10 @@ export const placeOrder = async (
         orderId: order.id,
         storeId: storeId,
         status: "Pending",
-        subTotal: groupedTotalPrice - groupShippingFees,
-        shippingFees: groupShippingFees,
-        total: totalAfterDiscount,
-        shippingService: shippingService || "International Delivery",
+        subTotal: groupedTotalPrice - groupShippingFees, // Subtotal usually excludes shipping
+        shippingFees: finalGroupShippingFee,
+        total: totalAfterDiscount + finalGroupShippingFee, // Total includes shipping
+        shippingService: finalShippingService,
         shippingDeliveryMin: deliveryTimeMin || 7,
         shippingDeliveryMax: deliveryTimeMax || 30,
         couponId: check && cartCoupon ? cartCoupon?.id : null,
@@ -628,8 +643,9 @@ export const placeOrder = async (
     }
 
     // Update order totals
-    orderTotalPrice += totalAfterDiscount;
-    orderShippingFee += groupShippingFees;
+    // If override is present, we handle shipping fee accumulation via the finalGroupShippingFee logic above (assigned to first group)
+    orderTotalPrice += totalAfterDiscount + finalGroupShippingFee;
+    orderShippingFee += finalGroupShippingFee;
   }
 
   // Update the main order with the final totals

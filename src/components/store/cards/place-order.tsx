@@ -1,4 +1,5 @@
 import { ShippingAddress } from "@prisma/client";
+import { BobGoRate } from "@/lib/bobgo/types";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "../ui/button";
 import PayFastButton from "@/components/store/checkout-page/payfast-button";
@@ -17,12 +18,20 @@ interface Props {
   shippingAddress: ShippingAddress | null;
   cartData: CartWithCartItemsType;
   setCartData: Dispatch<SetStateAction<CartWithCartItemsType>>;
+  shippingRates: BobGoRate[];
+  selectedRate: BobGoRate | null;
+  onSelectRate: (rate: BobGoRate) => void;
+  loadingRates: boolean;
 }
 
 const PlaceOrderCard = ({
   shippingAddress,
   setCartData,
   cartData,
+  shippingRates,
+  selectedRate,
+  onSelectRate,
+  loadingRates
 }: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { id, coupon, subTotal, shippingFees, total } = cartData;
@@ -33,7 +42,12 @@ const PlaceOrderCard = ({
     if (!shippingAddress) {
       toast.error("Select a shipping address first !");
     } else {
-      const order = await placeOrder(shippingAddress, id);
+      const order = await placeOrder(
+        shippingAddress, 
+        id, 
+        selectedRate?.total_charge, 
+        selectedRate ? `${selectedRate.courier_name} - ${selectedRate.service_level_name}` : undefined
+      );
       if (order) {
         // Do not empty cart here for PayFast; keep existing flow for manual place order
         emptyCart();
@@ -60,6 +74,31 @@ const PlaceOrderCard = ({
 
   return (
     <div className="sticky top-4 mt-3 ml-5 w-[380px] max-h-max">
+      <div className="relative py-4 px-6 bg-white mb-2">
+         <h1 className="text-gray-900 text-xl font-bold mb-2">Shipping Method</h1>
+         {loadingRates && <p className="text-sm text-gray-500">Loading rates...</p>}
+         {!loadingRates && shippingRates.length === 0 && shippingAddress && (
+             <p className="text-sm text-red-500">No shipping rates available for this address.</p>
+         )}
+         {!shippingAddress && <p className="text-sm text-gray-500">Select an address to see shipping rates.</p>}
+         
+         <div className="space-y-2 mt-2">
+             {shippingRates.map(rate => (
+                 <div 
+                    key={rate.service_level_id} 
+                    className={`p-2 border rounded cursor-pointer flex justify-between items-center ${selectedRate?.service_level_id === rate.service_level_id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                    onClick={() => onSelectRate(rate)}
+                 >
+                     <div>
+                         <p className="font-medium text-sm">{rate.courier_name}</p>
+                         <p className="text-xs text-gray-500">{rate.service_level_name} ({rate.delivery_time_min}-{rate.delivery_time_max} days)</p>
+                     </div>
+                     <p className="font-bold text-sm">R{rate.total_charge}</p>
+                 </div>
+             ))}
+         </div>
+      </div>
+
       <div className="relative py-4 px-6 bg-white">
         <h1 className="text-gray-900 text-2xl font-bold mb-4">Summary</h1>
         <Info title="Subtotal" text={`${subTotal.toFixed(2)}`} />
@@ -127,7 +166,12 @@ const PlaceOrderCard = ({
         {/* Alternative: PayFast gateway - creates order first, then redirects */}
         {/* Only show when address is selected */}
         {shippingAddress && (
-          <PayFastButton cartId={cartData.id} shippingAddressId={shippingAddress.id} />
+          <PayFastButton 
+            cartId={cartData.id} 
+            shippingAddressId={shippingAddress.id}
+            shippingFee={selectedRate?.total_charge}
+            shippingService={selectedRate ? `${selectedRate.courier_name} - ${selectedRate.service_level_name}` : undefined}
+          />
         )}
       </div>
       <div className="mt-2 p-4 bg-white px-6">

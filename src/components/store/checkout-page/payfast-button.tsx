@@ -6,9 +6,11 @@ import toast from "react-hot-toast";
 interface Props {
   cartId: string;
   shippingAddressId: string;
+  shippingFee?: number;
+  shippingService?: string;
 }
 
-export default function PayFastButton({ cartId, shippingAddressId }: Props) {
+export default function PayFastButton({ cartId, shippingAddressId, shippingFee, shippingService }: Props) {
   const [loading, setLoading] = useState(false);
   const handlePayFast = async () => {
     try {
@@ -17,7 +19,7 @@ export default function PayFastButton({ cartId, shippingAddressId }: Props) {
       const orderRes = await fetch("/api/payments/payfast/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cartId, shippingAddressId }),
+        body: JSON.stringify({ cartId, shippingAddressId, shippingFee, shippingService }),
       });
       if (!orderRes.ok) throw new Error("Failed to create order");
       const order = await orderRes.json();
