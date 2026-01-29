@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     try {
       // Get project ID from environment
-      const projectId = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID || '16527'
+      const projectId = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID || '301224'
       
       // IMPORTANT: Use app/us.posthog.com for queries, NOT us.i.posthog.com (ingestion only)
       const posthogApiBase = 'https://us.posthog.com/api'
