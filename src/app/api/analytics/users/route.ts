@@ -12,191 +12,123 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const range = searchParams.get('range') || '7d'
     
-    // Calculate date range
     const days = range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : 7
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
-    const endDate = new Date()
 
-    // Check if Personal API Key is configured
     const personalApiKey = process.env.POSTHOG_PERSONAL_API_KEY
-    const projectKey = process.env.NEXT_PUBLIC_POSTHOG_KEY!
+    const projectId = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID || '301224'
     
     if (!personalApiKey) {
       return NextResponse.json({
         dailyMetrics: [],
-        totals: {
-          pageviews: 0,
-          visitors: 0,
-          signups: 0,
-          sessions: 0,
-        },
-        averages: {
-          pageviewsPerDay: 0,
-          visitorsPerDay: 0,
-          pageviewsPerSession: 0,
-        },
+        totals: { pageviews: 0, visitors: 0, signups: 0, sessions: 0 },
+        averages: { pageviewsPerDay: 0, visitorsPerDay: 0, pageviewsPerSession: 0 },
         topPages: [],
-        error: 'PostHog Personal API Key not configured',
-        instruction: 'Add POSTHOG_PERSONAL_API_KEY to your .env file. Get it from: https://app.posthog.com/settings/user-api-keys'
+        error: 'POSTHOG_PERSONAL_API_KEY not configured'
       })
     }
 
-    try {
-      // Get project ID from environment
-      const projectId = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID || '301224'
-      
-      // IMPORTANT: Use app/us.posthog.com for queries, NOT us.i.posthog.com (ingestion only)
-      const posthogApiBase = 'https://us.posthog.com/api'
-      const headers = {
+    // Fetch events from PostHog
+    const eventsUrl = `https://us.posthog.com/api/projects/${projectId}/events/?event=$pageview&after=${startDate.toISOString()}&limit=1000`
+    
+    const response = await fetch(eventsUrl, {
+      headers: {
         'Authorization': `Bearer ${personalApiKey}`,
         'Content-Type': 'application/json'
-      }
+      },
+      cache: 'no-store'
+    })
 
-      // Query pageviews using PostHog's Events API
-      const eventsUrl = `${posthogApiBase}/projects/${projectId}/events/?event=$pageview&after=${startDate.toISOString()}&before=${endDate.toISOString()}`
-      
-      const eventsResponse = await fetch(eventsUrl, { headers })
-      
-      if (!eventsResponse.ok) {
-        throw new Error(`PostHog API error: ${eventsResponse.status} ${eventsResponse.statusText}`)
-      }
-
-      const eventsData = await eventsResponse.json()
-      
-      // Process events into daily metrics
-      const metricsMap = new Map()
-      
-      // Initialize all days
-      for (let i = 0; i < days; i++) {
-        const date = new Date(startDate)
-        date.setDate(date.getDate() + i)
-        const dateStr = date.toISOString().split('T')[0]
-        metricsMap.set(dateStr, {
-          date: dateStr,
-          pageviews: 0,
-          visitors: new Set(),
-          signups: 0,
-          sessions: new Set(),
-        })
-      }
-
-      // Count events from PostHog
-      if (eventsData?.results) {
-        eventsData.results.forEach((event: any) => {
-          const eventDate = event.timestamp ? new Date(event.timestamp) : null
-          if (eventDate) {
-            const dateStr = eventDate.toISOString().split('T')[0]
-            if (metricsMap.has(dateStr)) {
-              const metric = metricsMap.get(dateStr)
-              metric.pageviews++
-              if (event.distinct_id) {
-                metric.visitors.add(event.distinct_id)
-              }
-              if (event.properties?.$session_id) {
-                metric.sessions.add(event.properties.$session_id)
-              }
-            }
-          }
-        })
-      }
-
-      // Convert to array and calculate final metrics
-      const dailyMetrics = Array.from(metricsMap.values()).map(metric => ({
-        date: metric.date,
-        pageviews: metric.pageviews,
-        visitors: metric.visitors.size,
-        signups: metric.signups,
-        sessions: metric.sessions.size || Math.ceil(metric.visitors.size * 1.2),
-      }))
-
-      // Calculate totals
-      const totalPageviews = dailyMetrics.reduce((sum, day) => sum + day.pageviews, 0)
-      const totalVisitors = dailyMetrics.reduce((sum, day) => sum + day.visitors, 0)
-      const totalSignups = dailyMetrics.reduce((sum, day) => sum + day.signups, 0)
-      const totalSessions = dailyMetrics.reduce((sum, day) => sum + day.sessions, 0)
-
-      // Calculate averages
-      const avgPageviewsPerDay = Math.round(totalPageviews / days)
-      const avgVisitorsPerDay = Math.round(totalVisitors / days)
-      const avgPageviewsPerSession = totalSessions > 0 ? parseFloat((totalPageviews / totalSessions).toFixed(1)) : 0
-
-      // Get top pages from the events
-      const urlCounts = new Map()
-      if (eventsData?.results) {
-        eventsData.results.forEach((event: any) => {
-          const url = event.properties?.$current_url || event.properties?.url
-          if (url) {
-            urlCounts.set(url, (urlCounts.get(url) || 0) + 1)
-          }
-        })
-      }
-
-      const topPages = Array.from(urlCounts.entries())
-        .map(([url, views]) => ({ url, views }))
-        .sort((a, b) => b.views - a.views)
-        .slice(0, 10)
-
-      return NextResponse.json({
-        dailyMetrics,
-        totals: {
-          pageviews: totalPageviews,
-          visitors: totalVisitors,
-          signups: totalSignups,
-          sessions: totalSessions,
-        },
-        averages: {
-          pageviewsPerDay: avgPageviewsPerDay,
-          visitorsPerDay: avgVisitorsPerDay,
-          pageviewsPerSession: avgPageviewsPerSession,
-        },
-        topPages,
-        _source: '100% Real PostHog Data',
-        _success: true
-      })
-
-    } catch (posthogError) {
-      console.error('PostHog API Error:', posthogError)
-      
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('PostHog API Error:', response.status, errorText)
       return NextResponse.json({
         dailyMetrics: [],
-        totals: {
-          pageviews: 0,
-          visitors: 0,
-          signups: 0,
-          sessions: 0,
-        },
-        averages: {
-          pageviewsPerDay: 0,
-          visitorsPerDay: 0,
-          pageviewsPerSession: 0,
-        },
+        totals: { pageviews: 0, visitors: 0, signups: 0, sessions: 0 },
+        averages: { pageviewsPerDay: 0, visitorsPerDay: 0, pageviewsPerSession: 0 },
         topPages: [],
-        error: 'Failed to query PostHog',
-        details: posthogError instanceof Error ? posthogError.message : 'Unknown error',
-        instruction: 'Verify your POSTHOG_PERSONAL_API_KEY is correct and has the right permissions'
+        error: `PostHog API Error: ${response.status}`,
+        details: errorText
       })
     }
 
-  } catch (error) {
-    console.error('Analytics API Error:', error)
+    const data = await response.json()
+    const events = data.results || []
+
+    // Process events into daily metrics
+    const metricsMap = new Map<string, { pageviews: number; visitors: Set<string>; sessions: Set<string> }>()
+    const urlCounts = new Map<string, number>()
     
+    // Initialize days
+    for (let i = 0; i < days; i++) {
+      const date = new Date(startDate)
+      date.setDate(date.getDate() + i)
+      const dateStr = date.toISOString().split('T')[0]
+      metricsMap.set(dateStr, { pageviews: 0, visitors: new Set(), sessions: new Set() })
+    }
+
+    // Count events
+    events.forEach((event: any) => {
+      const eventDate = event.timestamp ? new Date(event.timestamp).toISOString().split('T')[0] : null
+      if (eventDate && metricsMap.has(eventDate)) {
+        const metric = metricsMap.get(eventDate)!
+        metric.pageviews++
+        if (event.distinct_id) metric.visitors.add(event.distinct_id)
+        if (event.properties?.$session_id) metric.sessions.add(event.properties.$session_id)
+      }
+      
+      // Count URLs
+      const url = event.properties?.$current_url || event.properties?.$pathname
+      if (url) {
+        urlCounts.set(url, (urlCounts.get(url) || 0) + 1)
+      }
+    })
+
+    // Convert to arrays
+    const dailyMetrics = Array.from(metricsMap.entries()).map(([date, m]) => ({
+      date,
+      pageviews: m.pageviews,
+      visitors: m.visitors.size,
+      sessions: m.sessions.size || Math.ceil(m.visitors.size * 1.2),
+      signups: 0
+    }))
+
+    const totalPageviews = dailyMetrics.reduce((sum, d) => sum + d.pageviews, 0)
+    const totalVisitors = dailyMetrics.reduce((sum, d) => sum + d.visitors, 0)
+    const totalSessions = dailyMetrics.reduce((sum, d) => sum + d.sessions, 0)
+
+    const topPages = Array.from(urlCounts.entries())
+      .map(([url, views]) => ({ url, views }))
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 10)
+
     return NextResponse.json({
-      dailyMetrics: [],
+      dailyMetrics,
       totals: {
-        pageviews: 0,
-        visitors: 0,
+        pageviews: totalPageviews,
+        visitors: totalVisitors,
         signups: 0,
-        sessions: 0,
+        sessions: totalSessions
       },
       averages: {
-        pageviewsPerDay: 0,
-        visitorsPerDay: 0,
-        pageviewsPerSession: 0,
+        pageviewsPerDay: Math.round(totalPageviews / days),
+        visitorsPerDay: Math.round(totalVisitors / days),
+        pageviewsPerSession: totalSessions > 0 ? parseFloat((totalPageviews / totalSessions).toFixed(1)) : 0
       },
+      topPages,
+      _source: 'PostHog API',
+      _eventsFound: events.length
+    })
+
+  } catch (error) {
+    console.error('Analytics Error:', error)
+    return NextResponse.json({
+      dailyMetrics: [],
+      totals: { pageviews: 0, visitors: 0, signups: 0, sessions: 0 },
+      averages: { pageviewsPerDay: 0, visitorsPerDay: 0, pageviewsPerSession: 0 },
       topPages: [],
-      error: 'Server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error'
     })
   }
 }
