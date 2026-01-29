@@ -43,8 +43,8 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      // Extract project ID from the key (phc_XXX format)
-      const projectId = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID || '01959399-9f94-0000-0d75-5fcb2c3e3a67'
+      // Get project ID from environment
+      const projectId = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID || '16527'
       
       const posthogApiBase = 'https://us.i.posthog.com/api'
       const headers = {
