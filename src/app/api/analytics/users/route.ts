@@ -46,7 +46,8 @@ export async function GET(request: NextRequest) {
       // Get project ID from environment
       const projectId = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID || '16527'
       
-      const posthogApiBase = 'https://us.i.posthog.com/api'
+      // IMPORTANT: Use app/us.posthog.com for queries, NOT us.i.posthog.com (ingestion only)
+      const posthogApiBase = 'https://us.posthog.com/api'
       const headers = {
         'Authorization': `Bearer ${personalApiKey}`,
         'Content-Type': 'application/json'
