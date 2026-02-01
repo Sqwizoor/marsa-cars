@@ -158,7 +158,7 @@ const { updateProductQuantity, removeFromCart } = useCartStore((state) => state)
 
   return (
     <div
-      className={cn("bg-white px-6 border-t bordet-t-[#ebebeb] select-none", {
+      className={cn("bg-white px-3 sm:px-6 border-t bordet-t-[#ebebeb] select-none rounded-lg", {
         "bg-red-100": stock === 0,
       })}
     >
@@ -198,7 +198,7 @@ const { updateProductQuantity, removeFromCart } = useCartStore((state) => state)
             <Link
               href={`/product/${productSlug}/${variantSlug}?size=${sizeId}`}
             >
-              <div className="m-0 mr-4 ml-2 w-28 h-28 bg-gray-200 relative rounded-lg">
+              <div className="m-0 mr-2 sm:mr-4 ml-1 sm:ml-2 w-20 h-20 sm:w-28 sm:h-28 bg-gray-200 relative rounded-lg">
                 <Image
                   src={image}
                   alt={name}
@@ -248,10 +248,10 @@ const { updateProductQuantity, removeFromCart } = useCartStore((state) => state)
               </button>
             </div>
             {/* Price - Delivery */}
-            <div className="flex items-center justify-between mt-2 relative">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2 relative gap-2">
               {stock > 0 ? (
                 <div>
-                  <span className="inline-block break-all">
+                  <span className="inline-block break-all text-sm sm:text-base">
                     R{price.toFixed(2)} x {quantity} = R{totalPrice.toFixed(2)}
                   </span>
                 </div>
@@ -266,7 +266,7 @@ const { updateProductQuantity, removeFromCart } = useCartStore((state) => state)
               <div className="text-xs">
                 <div className="text-gray-900 text-sm leading-6 list-none inline-flex items-center">
                   <div
-                    className="w-6 h-6 text-xs bg-gray-100 hover:bg-gray-200 leading-6 grid place-items-center rounded-full cursor-pointer"
+                    className="w-7 h-7 sm:w-6 sm:h-6 text-xs bg-gray-100 hover:bg-gray-200 active:bg-gray-300 leading-6 grid place-items-center rounded-full cursor-pointer"
                     onClick={() => updateProductQuantityHandler("remove")}
                   >
                     <Minus className="w-3 stroke-[#555]" />
@@ -280,7 +280,7 @@ const { updateProductQuantity, removeFromCart } = useCartStore((state) => state)
                     readOnly
                   />
                   <div
-                    className="w-6 h-6 text-xs bg-gray-100 hover:bg-gray-200 leading-6 grid place-items-center rounded-full cursor-pointer"
+                    className="w-7 h-7 sm:w-6 sm:h-6 text-xs bg-gray-100 hover:bg-gray-200 active:bg-gray-300 leading-6 grid place-items-center rounded-full cursor-pointer"
                     onClick={() => updateProductQuantityHandler("add")}
                   >
                     <Plus className="w-3 stroke-[#555]" />

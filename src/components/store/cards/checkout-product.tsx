@@ -12,7 +12,7 @@ export default function CheckoutProductCard({
 }) {
   const { productSlug, variantSlug, sizeId, shippingFee } = product;
   return (
-    <div className="bg-white px-6 border-t bordet-t-[#ebebeb] select-none">
+    <div className="bg-white px-3 sm:px-6 border-t bordet-t-[#ebebeb] select-none">
       <div className="py-4">
         <div className="relative flex self-start">
           {/* Image */}
@@ -20,7 +20,7 @@ export default function CheckoutProductCard({
             <Link
               href={`/product/${productSlug}/${variantSlug}?size=${sizeId}`}
             >
-              <div className="m-0 mr-4 ml-2 w-28 h-28 bg-gray-200 relative rounded-lg">
+              <div className="m-0 mr-2 sm:mr-4 ml-1 sm:ml-2 w-20 h-20 sm:w-28 sm:h-28 bg-gray-200 relative rounded-lg">
                 <Image
                   src={product.image}
                   width={200}
@@ -60,8 +60,8 @@ export default function CheckoutProductCard({
               {/* Price - Qty */}
               <div className="font-bold w-full flex items-start justify-between">
                 <div className="flex items-center gap-x-2">
-                  <span className="inline-block break-all">
-                    ${product.price.toFixed(2)} x {product.quantity}
+                  <span className="inline-block break-all text-sm sm:text-base">
+                    R{product.price.toFixed(2)} x {product.quantity}
                   </span>
                   {isDiscounted && (
                     <span className="text-xs font-normal text-orange-background">
@@ -78,7 +78,7 @@ export default function CheckoutProductCard({
                     <Truck className="w-4 inline-block text-[#01a971]" />
                     <span className="text-[#01a971] ml-1">
                       {shippingFee
-                        ? `$${shippingFee.toFixed(2)}`
+                        ? `R${shippingFee.toFixed(2)}`
                         : "Free Delivery"}
                     </span>
                   </span>

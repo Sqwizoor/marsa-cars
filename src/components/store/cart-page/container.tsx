@@ -95,8 +95,24 @@ export default function CartContainer({
             </div>
           ) : (
             <div className="bg-[#f5f5f5] min-h-[calc(100vh-65px)]">
-              <div className="max-w-[1200px] mx-auto py-6 flex flex-col lg:flex-row px-2 gap-5">
-                <div className="min-w-0 flex-1 order-1">
+              <div className="max-w-[1200px] mx-auto py-4 sm:py-6 flex flex-col lg:flex-row px-3 sm:px-4 gap-4 lg:gap-5">
+                {/* Cart side - shows first on mobile for easy checkout access */}
+                <div className="w-full lg:w-[380px] max-h-max order-1 lg:order-2 lg:sticky lg:top-4">
+                  {/* Cart summary */}
+                  <CartSummary
+                    cartItems={cartItems}
+                    shippingFees={totalShipping}
+                  />
+                  <div className="mt-2 p-4 bg-white px-4 sm:px-6 rounded-lg hidden lg:block">
+                    <FastDelivery />
+                  </div>
+                  <div className="mt-2 p-4 bg-white px-4 sm:px-6 rounded-lg hidden lg:block">
+                    <SecurityPrivacyCard />
+                  </div>
+                </div>
+                
+                {/* Cart items list */}
+                <div className="min-w-0 flex-1 order-2 lg:order-1">
                   {/* Cart header */}
                   <CartHeader
                     cartItems={cartItems}
@@ -106,7 +122,7 @@ export default function CartContainer({
                   <div className="my-2">
                     <CountryNote country={userCountry.name} />
                   </div>
-                  <div className="h-auto overflow-x-hidden overflow-auto mt-2">
+                  <div className="h-auto overflow-x-hidden overflow-auto mt-2 space-y-2">
                     {/* Cart items */}
                     {cartItems.map((product) => (
                       <CartProduct
@@ -119,19 +135,15 @@ export default function CartContainer({
                       />
                     ))}
                   </div>
-                </div>
-                {/* Cart side */}
-                <div className="w-full lg:w-[380px] max-h-max order-2 lg:sticky lg:top-4">
-                  {/* Cart summary */}
-                  <CartSummary
-                    cartItems={cartItems}
-                    shippingFees={totalShipping}
-                  />
-                  <div className="mt-2 p-4 bg-white px-6">
-                    <FastDelivery />
-                  </div>
-                  <div className="mt-2 p-4 bg-white px-6">
-                    <SecurityPrivacyCard />
+                  
+                  {/* Fast delivery and security cards on mobile - at bottom */}
+                  <div className="mt-4 lg:hidden space-y-2">
+                    <div className="p-4 bg-white px-4 rounded-lg">
+                      <FastDelivery />
+                    </div>
+                    <div className="p-4 bg-white px-4 rounded-lg">
+                      <SecurityPrivacyCard />
+                    </div>
                   </div>
                 </div>
               </div>

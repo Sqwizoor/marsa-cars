@@ -123,8 +123,8 @@ const CheckoutContainer: FC<Props> = ({
     }
   }, [activeCountry, cartItems]);
   return (
-    <div className="flex flex-col lg:flex-row">
-      <div className="flex-1 my-3 order-1">
+    <div className="flex flex-col lg:flex-row px-3 lg:px-0 gap-4">
+      <div className="flex-1 order-2 lg:order-1">
         <UserShippingAddresses
           addresses={addresses}
           countries={countries}
@@ -136,7 +136,7 @@ const CheckoutContainer: FC<Props> = ({
             country={activeCountry ? activeCountry.name : userCountry.name}
           />
         </div>
-        <div className="w-full py-4 px-4 bg-white my-3">
+        <div className="w-full py-4 px-2 sm:px-4 bg-white my-3 rounded-lg">
           <div className="relative">
             {cartData.cartItems.map((product) => (
               <CheckoutProductCard
@@ -148,7 +148,7 @@ const CheckoutContainer: FC<Props> = ({
           </div>
         </div>
       </div>
-      <div className="order-2 lg:order-2">
+      <div className="order-1 lg:order-2 w-full lg:w-auto">
         <PlaceOrderCard
           cartData={cartData}
           setCartData={setCartData}

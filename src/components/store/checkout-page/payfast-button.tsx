@@ -8,11 +8,19 @@ interface Props {
   shippingAddressId: string;
   shippingFee?: number;
   shippingService?: string;
+  disabled?: boolean;
 }
 
-export default function PayFastButton({ cartId, shippingAddressId, shippingFee, shippingService }: Props) {
+export default function PayFastButton({ cartId, shippingAddressId, shippingFee, shippingService, disabled }: Props) {
   const [loading, setLoading] = useState(false);
-  const handlePayFast = async () => {
+  
+  const handlePayNow = async () => {
+    // Validate address is selected
+    if (!shippingAddressId || disabled) {
+      toast.error("Please select a shipping address first");
+      return;
+    }
+    
     try {
       setLoading(true);
       // Step 1: Create order
@@ -31,7 +39,7 @@ export default function PayFastButton({ cartId, shippingAddressId, shippingFee, 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId: order.orderId }),
       });
-      if (!initRes.ok) throw new Error("Failed to initiate PayFast payment");
+      if (!initRes.ok) throw new Error("Failed to initiate payment");
       const data = await initRes.json();
       if (data.redirect) {
         window.location.href = data.redirect;
@@ -39,14 +47,19 @@ export default function PayFastButton({ cartId, shippingAddressId, shippingFee, 
         toast.error("No redirect URL returned");
       }
     } catch (e: any) {
-      toast.error(e.message || "PayFast initiation failed");
+      toast.error(e.message || "Payment initiation failed");
     } finally {
       setLoading(false);
     }
   };
+  
   return (
-    <Button disabled={loading} onClick={handlePayFast} variant="outline" className="w-full mt-2">
-      {loading ? "Redirecting..." : "Pay with PayFast"}
+    <Button 
+      disabled={loading} 
+      onClick={handlePayNow} 
+      className={`w-full ${disabled ? 'opacity-60' : ''}`}
+    >
+      {loading ? "Processing..." : "Pay Now"}
     </Button>
   );
 }
