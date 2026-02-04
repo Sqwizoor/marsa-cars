@@ -4,24 +4,28 @@ import { Plus } from "lucide-react";
 const ScrollingNotice = () => {
     // Content to be repeated
     const Content = () => (
-        <div className="flex items-center gap-12 px-6">
-            <span className="text-xs sm:text-sm font-medium tracking-wide">Find New & Used Car Parts</span>
-            <span className="text-xs sm:text-sm font-medium tracking-wide">Sell Your Cars</span>
-            <span className="text-xs sm:text-sm font-medium tracking-wide">Buy Cars</span>
-            <span className="text-xs sm:text-sm font-medium tracking-wide">Sell Your Car Parts</span>
-            <Link 
-                href="/cars/sell" 
-                className="flex items-center gap-1 bg-pink-600 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-pink-700 transition-colors shadow-sm whitespace-nowrap"
-            >
-                <Plus className="w-3 h-3" />
-                <span>Post Now</span>
+        <div className="flex items-center gap-8 px-4">
+            <Link href="/cars" className="text-xs font-bold uppercase tracking-tight text-slate-800 hover:text-pink-600 transition-colors whitespace-nowrap">
+                Browse Cars
             </Link>
+            <Link href="/parts" className="text-xs font-bold uppercase tracking-tight text-slate-800 hover:text-pink-600 transition-colors whitespace-nowrap">
+                Car Parts
+            </Link>
+            <Link href="/cars/sell" className="text-xs font-bold uppercase tracking-tight text-slate-800 hover:text-pink-600 transition-colors whitespace-nowrap">
+                Sell Your Car
+            </Link>
+            <Link href="/parts/sell" className="text-xs font-bold uppercase tracking-tight text-slate-800 hover:text-pink-600 transition-colors whitespace-nowrap">
+                Sell Car Parts
+            </Link>
+            <div className="w-1.5 h-1.5 rounded-full bg-pink-600 mx-2" />
         </div>
     );
 
     return (
-        <div className="w-full bg-black text-white overflow-hidden py-2 border-b border-white/10 relative z-[101]">
-            <div className="flex w-max animate-marquee hover:pause-on-hover">
+        <div className="w-full bg-white text-black overflow-hidden py-2.5 border-t border-slate-200 relative z-[101] shadow-sm">
+            <div className="flex w-max animate-marquee-right-slow hover:pause-on-hover">
+                <Content />
+                <Content />
                 <Content />
                 <Content />
                 <Content />

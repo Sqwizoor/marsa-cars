@@ -67,7 +67,7 @@ export default async function Header() {
 
   return (
     <div className="sticky top-0 z-[100] w-full bg-gradient-to-r from-slate-700/80 to-slate-900/70 backdrop-blur-md supports-[backdrop-filter]:bg-slate-900/60 flex flex-col">
-      <ScrollingNotice />
+
       <div className="mx-auto h-full w-full max-w-7xl text-white">
         <div className="flex items-center gap-3 py-0.5 sm:py-1 pr-3 sm:pr-4 lg:pr-6">
           {/* Left: Logo + mobile actions */}
@@ -112,11 +112,11 @@ export default async function Header() {
               <span>Free Post</span>
             </Link>
             <Link
-              href="/forum"
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-pink-600 hover:bg-pink-700 transition-all duration-200 text-white font-bold text-sm shadow-sm hover:shadow-md"
+              href="/parts/sell"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-all duration-200 text-slate-900 font-bold text-sm shadow-sm hover:shadow-md"
             >
-              <MessageSquare className="h-4 w-4" />
-              <span>Forum</span>
+              <Plus className="h-4 w-4" />
+              <span>+ Car Parts</span>
             </Link>
             {/* <DownloadApp /> */}
             <CountryLanguageCurrencySelector userCountry={userCountry} />
@@ -131,6 +131,9 @@ export default async function Header() {
             <Search />
           </div>
         </div>
+      </div>
+      <div className="lg:hidden">
+        <ScrollingNotice />
       </div>
     </div>
   );

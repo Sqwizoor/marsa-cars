@@ -45,7 +45,7 @@ export default function Featured({ products }: { products: SimpleProduct[] }) {
 
               <div className="relative w-full overflow-hidden">
                 <div
-                  className="flex gap-4 animate-marquee pause-on-hover will-change-transform"
+                  className="flex gap-4 animate-marquee-slow pause-on-hover will-change-transform"
                   style={{ display: 'flex', width: 'max-content' }}
                 >
                   {/* Create enough duplicates for seamless infinite scroll */}

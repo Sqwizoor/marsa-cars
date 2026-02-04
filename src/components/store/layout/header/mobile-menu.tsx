@@ -8,7 +8,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Menu, User, ShoppingCart, MessageSquare, Home, List, Heart, Package, Store, Sparkles, Car } from "lucide-react";
+import { Menu, User, ShoppingCart, MessageSquare, Home, List, Heart, Package, Store, Sparkles, Car, Plus } from "lucide-react";
 import Link from "next/link";
 import { useUser, SignOutButton } from "@clerk/nextjs";
 import Image from "next/image";
@@ -131,12 +131,12 @@ export default function MobileMenu({ role }: { role?: string }) {
                     Buy & Sell Cars
                 </Link>
                 <Link 
-                    href="/forum" 
+                    href="/parts/sell" 
                     className="flex items-center gap-3 px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors"
                     onClick={() => setOpen(false)}
                 >
-                    <MessageSquare className="h-4 w-4" />
-                    Forum
+                    <Plus className="h-4 w-4" />
+                    + Car Parts
                 </Link>
                  {/* <Link 
                     href="/categories" 

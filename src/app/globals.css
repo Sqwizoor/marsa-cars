@@ -5,84 +5,114 @@
 @layer base {
   :root {
     /* 60% - Main colors (white/light backgrounds) */
-    --background: 0 0% 100%; /* White */
-    --foreground: 0 0% 17%; /* Charcoal for text */
+    --background: 0 0% 100%;
+    /* White */
+    --foreground: 0 0% 17%;
+    /* Charcoal for text */
 
-    --card: 0 0% 98%; /* Light grey */
+    --card: 0 0% 98%;
+    /* Light grey */
     --card-foreground: 0 0% 17%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 17%;
 
     /* 10% - Accent color (Pink for CTAs and highlights) */
-    --primary: 340 82% 52%; /* Pink accent */
+    --primary: 340 82% 52%;
+    /* Pink accent */
     --primary-foreground: 0 0% 100%;
 
     /* 30% - Secondary colors (Dark grey/Charcoal) */
-    --secondary: 0 0% 26%; /* Charcoal */
+    --secondary: 0 0% 26%;
+    /* Charcoal */
     --secondary-foreground: 0 0% 96%;
 
-    --muted: 0 0% 96%; /* Light grey muted */
-    --muted-foreground: 0 0% 46%; /* Medium grey */
+    --muted: 0 0% 96%;
+    /* Light grey muted */
+    --muted-foreground: 0 0% 46%;
+    /* Medium grey */
 
-    --accent: 340 82% 52%; /* Pink accent */
+    --accent: 340 82% 52%;
+    /* Pink accent */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 88%; /* Light grey border */
+    --border: 0 0% 88%;
+    /* Light grey border */
     --input: 0 0% 88%;
-    --ring: 340 82% 52%; /* Pink focus ring */
+    --ring: 340 82% 52%;
+    /* Pink focus ring */
 
     --radius: 0.5rem;
 
     /* Chart colors using pink palette */
-    --chart-1: 340 82% 52%; /* Primary pink */
-    --chart-2: 221 83% 53%; /* Navy blue */
-    --chart-3: 45 100% 51%; /* Gold */
-    --chart-4: 0 0% 26%; /* Charcoal */
-    --chart-5: 0 0% 46%; /* Medium grey */
+    --chart-1: 340 82% 52%;
+    /* Primary pink */
+    --chart-2: 221 83% 53%;
+    /* Navy blue */
+    --chart-3: 45 100% 51%;
+    /* Gold */
+    --chart-4: 0 0% 26%;
+    /* Charcoal */
+    --chart-5: 0 0% 46%;
+    /* Medium grey */
   }
 
   .dark {
     /* 60% - Main colors (dark backgrounds) */
-    --background: 0 0% 10%; /* Dark charcoal */
-    --foreground: 0 0% 98%; /* White text */
+    --background: 0 0% 10%;
+    /* Dark charcoal */
+    --foreground: 0 0% 98%;
+    /* White text */
 
-    --card: 0 0% 14%; /* Slightly lighter charcoal */
+    --card: 0 0% 14%;
+    /* Slightly lighter charcoal */
     --card-foreground: 0 0% 98%;
 
     --popover: 0 0% 10%;
     --popover-foreground: 0 0% 98%;
 
     /* 10% - Accent color (Pink remains for CTAs) */
-    --primary: 340 82% 52%; /* Pink accent */
+    --primary: 340 82% 52%;
+    /* Pink accent */
     --primary-foreground: 0 0% 100%;
 
     /* 30% - Secondary colors (Medium grey) */
-    --secondary: 0 0% 26%; /* Dark grey */
+    --secondary: 0 0% 26%;
+    /* Dark grey */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 20%; /* Dark muted */
-    --muted-foreground: 0 0% 65%; /* Light grey text */
+    --muted: 0 0% 20%;
+    /* Dark muted */
+    --muted-foreground: 0 0% 65%;
+    /* Light grey text */
 
-    --accent: 340 82% 52%; /* Pink accent */
+    --accent: 340 82% 52%;
+    /* Pink accent */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 20%; /* Dark border */
+    --border: 0 0% 20%;
+    /* Dark border */
     --input: 0 0% 20%;
-    --ring: 340 82% 52%; /* Pink focus ring */
+    --ring: 340 82% 52%;
+    /* Pink focus ring */
 
     /* Chart colors for dark mode */
-    --chart-1: 340 82% 52%; /* Primary pink */
-    --chart-2: 221 83% 53%; /* Navy blue */
-    --chart-3: 45 100% 51%; /* Gold */
-    --chart-4: 0 0% 70%; /* Light grey */
-    --chart-5: 0 0% 46%; /* Medium grey */
+    --chart-1: 340 82% 52%;
+    /* Primary pink */
+    --chart-2: 221 83% 53%;
+    /* Navy blue */
+    --chart-3: 45 100% 51%;
+    /* Gold */
+    --chart-4: 0 0% 70%;
+    /* Light grey */
+    --chart-5: 0 0% 46%;
+    /* Medium grey */
   }
 }
 
@@ -90,6 +120,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -100,15 +131,19 @@
   0% {
     transform: translateX(-100%);
   }
+
   100% {
     transform: translateX(100%);
   }
 }
 
 @keyframes bounce-slow {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -132,16 +167,19 @@
   grid-column: 1/2;
   grid-row: 1/3;
 }
+
 .grid_3_image_2 {
   height: 100%;
   grid-column: 2/3;
   grid-row: 1/2;
 }
+
 .grid_3_image_3 {
   height: 100%;
   grid-column: 2/3;
   grid-row: 2/3;
 }
+
 .grid_4_image_1,
 .grid_4_image_2,
 .grid_4_image_3,
@@ -153,6 +191,7 @@
   grid-row: 1/3;
   height: 400px;
 }
+
 .grid_5_image_2 {
   grid-row: 4/6;
   height: 400px;
@@ -163,11 +202,13 @@
   grid-row: span 2;
   height: 266.66px;
 }
+
 .grid_5_image_4 {
   grid-column: 2 !important;
   grid-row: span 2;
   height: 266.66px;
 }
+
 .grid_5_image_5 {
   grid-column: 2 !important;
   grid-row: span 2;
@@ -209,6 +250,7 @@
 .sign svg path {
   fill: white;
 }
+
 /* text */
 .text {
   position: absolute;
@@ -220,6 +262,7 @@
   font-weight: 600;
   transition-duration: 0.3s;
 }
+
 /* hover effect on button width */
 .Btn:hover {
   width: 125px;
@@ -232,6 +275,7 @@
   transition-duration: 0.3s;
   padding-left: 20px;
 }
+
 /* hover effect button's text */
 .Btn:hover .text {
   opacity: 1;
@@ -239,6 +283,7 @@
   transition-duration: 0.3s;
   padding-right: 10px;
 }
+
 /* button click effect*/
 .Btn:active {
   transform: translate(2px, 2px);
@@ -293,10 +338,12 @@
 .react-datetime-picker__wrapper {
   border: none !important;
 }
+
 .react-datetime-picker__inputGroup__input {
   padding: 0 3px !important;
   outline-color: #1087ff !important;
 }
+
 .react-datetime-picker__inputGroup__divider {
   margin: 0 3px !important;
 }
@@ -324,9 +371,11 @@
 .dark .react-calendar {
   background: #1a1b1f !important;
 }
+
 .dark .react-calendar__tile:enabled:hover {
   color: #000;
 }
+
 .dark .react-calendar__tile--now {
   color: #000;
 }
@@ -348,6 +397,7 @@
 .select-item:hover {
   background-color: #303236 !important;
 }
+
 .select-item.selected {
   background-color: #303236 !important;
 }
@@ -380,18 +430,37 @@
 /*  clean product card */
 /* From Uiverse.io by Smit-Prajapati */
 
-/* Marquee Animation */
-@keyframes marquee {
+/* Marquee Animations */
+@keyframes marquee-left {
   0% {
     transform: translateX(0);
   }
+
   100% {
-    transform: translateX(-50%); /* Moves left by half width */
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-right {
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
   }
 }
 
 .animate-marquee {
-  animation: marquee 20s linear infinite;
+  animation: marquee-left 20s linear infinite;
+}
+
+.animate-marquee-slow {
+  animation: marquee-left 40s linear infinite;
+}
+
+.animate-marquee-right-slow {
+  animation: marquee-right 60s linear infinite;
 }
 
 .pause-on-hover:hover {
