@@ -12,6 +12,7 @@ import { MessageSquare, Plus } from "lucide-react";
 import MobileMenu from "./mobile-menu";
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import ScrollingNotice from "./scrolling-notice";
 
 export default async function Header() {
   // Get cookies from the store
@@ -65,7 +66,8 @@ export default async function Header() {
   const offerTags = rawOfferTags.filter(tag => tag.url !== "super-deals");
 
   return (
-    <div className="sticky top-0 z-[100] w-full bg-gradient-to-r from-slate-700/80 to-slate-900/70 backdrop-blur-md supports-[backdrop-filter]:bg-slate-900/60">
+    <div className="sticky top-0 z-[100] w-full bg-gradient-to-r from-slate-700/80 to-slate-900/70 backdrop-blur-md supports-[backdrop-filter]:bg-slate-900/60 flex flex-col">
+      <ScrollingNotice />
       <div className="mx-auto h-full w-full max-w-7xl text-white">
         <div className="flex items-center gap-3 py-0.5 sm:py-1 pr-3 sm:pr-4 lg:pr-6">
           {/* Left: Logo + mobile actions */}
