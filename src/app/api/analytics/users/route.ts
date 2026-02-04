@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
     const { userId } = await auth()
     
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorizgited' }, { status: 401 })
     }
 
     const searchParams = request.nextUrl.searchParams

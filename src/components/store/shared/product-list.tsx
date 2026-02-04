@@ -2,17 +2,19 @@ import { ProductType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { FC } from "react";
+import { FC, Fragment } from "react";
 import ProductCard from "../cards/product/product-card";
+import SponsoredAd from "./sponsored-ad";
 
 interface Props {
   products: ProductType[];
   title?: string;
   link?: string;
   arrow?: boolean;
+  adInterval?: number;
 }
 
-const ProductList: FC<Props> = ({ products, title, link, arrow }) => {
+const ProductList: FC<Props> = ({ products, title, link, arrow, adInterval }) => {
   const Title = () => {
     if (link) {
       <Link href={link} className="h-12">
@@ -42,8 +44,15 @@ const ProductList: FC<Props> = ({ products, title, link, arrow }) => {
             }
           )}
         >
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {products.map((product, index) => (
+            <Fragment key={product.id}>
+              <ProductCard product={product} />
+              {adInterval && (index + 1) % adInterval === 0 && (
+                <div className="col-span-full my-4">
+                  <SponsoredAd index={Math.floor((index + 1) / adInterval) - 1} />
+                </div>
+              )}
+            </Fragment>
           ))}
         </div>
       ) : (

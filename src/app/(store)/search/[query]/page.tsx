@@ -52,7 +52,7 @@ export default async function SearchPage({
             </div>
             <ProductSort />
             {/* Product list */}
-            <ProductList products={products} />
+            <ProductList products={products} adInterval={6} />
           </div>
         </div>
       </div>

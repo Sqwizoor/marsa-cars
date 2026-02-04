@@ -8,7 +8,7 @@ import CountryLanguageCurrencySelector from "./country-lang-curr-selector";
 import Logo from "@/components/shared/logo";
 import { getAllOfferTags } from "@/queries/offer-tag";
 import OfferTagsWrapper from "./offer-tags-wrapper";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Plus } from "lucide-react";
 import MobileMenu from "./mobile-menu";
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
@@ -77,6 +77,13 @@ export default async function Header() {
             </Link>
             {/* Mobile quick actions */}
             <div className="flex items-center gap-1 lg:hidden pr-3 sm:pr-4">
+              <Link
+                href="/cars/sell"
+                className="flex items-center gap-1 px-3 py-1.5 mr-1 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs shadow-sm transition-all duration-200"
+              >
+                <Plus className="h-3 w-3" />
+                <span>Free Post</span>
+              </Link>
               <UserMenu />
               <Cart />
               <MobileMenu role={role} />
@@ -99,7 +106,8 @@ export default async function Header() {
               href="/cars/sell"
               className="flex items-center gap-2 px-4 py-2 mr-4 rounded-full bg-pink-600 hover:bg-pink-700 transition-all duration-200 text-white font-bold text-sm shadow-sm hover:shadow-md"
             >
-              <span>Sell Your Car</span>
+              <Plus className="h-4 w-4" />
+              <span>Free Post</span>
             </Link>
             <Link
               href="/forum"
