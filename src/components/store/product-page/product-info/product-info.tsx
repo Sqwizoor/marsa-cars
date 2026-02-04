@@ -162,16 +162,16 @@ const ProductInfo: FC<Props> = ({
       <ProductWatch productId={variantId} />
       <Separator className="mt-2" />
       
-      <div className="flex flex-row gap-4 md:gap-8">
+      <div className="flex flex-col gap-6 mt-4">
         {/* Color wheel - variant switcher */}
-        <div className="mt-4 space-y-2 flex-1">
+        <div className="space-y-3">
           <div className="relative flex items-center justify-between text-main-primary font-bold">
-            <span className="flex items-center gap-x-2">
+            <span className="flex items-center gap-x-2 text-sm md:text-base">
               {colors.length > 1 ? "Colors" : "Color"}
-              <ColorWheel colors={colors} size={25} />
+              <ColorWheel colors={colors} size={20} />
             </span>
           </div>
-          <div className="mt-4">
+          <div className="w-full">
             {variantInfo.length > 1 && (
               <ProductVariantSelector
                 variants={variantInfo}
@@ -184,9 +184,9 @@ const ProductInfo: FC<Props> = ({
         </div>
         
         {/* Size selector */}
-        <div className="space-y-2 pb-2 mt-4 flex-1">
-          <div>
-            <h1 className="text-main-primary font-bold">Size </h1>
+        <div className="space-y-3 pb-2">
+          <div className="flex items-center gap-x-2">
+            <h1 className="text-main-primary font-bold text-sm md:text-base">Size</h1>
           </div>
           <SizeSelector
             sizes={sizes}

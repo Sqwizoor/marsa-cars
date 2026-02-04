@@ -16,6 +16,7 @@ import {
   VariantImageType,
 } from "@/lib/types";
 import { Prisma, Store, ProductApprovalStatus } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 
 // Clerk
 import { currentUser } from "@clerk/nextjs/server";
@@ -881,73 +882,77 @@ export const retrieveProductDetails = async (
   productSlug: string,
   variantSlug: string
 ) => {
-  const product = await db.product.findFirst({
-    where: {
-      slug: productSlug,
-    } as any,
-    include: {
-      category: true,
-      subCategory: true,
-      offerTag: true,
-      store: true,
-      specs: true,
-      questions: true,
-      reviews: {
-        include: {
-          images: true,
-          user: true,
-        },
-        take: 4,
-      },
-      freeShipping: {
-        include: {
-          eligibaleCountries: true,
-        },
-      },
-      variants: {
-        where: {
-          slug: variantSlug,
-        },
-        include: {
-          images: true,
-          colors: true,
-          sizes: true,
-          specs: true,
-        },
-      },
-    },
-  });
+  return await unstable_cache(
+    async () => {
+        const product = await db.product.findFirst({
+            where: {
+            slug: productSlug,
+            } as any,
+            include: {
+            category: true,
+            subCategory: true,
+            offerTag: true,
+            store: true,
+            specs: true,
+            questions: true,
+            reviews: {
+                include: {
+                images: true,
+                user: true,
+                },
+                take: 4,
+            },
+            freeShipping: {
+                include: {
+                eligibaleCountries: true,
+                },
+            },
+            variants: {
+                where: {
+                slug: variantSlug,
+                },
+                include: {
+                images: true,
+                colors: true,
+                sizes: true,
+                specs: true,
+                },
+            },
+            },
+        });
 
-  // console.log(product);
+        if (!product) return null;
+        // Get variants info
+        const variantsInfo = await db.productVariant.findMany({
+            where: {
+            productId: product.id,
+            },
+            include: {
+            images: true,
+            sizes: true,
+            colors: true,
+            product: {
+            select: { slug: true },
+            },
+            },
+        });
 
-  if (!product) return null;
-  // Get variants info
-  const variantsInfo = await db.productVariant.findMany({
-    where: {
-      productId: product.id,
+        return {
+            ...product,
+            variantsInfo: variantsInfo.map((variant) => ({
+            variantName: variant.variantName,
+            variantSlug: variant.slug,
+            variantImage: variant.variantImage,
+            variantUrl: `/product/${productSlug}/${variant.slug}`,
+            images: variant.images,
+            sizes: variant.sizes,
+            colors: variant.colors,
+            })),
+        };
     },
-    include: {
-      images: true,
-      sizes: true,
-      colors: true,
-      product: {
-        select: { slug: true },
-      },
-    },
-  });
-
-  return {
-    ...product,
-    variantsInfo: variantsInfo.map((variant) => ({
-      variantName: variant.variantName,
-      variantSlug: variant.slug,
-      variantImage: variant.variantImage,
-      variantUrl: `/product/${productSlug}/${variant.slug}`,
-      images: variant.images,
-      sizes: variant.sizes,
-      colors: variant.colors,
-    })),
-  };
+    [`product-details-${productSlug}-${variantSlug}`],
+    { revalidate: 3600, tags: ['product', 'details'] }
+  )();
 };
 
 const getUserCountry = async () => {

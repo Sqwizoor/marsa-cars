@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     // Fetch Events Raw (Reliable)
     // We fetch ALL events for the last X days, then filter in memory
     // Limit to 1000 events to prevent timeout/compute issues
-    const eventsUrl = `https://us.posthog.com/api/projects/${projectId}/events/?after=${startDate.toISOString()}&limit=1000`
+    const eventsUrl = `https://us.posthog.com/api/projects/${projectId}/events/?after=${startDate.toISOString()}&limit=5000`
     
     const response = await fetch(eventsUrl, {
       headers: {

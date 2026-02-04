@@ -293,7 +293,13 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
   };
 
   if (!productData) {
-    return null;
+    return (
+      <div className="min-h-screen">
+          <div className="w-full xl:w-[calc(100%-406px)] mt-6 pb-16">
+            {children}
+          </div>
+      </div>
+    );
   }
 
   return (

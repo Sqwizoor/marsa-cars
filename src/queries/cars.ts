@@ -14,6 +14,7 @@ import {
   CarSellerType,
 } from "@prisma/client";
 import { getCarSubscriptionPlanByTier } from "@/constants/car-subscription-plans";
+import { unstable_cache } from "next/cache";
 
 // ==================== CAR SUBSCRIPTION QUERIES ====================
 
@@ -706,11 +707,10 @@ export const markInquiryAsRead = async (
 /**
  * Get featured cars for homepage
  */
-export const getFeaturedCars = async (
-  limit: number = 8
-): Promise<CarListingWithImages[]> => {
-  try {
-    const listings = await db.carListing.findMany({
+// Cached version of getFeaturedCars
+const getCachedFeaturedCars = unstable_cache(
+  async (limit: number) => {
+    return await db.carListing.findMany({
       where: {
         status: "ACTIVE",
         OR: [{ isSponsored: true }, { isFeatured: true }],
@@ -725,7 +725,19 @@ export const getFeaturedCars = async (
       orderBy: [{ isSponsored: "desc" }, { isFeatured: "desc" }, { views: "desc" }],
       take: limit,
     });
+  },
+  ['featured-cars'],
+  { revalidate: 900, tags: ['cars', 'featured'] } // 15 mins
+);
 
+/**
+ * Get featured cars for homepage
+ */
+export const getFeaturedCars = async (
+  limit: number = 8
+): Promise<CarListingWithImages[]> => {
+  try {
+    const listings = await getCachedFeaturedCars(limit);
     return listings as CarListingWithImages[];
   } catch (error) {
     console.error("Error getting featured cars:", error);
@@ -892,16 +904,24 @@ export const updateCarListingStatus = async (
   }
 };
 
-export const getSponsoredCars = async (sessionId?: string, limit: number = 8) => {
-  try {
-    // First, get all IDs of sponsored cars
-    const allSponsoredIds = await db.carListing.findMany({
+const getSponsoredCarIds = unstable_cache(
+  async () => {
+    return await db.carListing.findMany({
       where: {
         isSponsored: true,
         status: "ACTIVE",
       },
       select: { id: true },
     });
+  },
+  ['sponsored-car-ids'],
+  { revalidate: 300, tags: ['cars', 'sponsored'] } // 5 mins
+);
+
+export const getSponsoredCars = async (sessionId?: string, limit: number = 8) => {
+  try {
+    // First, get all IDs of sponsored cars (Cached)
+    const allSponsoredIds = await getSponsoredCarIds();
 
     if (allSponsoredIds.length === 0) return [];
 

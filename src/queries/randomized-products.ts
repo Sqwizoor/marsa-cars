@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { ProductWithVariantType, VariantSimplified, VariantImageType, SortOrder } from "@/lib/types";
 import { Product, ProductVariant, Store, Size } from "@prisma/client";
 import seedrandom from "seedrandom";
+import { unstable_cache } from "next/cache";
 
 // In-memory tracking for sponsored fairness
 // Map<productId, impressionCount>
@@ -25,6 +26,19 @@ setInterval(() => {
   }
 }, 1000 * 60 * 60);
 
+// Cached fetch to get all active product IDs
+const getAllProductIds = unstable_cache(
+  async () => {
+    return await db.product.findMany({
+      where: { status: "APPROVED" },
+      select: { id: true },
+      orderBy: { createdAt: "desc" }
+    });
+  },
+  ['all-product-ids'],
+  { revalidate: 3600, tags: ['products'] } // 1 hour cache
+);
+
 export const getRandomizedProducts = async (
   options: {
     sessionId: string;
@@ -35,16 +49,8 @@ export const getRandomizedProducts = async (
   const { sessionId, limit = 20, page = 1 } = options;
   const skip = (page - 1) * limit;
 
-  // 1. Fetch ALL active products (for randomization)
-  // Optimization: For large datasets, we should fetch IDs only first, randomize, then fetch full data
-  // But for now, assuming "too many products" isn't millions yet, we can try a slightly optimized approach:
-  // Fetch IDs, shuffle them with seeded random, then paginate the IDs
-  
-  const allProductIds = await db.product.findMany({
-    where: { status: "APPROVED" },
-    select: { id: true },
-    orderBy: { createdAt: "desc" } // Deterministic initial order before shuffle
-  });
+  // 1. Fetch ALL active products (Cached)
+  const allProductIds = await getAllProductIds();
 
   // 2. Shuffle IDs using session ID + page as seed? 
   // No, we want consistent order across pages. So seed with just Session ID.
@@ -104,6 +110,31 @@ export const getRandomizedProducts = async (
   };
 };
 
+// Cached fetch for sponsored candidates
+const getSponsoredCandidates = unstable_cache(
+  async () => {
+    const sponsoredTag = await db.offerTag.findFirst({
+        where: { name: { contains: "Sponsored", mode: "insensitive" } }
+    });
+
+    if (!sponsoredTag) return [];
+
+    return await db.product.findMany({
+        where: { 
+          offerTagId: sponsoredTag.id,
+          status: "APPROVED"
+        },
+        include: {
+          variants: {
+            include: { images: true, sizes: true, colors: true }
+          }
+        }
+    });
+  },
+  ['sponsored-products-candidates'],
+  { revalidate: 300, tags: ['products', 'sponsored'] } // 5 mins
+);
+
 export const getFairSponsoredProducts = async (
   options: {
     sessionId: string;
@@ -112,41 +143,8 @@ export const getFairSponsoredProducts = async (
 ) => {
   const { sessionId, limit = 6 } = options;
 
-  // 1. Fetch all active sponsored products
-  // Assuming "isSponsored" flag exists on Product? 
-  // Wait, the schema showed `CarListing` has `isSponsored`, but `Product` doesn't seem to have `isSponsored` explicitly in the schema I viewed?
-  // Let me re-verify the Product model. There was `OfferTag`, but maybe not direct `isSponsored`.
-  // The user request said "sponsored section". I should check how "sponsored" is currently handled.
-  // The `getSponsoredCars` existed. `getHomeDataDynamic` used `offerTag`.
-  // Let's assume for now we use a specific OfferTag named "Sponsored" or similar, OR we add a field.
-  // Actually, checking schema again -> Product DOES NOT have `isSponsored`.
-  // However, I see `cheapestSize` logic in `getHomeDataDynamic`.
-  
-  // Let's search for "Sponsored" usage in `products.ts` or schema again to be sure.
-  // If no "Sponsored" field on Product, I might need to use `OfferTag` with value "sponsored" or similar.
-  // OR, since the user asked for "Products only please not the cars", and previously there were "Sponsored Cars".
-  // Maybe they imply there ARE sponsored products?
-  
-  // Let's assume for this implementation we will use an Offer Tag "sponsored" for products, same as "super-deals" etc.
-  // If that tag doesn't exist, we might return empty.
-  
-  const sponsoredTag = await db.offerTag.findFirst({
-    where: { name: { contains: "Sponsored", mode: "insensitive" } }
-  });
-
-  if (!sponsoredTag) return [];
-
-  const sponsoredProducts = await db.product.findMany({
-    where: { 
-      offerTagId: sponsoredTag.id,
-      status: "APPROVED"
-    },
-    include: {
-      variants: {
-        include: { images: true, sizes: true, colors: true }
-      }
-    }
-  });
+  // 1. Fetch all active sponsored products candidates (Cached)
+  const sponsoredProducts = await getSponsoredCandidates();
 
   if (sponsoredProducts.length === 0) return [];
 
