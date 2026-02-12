@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, ExternalLink, Check, X, Eye, Trash, Ban } from "lucide-react";
+import { MoreHorizontal, ExternalLink, Check, X, Eye, Trash, Ban, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,9 +15,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { updateCarListingStatus, deleteCarListing } from "@/queries/cars";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useState } from "react";
 
 // Define the shape of the data for the table
 export type AdminCarListingType = {
@@ -41,6 +52,128 @@ export type AdminCarListingType = {
     dealerName?: string | null;
   };
   createdAt: Date;
+};
+
+const CarListingActions = ({ listing }: { listing: AdminCarListingType }) => {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleStatusUpdate = async (newStatus: CarListingStatus) => {
+    try {
+      const res = await updateCarListingStatus(listing.id, newStatus);
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success(`Listing ${newStatus.toLowerCase()} successfully`);
+        router.refresh();
+      }
+    } catch (error) {
+      toast.error("An error occurred");
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+      const res = await deleteCarListing(listing.id);
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success("Listing deleted successfully");
+        router.refresh();
+        setOpen(false);
+      }
+    } catch (error) {
+      toast.error("An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the listing for "{listing.title}".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={loading}
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem asChild>
+            <Link href={`/cars/${listing.slug}`} target="_blank">
+              <Eye className="mr-2 h-4 w-4" />
+              View Listing
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+
+          {listing.status === "PENDING" && (
+            <>
+              <DropdownMenuItem onClick={() => handleStatusUpdate("ACTIVE")}>
+                <Check className="mr-2 h-4 w-4 text-green-600" />
+                Approve
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleStatusUpdate("REJECTED")}>
+                <X className="mr-2 h-4 w-4 text-red-600" />
+                Reject
+              </DropdownMenuItem>
+            </>
+          )}
+
+          {listing.status === "ACTIVE" && (
+            <DropdownMenuItem onClick={() => handleStatusUpdate("REJECTED")}>
+              <Ban className="mr-2 h-4 w-4 text-orange-600" />
+              Suspend/Reject
+            </DropdownMenuItem>
+          )}
+
+          {(listing.status === "REJECTED" || listing.status === "DRAFT") && (
+            <DropdownMenuItem onClick={() => handleStatusUpdate("ACTIVE")}>
+              <Check className="mr-2 h-4 w-4 text-green-600" />
+              Approve / Activate
+            </DropdownMenuItem>
+          )}
+
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => setOpen(true)}
+            className="text-red-600 focus:text-red-600"
+          >
+            <Trash className="mr-2 h-4 w-4" />
+            Delete Permanently
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+  );
 };
 
 export const columns: ColumnDef<AdminCarListingType>[] = [
@@ -141,93 +274,6 @@ export const columns: ColumnDef<AdminCarListingType>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const listing = row.original;
-      const router = useRouter();
-
-      const handleStatusUpdate = async (newStatus: CarListingStatus) => {
-        try {
-          const res = await updateCarListingStatus(listing.id, newStatus);
-          if (res.error) {
-            toast.error(res.error);
-          } else {
-            toast.success(`Listing ${newStatus.toLowerCase()} successfully`);
-            router.refresh();
-          }
-        } catch (error) {
-          toast.error("An error occurred");
-        }
-      };
-
-      const handleDelete = async () => {
-        if (confirm("Are you sure you want to delete this listing?")) {
-          try {
-            const res = await deleteCarListing(listing.id);
-            if (res.error) {
-              toast.error(res.error);
-            } else {
-              toast.success("Listing deleted successfully");
-              router.refresh();
-            }
-          } catch (error) {
-            toast.error("An error occurred");
-          }
-        }
-      };
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem asChild>
-              <Link href={`/cars/${listing.slug}`} target="_blank">
-                <Eye className="mr-2 h-4 w-4" />
-                View Listing
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            
-            {listing.status === "PENDING" && (
-              <>
-                <DropdownMenuItem onClick={() => handleStatusUpdate("ACTIVE")}>
-                  <Check className="mr-2 h-4 w-4 text-green-600" />
-                  Approve
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleStatusUpdate("REJECTED")}>
-                  <X className="mr-2 h-4 w-4 text-red-600" />
-                  Reject
-                </DropdownMenuItem>
-              </>
-            )}
-
-            {listing.status === "ACTIVE" && (
-              <DropdownMenuItem onClick={() => handleStatusUpdate("REJECTED")}>
-                <Ban className="mr-2 h-4 w-4 text-orange-600" />
-                Suspend/Reject
-              </DropdownMenuItem>
-            )}
-            
-            {(listing.status === "REJECTED" || listing.status === "DRAFT") && (
-               <DropdownMenuItem onClick={() => handleStatusUpdate("ACTIVE")}>
-                  <Check className="mr-2 h-4 w-4 text-green-600" />
-                  Approve / Activate
-                </DropdownMenuItem>
-            )}
-
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
-              <Trash className="mr-2 h-4 w-4" />
-              Delete Permanently
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => <CarListingActions listing={row.original} />,
   },
 ];

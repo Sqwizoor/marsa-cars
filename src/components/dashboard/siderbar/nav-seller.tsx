@@ -43,19 +43,27 @@ export default function SidebarNavSeller({
               let icon;
               const iconSearch = icons.find((icon) => icon.value === link.icon);
               if (iconSearch) icon = <iconSearch.path />;
+
+              const isAbsolute = link.link.startsWith("/");
+              const href = isAbsolute
+                ? link.link
+                : `/dashboard/seller/stores/${activeStore}/${link.link}`;
+
+              const isActive = isAbsolute
+                ? pathname === link.link
+                : link.link === ""
+                ? pathname === `/dashboard/seller/stores/${activeStore}`
+                : `/dashboard/seller/stores/${activeStore}/${link.link}` === pathname;
+
               return (
                 <CommandItem
                   key={index}
                   className={cn("w-full h-12 cursor-pointer mt-1", {
-                    "bg-accent text-accent-foreground":
-                      link.link === ""
-                        ? pathname === `/dashboard/seller/stores/${activeStore}`
-                        : `/dashboard/seller/stores/${activeStore}/${link.link}` ===
-                          pathname,
+                    "bg-accent text-accent-foreground": isActive,
                   })}
                 >
                   <Link
-                    href={`/dashboard/seller/stores/${activeStore}/${link.link}`}
+                    href={href}
                     className="flex items-center gap-2 hover:bg-transparent rounded-md transition-all w-full"
                   >
                     {icon}

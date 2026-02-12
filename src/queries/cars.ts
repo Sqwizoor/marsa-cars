@@ -513,9 +513,16 @@ export const deleteCarListing = async (
       return { error: "Unauthenticated" };
     }
 
-    // Verify ownership
+    // Verify ownership or admin access
+    const isAdmin = user.privateMetadata?.role === "ADMIN";
+    
+    const where: any = { id: listingId };
+    if (!isAdmin) {
+      where.userId = user.id;
+    }
+
     const listing = await db.carListing.findFirst({
-      where: { id: listingId, userId: user.id },
+      where,
       include: { carSubscription: true },
     });
 
