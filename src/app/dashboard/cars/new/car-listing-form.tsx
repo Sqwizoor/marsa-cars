@@ -39,7 +39,7 @@ import {
   FileText,
   Image as ImageIcon
 } from "lucide-react";
-import toast from "react-hot-toast";
+import { useToast } from "@/hooks/use-toast";
 import { CarSubscription } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
@@ -53,6 +53,7 @@ type Step = "details" | "images" | "review" | "success";
 
 export default function CarListingForm({ subscription, canCreate }: CarListingFormProps) {
   const router = useRouter();
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState<Step>("details");
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
@@ -153,12 +154,20 @@ export default function CarListingForm({ subscription, canCreate }: CarListingFo
         !formData.price || !formData.mileage || !formData.fuelType ||
         !formData.transmission || !formData.condition || !formData.province ||
         !formData.city || !formData.description) {
-      toast.error("Please fill in all required fields");
+      toast({
+        variant: "destructive",
+        title: "Required Fields Missing",
+        description: "Please fill in all required fields",
+      });
       return;
     }
 
     if (images.length === 0) {
-      toast.error("Please add at least one image");
+      toast({
+        variant: "destructive",
+        title: "Images Missing",
+        description: "Please add at least one image",
+      });
       return;
     }
 
@@ -181,10 +190,17 @@ export default function CarListingForm({ subscription, canCreate }: CarListingFo
         throw new Error(data.error || "Failed to create listing");
       }
 
-      toast.success("Car listing created successfully!");
+      toast({
+        title: "Success",
+        description: "Car listing created successfully!",
+      });
       setCurrentStep("success");
     } catch (error: any) {
-      toast.error(error.message);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
     }
     setLoading(false);
   };
