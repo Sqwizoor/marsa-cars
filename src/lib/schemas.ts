@@ -543,3 +543,13 @@ export const StoreShippingSchema = z.object({
 export const AddMemberSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
+
+export const ArticleFormSchema = z.object({
+  title: z.string().min(2, "Title is required"),
+  slug: z.string().min(2, "Slug is required"),
+  content: z.string().min(2, "Content is required"),
+  excerpt: z.string().optional(),
+  coverImage: z.object({ url: z.string() }).array().length(1, "Cover image is required"),
+  published: z.boolean().default(false),
+  tags: z.array(z.string()).default([]),
+});

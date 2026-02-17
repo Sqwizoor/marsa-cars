@@ -52,25 +52,17 @@ export default function SourcePartModal() {
         // But if they submit, we shouldn't show it again.
     }
 
-    const timer1 = setTimeout(() => {
-      // Show after 2 seconds
+    const timer = setTimeout(() => {
+      // Show after 1 minute
       if (!sessionStorage.getItem("partRequestSubmitted")) {
          setOpen(true);
          setHasShown(true);
          sessionStorage.setItem("partRequestShown", "true");
       }
-    }, 2000);
-
-    const timer2 = setTimeout(() => {
-      // Show after 5 minutes
-      if (!sessionStorage.getItem("partRequestSubmitted")) {
-        setOpen(true);
-      }
-    }, 300000); // 5 minutes
+    }, 60000); // 1 minute
 
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
+      clearTimeout(timer);
     };
   }, []);
 
@@ -108,7 +100,7 @@ export default function SourcePartModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[600px] overflow-hidden p-0 border-0 shadow-2xl rounded-2xl">
+      <DialogContent className="sm:max-w-[425px] md:max-w-[600px] overflow-hidden p-0 border-0 shadow-2xl rounded-2xl z-[9999]">
         <div className="relative h-32 bg-gradient-to-r from-blue-600 to-indigo-700 flex items-center justify-center overflow-hidden">
             {/* Background Pattern */}
              <div className="absolute inset-0 opacity-20" 

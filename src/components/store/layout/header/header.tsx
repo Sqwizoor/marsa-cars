@@ -110,6 +110,14 @@ export default async function Header() {
             >
               Articles
             </Link>
+            {role === "ADMIN" && (
+              <Link
+                href="/dashboard/admin"
+                className="text-white font-bold text-sm bg-blue-600/50 hover:bg-blue-600 px-3 py-1 rounded-full transition-all mr-4"
+              >
+                Admin Dashboard
+              </Link>
+            )}
             <Link
               href="/cars/sell"
               className="flex items-center gap-2 px-4 py-2 mr-4 rounded-full bg-pink-600 hover:bg-pink-700 transition-all duration-200 text-white font-bold text-sm shadow-sm hover:shadow-md"
