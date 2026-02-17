@@ -6,8 +6,6 @@ import { ArrowRight } from "lucide-react";
 export default async function ArticlesSection() {
   const articles = await getLatestArticles(4);
 
-  if (!articles || articles.length === 0) return null;
-
   return (
     <section className="py-12 md:py-16 bg-gray-50/50">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,11 +31,17 @@ export default async function ArticlesSection() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
-        </div>
+        {articles && articles.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {articles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+            <p className="text-gray-500 font-medium">No articles found at the moment.</p>
+          </div>
+        )}
 
         <div className="mt-8 text-center md:hidden">
             <Link 

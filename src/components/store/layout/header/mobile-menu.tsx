@@ -138,6 +138,14 @@ export default function MobileMenu({ role }: { role?: string }) {
                     <Plus className="h-4 w-4" />
                     + Car Parts
                 </Link>
+                <Link 
+                    href="/articles" 
+                    className="flex items-center gap-3 px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors"
+                    onClick={() => setOpen(false)}
+                >
+                    <MessageSquare className="h-4 w-4" />
+                    Articles
+                </Link>
                  {/* <Link 
                     href="/categories" 
                     className="flex items-center gap-3 px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors"

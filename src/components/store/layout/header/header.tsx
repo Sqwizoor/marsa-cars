@@ -105,6 +105,12 @@ export default async function Header() {
           {/* Right: Desktop actions */}
           <div className="hidden items-center gap-2 lg:flex">
             <Link
+              href="/articles"
+              className="text-white font-bold text-sm hover:text-gray-200 transition-colors mr-4"
+            >
+              Articles
+            </Link>
+            <Link
               href="/cars/sell"
               className="flex items-center gap-2 px-4 py-2 mr-4 rounded-full bg-pink-600 hover:bg-pink-700 transition-all duration-200 text-white font-bold text-sm shadow-sm hover:shadow-md"
             >
