@@ -21,6 +21,7 @@ export default function StoreLayout({ children }: { children: ReactNode }) {
       <div>
         {children}
       </div>
+      <SourcePartModal />
       <Footer />
       <Toaster position="top-center" />
     </div>

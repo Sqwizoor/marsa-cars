@@ -15,16 +15,18 @@ interface ArticleCardProps {
 export default function ArticleCard({ article }: ArticleCardProps) {
   return (
     <article className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
-      <Link href={`/articles/${article.slug}`} className="block relative aspect-[16/9] overflow-hidden">
-        <Image
-          src={article.coverImage}
-          alt={article.title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </Link>
+      <div className="p-3 pb-0">
+        <Link href={`/articles/${article.slug}`} className="block relative aspect-[16/9] overflow-hidden rounded-xl">
+          <Image
+            src={article.coverImage}
+            alt={article.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </Link>
+      </div>
       
       <div className="flex flex-col flex-1 p-5">
         <div className="flex items-center gap-2 mb-3">

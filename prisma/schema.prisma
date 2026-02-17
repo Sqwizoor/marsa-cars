@@ -1131,3 +1131,15 @@ model Article {
   @@index([published])
   @@index([authorId])
 }
+
+model PartRequest {
+  id              String   @id @default(uuid())
+  partName        String
+  partNumber      String?
+  vehicleDetails  String
+  userName        String
+  contactInfo     String
+  status          String   @default("PENDING")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
