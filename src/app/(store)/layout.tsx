@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 // Components
 import Header from "@/components/store/layout/header/header";
 import Footer from "@/components/store/layout/footer/footer";
+import SourcePartModal from "@/components/store/layout/source-part-modal";
 
 // Toaster
 import { Toaster } from "react-hot-toast";
