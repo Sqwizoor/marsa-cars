@@ -14,6 +14,7 @@ import Link from "next/link";
 import { getOrCreateSessionId } from "@/lib/session";
 import { getRandomizedProducts, getFairSponsoredProducts } from "@/queries/randomized-products";
 import FeaturedCategories from "@/components/store/home/featured-categories";
+import ArticlesSection from "@/components/store/home/articles-section";
 
 export default async function HomePage() {
   const sessionId = await getOrCreateSessionId();
@@ -195,7 +196,12 @@ export default async function HomePage() {
                   </div>
                 </div>
               </div>
+              
+              <ArticlesSection />
             </div>
+
+
+
           </div>
         </div>
       </div>
