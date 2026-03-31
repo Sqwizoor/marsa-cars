@@ -49,7 +49,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${barlow.variable} ${inter.variable} antialiased`}
         >
-          <ThemeProvider
+          {/* <ThemeProvider
             attribute="class"
             defaultTheme="light"
             enableSystem={false}
@@ -58,7 +58,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <PostHogIdentifier />
             <ModalProvider>{children}</ModalProvider>
             <Toaster />
-          </ThemeProvider>
+          </ThemeProvider> */}
+
+          <h1>Something went wrong , if your a developer check you settings, Hope we will be back soon</h1>
         </body>
       </html>
     </ClerkProvider>
