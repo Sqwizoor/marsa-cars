@@ -1,28 +1,28 @@
 "use server";
 
-// import { db } from "@/lib/db";
-// import {
-//   ProductSimpleVariantType,
-//   ProductSize,
-//   ProductType,
-//   ProductWithVariants,
-//   SimpleProduct,
-//   VariantImageType,
-// } from "@/lib/types";
-// import { unstable_cache } from "next/cache";
+import { db } from "@/lib/db";
+import {
+  ProductSimpleVariantType,
+  ProductSize,
+  ProductType,
+  ProductWithVariants,
+  SimpleProduct,
+  VariantImageType,
+} from "@/lib/types";
+import { unstable_cache } from "next/cache";
 
-// type FormatType = "simple" | "full";
+type FormatType = "simple" | "full";
 
-// type Param = {
-//   property: "category" | "subCategory" | "offer";
-//   value: string;
-//   type: FormatType;
-//   limit?: number;
-// };
+type Param = {
+  property: "category" | "subCategory" | "offer";
+  value: string;
+  type: FormatType;
+  limit?: number;
+};
 
-// type PropertyMapping = {
-//   [key: string]: string;
-// };
+type PropertyMapping = {
+  [key: string]: string;
+};
 
 // Cached internal function for single param fetch
 // Cache key depends on args automatically via unstable_cache mechanism if used inside a cached function
