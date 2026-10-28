@@ -1,5 +1,5 @@
 "use client";
-import { Headset, MapPin, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import SocialLogo from "social-logos";
 import Logo from "@/components/shared/logo";
 
@@ -45,13 +45,6 @@ export default function Contact() {
         </h3>
         
         <div className="space-y-3">
-          <div className="flex items-start gap-3 group">
-            <MapPin className="w-5 h-5 text-blue-400 mt-0.5 group-hover:scale-110 transition-transform" />
-            <span className="text-sm text-slate-300 leading-relaxed">
-              Address: [ Pay & Collect address Johannesburg South , 30 ElandClose road Unit C16 Elandspark Alberton Johannesburg ]
-            </span>
-          </div>
-          
           <div className="flex items-center gap-3 group">
             <Mail className="w-5 h-5 text-purple-400 group-hover:scale-110 transition-transform" />
             <a href="mailto:sales@joumasecars.africa" className="text-sm text-slate-300 hover:text-white transition-colors">

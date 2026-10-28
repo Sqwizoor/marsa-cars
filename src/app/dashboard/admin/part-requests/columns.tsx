@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { PartRequest } from "@prisma/client";
-import { MoreHorizontal, Trash, CheckCircle, Clock } from "lucide-react";
+import { MoreHorizontal, Trash, CheckCircle, Clock, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,6 +28,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { deletePartRequest, updatePartRequestStatus } from "@/queries/part-requests";
 import { Badge } from "@/components/ui/badge";
+import { useModal } from "@/app/providers/modal-provider";
+import CustomModal from "@/components/dashboard/shared/custom-modal";
+import PartRequestDetails from "@/components/dashboard/forms/part-request-details";
 
 export const columns: ColumnDef<PartRequest>[] = [
   {
@@ -74,6 +77,7 @@ export const columns: ColumnDef<PartRequest>[] = [
 const CellActions = ({ rowData }: { rowData: PartRequest }) => {
   const { toast } = useToast();
   const router = useRouter();
+  const { setOpen } = useModal();
   const [loading, setLoading] = useState(false);
 
   const onUpdateStatus = async (newStatus: string) => {
@@ -99,6 +103,19 @@ const CellActions = ({ rowData }: { rowData: PartRequest }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem
+            className="flex gap-2"
+            onClick={() => {
+                setOpen(
+                    <CustomModal heading="Request Details" subheading="Review all details for this sourcing request.">
+                        <PartRequestDetails data={rowData} />
+                    </CustomModal>
+                )
+            }}
+          >
+            <Eye size={15} /> View Full Details
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             className="flex gap-2"
             onClick={() => onUpdateStatus("RESOLVED")}
