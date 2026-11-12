@@ -84,7 +84,7 @@ const getCachedProductData = async (property: string, value: string, type: Forma
       return formatProductData(products as ProductWithVariants[], type);
     },
     [`home-product-data-${property}-${value}-${type}-${limit}`],
-    { revalidate: 1800, tags: ["products", "home"] }
+    { revalidate: 10, tags: ["products", "home"] }
   )();
 };
 

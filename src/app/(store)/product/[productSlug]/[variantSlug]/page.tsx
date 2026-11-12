@@ -10,6 +10,9 @@ import { Separator } from "@/components/ui/separator";
 import { getProductPageData, getProducts } from "@/queries/product";
 import { notFound, redirect } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface PageProps {
   params: Promise<{ productSlug: string; variantSlug: string }>;
   searchParams?: Promise<{

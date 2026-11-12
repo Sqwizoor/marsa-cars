@@ -892,77 +892,71 @@ export const retrieveProductDetails = async (
     });
   }
 
-  return await unstable_cache(
-    async () => {
-      const product = await db.product.findFirst({
-        where: {
-          slug: productSlug,
-        } as any,
+  const product = await db.product.findFirst({
+    where: {
+      slug: productSlug,
+    } as any,
+    include: {
+      category: true,
+      subCategory: true,
+      offerTag: true,
+      store: true,
+      specs: true,
+      questions: true,
+      reviews: {
         include: {
-          category: true,
-          subCategory: true,
-          offerTag: true,
-          store: true,
-          specs: true,
-          questions: true,
-          reviews: {
-            include: {
-              images: true,
-              user: true,
-            },
-            take: 4,
-          },
-          freeShipping: {
-            include: {
-              eligibaleCountries: true,
-            },
-          },
-          variants: {
-            where: {
-              slug: variantSlug,
-            },
-            include: {
-              images: true,
-              colors: true,
-              sizes: true,
-              specs: true,
-            },
-          },
+          images: true,
+          user: true,
         },
-      });
-
-      if (!product) return null;
-      // Get variants info
-      const variantsInfo = await db.productVariant.findMany({
+        take: 4,
+      },
+      freeShipping: {
+        include: {
+          eligibaleCountries: true,
+        },
+      },
+      variants: {
         where: {
-          productId: product.id,
+          slug: variantSlug,
         },
         include: {
           images: true,
-          sizes: true,
           colors: true,
-          product: {
-            select: { slug: true },
-          },
+          sizes: true,
+          specs: true,
         },
-      });
-
-      return {
-        ...product,
-        variantsInfo: variantsInfo.map((variant) => ({
-          variantName: variant.variantName,
-          variantSlug: variant.slug,
-          variantImage: variant.variantImage,
-          variantUrl: `/product/${productSlug}/${variant.slug}`,
-          images: variant.images,
-          sizes: variant.sizes,
-          colors: variant.colors,
-        })),
-      };
+      },
     },
-    [`product-details-${productSlug}-${variantSlug}`],
-    { revalidate: 3600, tags: ["product", "details"] }
-  )();
+  });
+
+  if (!product) return null;
+  // Get variants info
+  const variantsInfo = await db.productVariant.findMany({
+    where: {
+      productId: product.id,
+    },
+    include: {
+      images: true,
+      sizes: true,
+      colors: true,
+      product: {
+        select: { slug: true },
+      },
+    },
+  });
+
+  return {
+    ...product,
+    variantsInfo: variantsInfo.map((variant) => ({
+      variantName: variant.variantName,
+      variantSlug: variant.slug,
+      variantImage: variant.variantImage,
+      variantUrl: `/product/${productSlug}/${variant.slug}`,
+      images: variant.images,
+      sizes: variant.sizes,
+      colors: variant.colors,
+    })),
+  };
 };
 
 const getUserCountry = async () => {
