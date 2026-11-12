@@ -61,7 +61,7 @@ export default function CheckoutProductCard({
               <div className="font-bold w-full flex items-start justify-between">
                 <div className="flex items-center gap-x-2">
                   <span className="inline-block break-all">
-                    ${product.price.toFixed(2)} x {product.quantity}
+                    R{product.price.toFixed(2)} x {product.quantity}
                   </span>
                   {isDiscounted && (
                     <span className="text-xs font-normal text-orange-background">
@@ -78,7 +78,7 @@ export default function CheckoutProductCard({
                     <Truck className="w-4 inline-block text-[#01a971]" />
                     <span className="text-[#01a971] ml-1">
                       {shippingFee
-                        ? `$${shippingFee.toFixed(2)}`
+                        ? `R${shippingFee.toFixed(2)}`
                         : "Free Delivery"}
                     </span>
                   </span>

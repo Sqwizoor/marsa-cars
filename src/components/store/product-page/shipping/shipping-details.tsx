@@ -73,7 +73,7 @@ const ShippingDetails: FC<Props> = ({ shippingDetails, quantity, weight }) => {
                 <span>
                   Shipping to <span>{countryName}</span>
                 </span>
-                <span>&nbsp;for ${shippingTotal.toFixed(2)}</span>
+                <span>&nbsp;for R{shippingTotal.toFixed(2)}</span>
               </span>
             )}
           </div>

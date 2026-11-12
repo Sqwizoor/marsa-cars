@@ -350,7 +350,7 @@ export const applyCoupon = async (
     });
 
     return {
-      message: `Coupon applied successfully. Discount: -$${discountedAmount.toFixed(
+      message: `Coupon applied successfully. Discount: -R${discountedAmount.toFixed(
         2
       )} applied to items from ${coupon.store.name}.`,
       cart: updatedCart,

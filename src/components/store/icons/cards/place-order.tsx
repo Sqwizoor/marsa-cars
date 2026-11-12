@@ -60,16 +60,16 @@ const PlaceOrderCard: FC<Props> = ({
     <div className="sticky top-4 mt-3 ml-5 w-[380px] max-h-max">
       <div className="relative py-4 px-6 bg-white">
         <h1 className="text-gray-900 text-2xl font-bold mb-4">Summary</h1>
-        <Info title="Subtotal" text={`${subTotal.toFixed(2)}`} />
-        <Info title="Shipping Fees" text={`+${shippingFees.toFixed(2)}`} />
-        <Info title="Taxes" text="+0.00" />
+        <Info title="Subtotal" text={`R${subTotal.toFixed(2)}`} />
+        <Info title="Shipping Fees" text={`+R${shippingFees.toFixed(2)}`} />
+        <Info title="Taxes" text="+R0.00" />
         {coupon && (
           <Info
             title={`Coupon (${coupon.code}) (-${coupon.discount}%)`}
-            text={`-$${discountedAmount.toFixed(2)}`}
+            text={`-R${discountedAmount.toFixed(2)}`}
           />
         )}
-        <Info title="Total" text={`+${total.toFixed(2)}`} isBold noBorder />
+        <Info title="Total" text={`+R${total.toFixed(2)}`} isBold noBorder />
       </div>
       <div className="mt-2">
         {coupon ? (

@@ -45,7 +45,7 @@ export default function ProductRow({ product }: { product: OrderItem }) {
                   Price
                 </p>
                 <p className="lg:mt-4 font-medium text-sm leading-7 text-blue-primary">
-                  ${product.price.toFixed(2)}
+                  R{product.price.toFixed(2)}
                 </p>
               </div>
             </div>

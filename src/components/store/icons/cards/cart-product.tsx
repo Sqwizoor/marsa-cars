@@ -238,7 +238,7 @@ const CartProduct: FC<Props> = ({
               {stock > 0 ? (
                 <div>
                   <span className="inline-block break-all">
-                    ${price.toFixed(2)} x {quantity} = ${totalPrice.toFixed(2)}
+                    R{price.toFixed(2)} x {quantity} = R{totalPrice.toFixed(2)}
                   </span>
                 </div>
               ) : (
@@ -283,22 +283,22 @@ const CartProduct: FC<Props> = ({
                       <span className="text-[#01A971] ml-1">
                         {shippingMethod === "ITEM" ? (
                           <>
-                            ${shippingInfo.initialFee} (first item)
+                            R{shippingInfo.initialFee} (first item)
                             {quantity > 1
                               ? `+ 
-                                        ${quantity - 1} item(s) x $${extraShippingFee} 
+                                        ${quantity - 1} item(s) x R${extraShippingFee} 
                               (additional items)`
                               : " x 1"}
-                            = ${shippingInfo.totalFee.toFixed(2)}
+                            = R{shippingInfo.totalFee.toFixed(2)}
                           </>
                         ) : shippingMethod === "WEIGHT" ? (
                           <>
-                            ${shippingFee} x {shippingInfo.weight}kg x&nbsp;
-                            {quantity} {quantity > 1 ? "items" : "item"} = $
+                            R{shippingFee} x {shippingInfo.weight}kg x&nbsp;
+                            {quantity} {quantity > 1 ? "items" : "item"} = R
                             {shippingInfo.totalFee.toFixed(2)}
                           </>
                         ) : (
-                          <>Fixed Fee : ${shippingInfo.totalFee.toFixed(2)}</>
+                          <>Fixed Fee : R{shippingInfo.totalFee.toFixed(2)}</>
                         )}
                       </span>
                     ) : (

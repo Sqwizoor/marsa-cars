@@ -98,9 +98,9 @@ export const generateOrderPDFBlob = async (
             <Text style={styles.groupHeader}>Group {groupIndex + 1}</Text>
             <Text>Store: {group.store.name}</Text>
             <Text>Coupon Used: {group.coupon?.code || "None"}</Text>
-            <Text>Shipping Fees: ${group.shippingFees.toFixed(2)}</Text>
-            <Text>Group Subtotal: ${group.subTotal.toFixed(2)}</Text>
-            <Text>Group Total: ${group.total.toFixed(2)}</Text>
+            <Text>Shipping Fees: R{group.shippingFees.toFixed(2)}</Text>
+            <Text>Group Subtotal: R{group.subTotal.toFixed(2)}</Text>
+            <Text>Group Total: R{group.total.toFixed(2)}</Text>
             <Text>Items Count: {group._count.items}</Text>
 
             {/* Items Table */}
@@ -117,9 +117,9 @@ export const generateOrderPDFBlob = async (
                     {item.name}
                   </Text>
                   <Text style={styles.tableCell}>{item.quantity}</Text>
-                  <Text style={styles.tableCell}>${item.price.toFixed(2)}</Text>
+                  <Text style={styles.tableCell}>R{item.price.toFixed(2)}</Text>
                   <Text style={styles.tableCell}>
-                    ${item.totalPrice.toFixed(2)}
+                    R{item.totalPrice.toFixed(2)}
                   </Text>
                 </View>
               ))}
@@ -128,9 +128,9 @@ export const generateOrderPDFBlob = async (
         ))}
         {/* Order Totals */}
         <View>
-          <Text>Order Subtotal: ${order.subTotal.toFixed(2)}</Text>
-          <Text>Order Shipping Fees: ${order.shippingFees.toFixed(2)}</Text>
-          <Text>Order Total: ${order.total.toFixed(2)}</Text>
+          <Text>Order Subtotal: R{order.subTotal.toFixed(2)}</Text>
+          <Text>Order Shipping Fees: R{order.shippingFees.toFixed(2)}</Text>
+          <Text>Order Total: R{order.total.toFixed(2)}</Text>
         </View>
       </Page>
     </Document>

@@ -152,10 +152,10 @@ export const columns: ColumnDef<InventoryItem>[] = [
 
       return (
         <div className="flex flex-col">
-          <span className="font-semibold">${finalPrice.toFixed(2)}</span>
+          <span className="font-semibold">R{finalPrice.toFixed(2)}</span>
           {discount > 0 && (
             <div className="flex gap-2 items-center">
-              <span className="text-xs line-through text-muted-foreground">${price.toFixed(2)}</span>
+              <span className="text-xs line-through text-muted-foreground">R{price.toFixed(2)}</span>
               <Badge variant="secondary" className="text-xs bg-red-500/10 text-red-600 border-red-200">
                 -{discount}%
               </Badge>

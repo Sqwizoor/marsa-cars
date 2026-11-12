@@ -304,7 +304,7 @@ const { updateProductQuantity, removeFromCart } = useCartStore((state) => state)
                               ${quantity - 1} item(s) x R${extraShippingFee} 
                               (additional items)`
                               : " x 1"}
-                            = ${shippingInfo.totalFee.toFixed(2)}
+                            = R{shippingInfo.totalFee.toFixed(2)}
                           </>
                         ) : shippingMethod === "WEIGHT" ? (
                           <>

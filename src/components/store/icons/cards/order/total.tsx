@@ -22,14 +22,14 @@ export default function OrderTotalDetailsCard({
           </div>
           <div className="text-right space-y-4">
             <p className="text-lg font-semibold text-main-primary">
-              ${subTotal.toFixed(2)}
+              R{subTotal.toFixed(2)}
             </p>
             <p className="mt-0.5 text-sm text-neutral-500">
-              +${shippingFees.toFixed(2)}
+              +R{shippingFees.toFixed(2)}
             </p>
-            <p className="mt-0.5 text-sm text-neutral-500">+$0.00</p>
+            <p className="mt-0.5 text-sm text-neutral-500">+R0.00</p>
             <p className="text-white px-3 text-sm py-1.5 bg-blue-primary rounded-lg font-semibold">
-              ${total.toFixed(2)}
+              R{total.toFixed(2)}
             </p>
           </div>
         </div>

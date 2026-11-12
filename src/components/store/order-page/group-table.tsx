@@ -95,13 +95,13 @@ export default function OrderGroupTable({
           <p className="font-medium text-lg text-gray-900 px-6 py-3 max-lg:text-center border-r">
             Subtotal:
             <span className="text-gray-500 ms-1">
-              ${group.subTotal.toFixed(2)}
+              R{group.subTotal.toFixed(2)}
             </span>
           </p>
           <p className="font-medium text-lg text-gray-900 px-6 py-3 max-lg:text-center border-r">
             Shipping Fees:
             <span className="text-gray-500 ms-1">
-              ${group.shippingFees.toFixed(2)}
+              R{group.shippingFees.toFixed(2)}
             </span>
           </p>
           {group.couponId && (
@@ -109,7 +109,7 @@ export default function OrderGroupTable({
               Coupon ({coupon?.code})
               <span className="text-gray-500 ms-1">(-{coupon?.discount}%)</span>
               <span className="text-gray-500 ms-1">
-                (-${discountedAmount.toFixed(2)})
+                (-R{discountedAmount.toFixed(2)})
               </span>
             </p>
           )}
@@ -117,7 +117,7 @@ export default function OrderGroupTable({
         <div>
           <p className="font-semibold text-xl text-black py-2">
             Total price:
-            <span className="text-blue-primary ms-1">${total.toFixed(2)}</span>
+            <span className="text-blue-primary ms-1">R{total.toFixed(2)}</span>
           </p>
         </div>
       </div>
