@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { getPayFastConfig } from "@/lib/payfast/config";
 import { validateITNWithPayFast, verifyITNSignature, isFromPayFast } from "@/lib/payfast/utils";
 import { BobGoClient } from "@/lib/bobgo/client";
+import { persistShipmentTracking } from "@/queries/tracking";
 import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function POST(req: NextRequest) {
@@ -129,7 +130,7 @@ export async function POST(req: NextRequest) {
               weight: 1, // Placeholder
           })));
 
-          await BobGoClient.createOrder({
+          const bobgoOrderRes = await BobGoClient.createOrder({
               order_number: fullOrder.id,
               payment_status: 'paid',
               collection_address: {
@@ -163,6 +164,21 @@ export async function POST(req: NextRequest) {
               },
               items: items
           });
+          const createdTrackingRef =
+            bobgoOrderRes?.tracking_reference ||
+            bobgoOrderRes?.shipment_tracking_reference ||
+            bobgoOrderRes?.shipments?.[0]?.tracking_reference;
+          if (createdTrackingRef) {
+            await persistShipmentTracking({
+              orderId: fullOrder.id,
+              orderGroupId: fullOrder.groups[0]?.id,
+              trackingReference: createdTrackingRef,
+              bobgoShipmentId: bobgoOrderRes?.id ? String(bobgoOrderRes.id) : undefined,
+              courierName: bobgoOrderRes?.courier_name || fullOrder.groups[0]?.shippingService,
+              status: "pending-collection",
+              statusFriendly: "Order Synced to Bob Go",
+            });
+          }
       }
 
       // Track order payment completed event

@@ -21,9 +21,18 @@ const UserShippingAddresses: FC<Props> = ({
 }) => {
   const [show, setShow] = useState<boolean>(false);
   return (
-    <div className="w-full py-4 px-6 bg-white">
+    <div className="w-full py-4 px-4 sm:px-6 bg-white rounded-xl shadow-sm border border-slate-100">
       <div className="relative flex flex-col text-sm">
-        <h1 className="text-lg mb-3 font-bold">Shipping Addresses</h1>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900">
+            Shipping Addresses
+          </h2>
+          {addresses && addresses.length > 0 && (
+            <span className="text-xs text-slate-500 font-medium">
+              {addresses.length} {addresses.length === 1 ? "saved" : "saved"}
+            </span>
+          )}
+        </div>
         {addresses && addresses.length > 0 && (
           <AddressList
             addresses={addresses}
@@ -32,15 +41,16 @@ const UserShippingAddresses: FC<Props> = ({
             setSelectedAddress={setSelectedAddress}
           />
         )}
-        <div
-          className="mt-4 ml-8 text-orange-background cursor-pointer"
+        <button
+          type="button"
           onClick={() => setShow(true)}
+          className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-pink-300 hover:border-pink-500 bg-pink-50/60 hover:bg-pink-50 text-pink-700 font-semibold text-xs sm:text-sm transition self-start cursor-pointer active:scale-95"
         >
-          <Plus className="inline-block mr-1 w-3" />
-          <span className="text-sm">Add new address</span>
-        </div>
+          <Plus className="w-4 h-4 text-pink-600 shrink-0" />
+          <span>Add new address</span>
+        </button>
         {/* Modal */}
-        <Modal title="Add new Address" show={show} setShow={setShow}>
+        <Modal title="Add New Shipping Address" show={show} setShow={setShow}>
           <AddressDetails countries={countries} setShow={setShow} />
         </Modal>
       </div>

@@ -1,12 +1,21 @@
 "use server"
 
 import { db } from "@/lib/db"
+import { api, convexQuery, isConvexEnabled } from "@/lib/convex"
 import { currentUser } from "@clerk/nextjs/server"
 
 export async function getStoreAnalytics(storeUrl: string, days: number = 30) {
   try {
     const user = await currentUser()
     if (!user) throw new Error("Unauthenticated")
+
+    if (isConvexEnabled()) {
+      return await convexQuery(api.analytics.getStoreAnalytics, {
+        storeUrl,
+        days,
+        userId: user.id,
+      })
+    }
 
     const store = await db.store.findFirst({
       where: {
@@ -43,7 +52,6 @@ export async function getStoreAnalytics(storeUrl: string, days: number = 30) {
     // Aggregate revenue by date
     const revenueMap = new Map<string, number>()
     const ordersMap = new Map<string, number>()
-    const customersMap = new Map<string, Set<string>>()
     
     let totalRevenue = 0
     let totalOrders = 0
@@ -113,7 +121,6 @@ export async function getStoreAnalytics(storeUrl: string, days: number = 30) {
     })
 
     // Get sales by category
-    // Since we can't easily group by relation in Prisma, we fetch items and aggregate manually
     const itemsWithCategory = await db.orderItem.findMany({
       where: {
         orderGroup: {

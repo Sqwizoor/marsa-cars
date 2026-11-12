@@ -92,7 +92,7 @@ export default function CountryLanguageCurrencySelector({
                 onChange={(val) => handleCountryClick(val)}
                 selectedValue={
                   (countries.find(
-                    (option) => option.name === userCountry?.name
+                    (option) => option.name === userCountry?.name || option.code === userCountry?.code
                   ) as SelectMenuOption) || countries[0]
                 }
               />

@@ -3,6 +3,7 @@ import { OrderGroupWithItemsType, OrderStatus } from "@/lib/types";
 import Image from "next/image";
 import React from "react";
 import ProductRow from "./product-row";
+import GroupTrackingSection from "./group-tracking-section";
 
 export default function OrderGroupTable({
   group,
@@ -69,6 +70,8 @@ export default function OrderGroupTable({
           </div>
         </div>
       </div>
+      {/* Bob Go Order Tracking */}
+      <GroupTrackingSection orderGroupId={group.id} orderId={group.orderId} />
       {/* Group info */}
       <div className="w-full border-t border-gray-200 px-6 flex flex-col lg:flex-row items-center justify-between">
         <div className="flex flex-col sm:flex-row items-center max-lg:border-b border-gray-200">

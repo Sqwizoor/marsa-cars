@@ -9,10 +9,10 @@ export default async function CartPage() {
 
   // Set default country if cookie is missing
   let userCountry: Country = {
-    name: "United States",
-    city: "",
-    code: "US",
-    region: "",
+    name: "South Africa",
+    city: "Johannesburg",
+    code: "ZA",
+    region: "Gauteng",
   };
 
   // If cookie exists, update the user country

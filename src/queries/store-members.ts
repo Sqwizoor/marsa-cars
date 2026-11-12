@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { api, convexMutation, convexQuery, isConvexEnabled } from "@/lib/convex";
 import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { Store } from "@prisma/client";
 
@@ -10,6 +11,13 @@ export const getStoreMembers = async (storeUrl: string) => {
   try {
     const user = await currentUser();
     if (!user) throw new Error("Unauthenticated.");
+
+    if (isConvexEnabled()) {
+      return await convexQuery(api.stores.getStoreMembers, {
+        storeUrl,
+        userId: user.id,
+      });
+    }
 
     const store = (await db.store.findUnique({
       where: { url: storeUrl },
@@ -40,6 +48,25 @@ export const addStoreMember = async (storeUrl: string, email: string) => {
     const user = await currentUser();
     if (!user) return { error: "Unauthenticated." };
 
+    if (isConvexEnabled()) {
+      const res = await convexMutation(api.stores.addStoreMember, {
+        storeUrl,
+        email,
+        ownerId: user.id,
+      });
+      if ((res as any)?.success && (res as any)?.memberId) {
+        try {
+          const client = await clerkClient();
+          await client.users.updateUserMetadata((res as any).memberId, {
+            privateMetadata: { role: "SELLER" },
+          });
+        } catch (e) {
+          console.error("Failed to sync Clerk metadata:", e);
+        }
+      }
+      return res;
+    }
+
     const store = await db.store.findUnique({
       where: { url: storeUrl },
     });
@@ -65,34 +92,34 @@ export const addStoreMember = async (storeUrl: string, email: string) => {
 
     // Check if already a member
     const existingMember = await db.store.findFirst({
-        where: {
-            id: store.id,
-            members: {
-                some: {
-                    id: memberUser.id
-                }
-            }
-        }
+      where: {
+        id: store.id,
+        members: {
+          some: {
+            id: memberUser.id,
+          },
+        },
+      },
     });
 
     if (existingMember) {
-        return { error: "User is already a member of this store." };
+      return { error: "User is already a member of this store." };
     }
 
     // Update role to SELLER if they are just a USER
     if (memberUser.role === "USER") {
-        await db.user.update({
-            where: { id: memberUser.id },
-            data: { role: "SELLER" }
-        });
+      await db.user.update({
+        where: { id: memberUser.id },
+        data: { role: "SELLER" },
+      });
 
-        // Also update Clerk metadata so they can access dashboard immediately
-        const client = await clerkClient();
-        await client.users.updateUserMetadata(memberUser.id, {
-            privateMetadata: {
-                role: "SELLER"
-            }
-        });
+      // Also update Clerk metadata so they can access dashboard immediately
+      const client = await clerkClient();
+      await client.users.updateUserMetadata(memberUser.id, {
+        privateMetadata: {
+          role: "SELLER",
+        },
+      });
     }
 
     await db.store.update({
@@ -118,6 +145,14 @@ export const removeStoreMember = async (storeUrl: string, memberId: string) => {
     const user = await currentUser();
     if (!user) return { error: "Unauthenticated." };
 
+    if (isConvexEnabled()) {
+      return await convexMutation(api.stores.removeStoreMember, {
+        storeUrl,
+        memberId,
+        ownerId: user.id,
+      });
+    }
+
     const store = await db.store.findUnique({
       where: { url: storeUrl },
     });
@@ -126,10 +161,7 @@ export const removeStoreMember = async (storeUrl: string, memberId: string) => {
 
     // Only owner can remove members
     if (store.userId !== user.id) {
-        // Allow members to leave? Maybe later. For now only owner removes.
-        // If member wants to leave, they can theoretically use this if we change logic,
-        // but typically "removeStoreMember" implies admin action.
-        return { error: "Only the store owner can remove members." };
+      return { error: "Only the store owner can remove members." };
     }
 
     await db.store.update({

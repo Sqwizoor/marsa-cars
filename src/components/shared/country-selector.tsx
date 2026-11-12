@@ -47,6 +47,10 @@ export default function CountrySelector({
   }, [ref, open, onToggle]);
 
   const [query, setQuery] = useState("");
+  const activeValue =
+    selectedValue && selectedValue.name
+      ? selectedValue
+      : { name: "South Africa", code: "ZA" };
 
   return (
     <div ref={ref}>
@@ -63,16 +67,21 @@ export default function CountrySelector({
           disabled={disabled}
         >
           <span className="truncate flex items-center text-gray-900">
-            {selectedValue && selectedValue.code && (
+            {activeValue && activeValue.code && (
               <Image
-                alt={`${selectedValue.name}`}
-                src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${selectedValue.code}.svg`}
+                alt={`${activeValue.name}`}
+                src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${activeValue.code}.svg`}
                 width={32}
                 height={24}
                 className={"inline mr-2 h-4 w-6 rounded-sm object-cover"}
               />
             )}
-            {selectedValue?.name || "Select a country"}
+            <span className="font-medium">{activeValue?.name || "South Africa"}</span>
+            {activeValue?.code === "ZA" && (
+              <span className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 bg-green-100 text-green-800 rounded">
+                Main
+              </span>
+            )}
           </span>
           <span
             className={`absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none ${
@@ -157,6 +166,11 @@ export default function CountrySelector({
                         className={"inline mr-2 h-4 w-6 rounded-sm object-cover"}
                       />
                       <span className="font-normal truncate">{value.name}</span>
+                      {value.code === "ZA" && (
+                        <span className="ml-2 text-[10px] font-semibold px-2 py-0.5 bg-green-100 text-green-800 border border-green-300 rounded-full whitespace-nowrap">
+                          Main Country
+                        </span>
+                      )}
                       {value.name === selectedValue?.name && (
                         <span className="text-blue-600 absolute inset-y-0 right-0 flex items-center pr-8">
                           <svg

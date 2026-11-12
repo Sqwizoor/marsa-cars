@@ -45,21 +45,22 @@ export default async function CheckoutPage() {
   // Get user shipping address
   const addresses = await getUserShippingAddresses();
 
-  // Get list of countries
-  const countries = await db.country.findMany({
-    orderBy: { name: "desc" },
-  });
+  // Get list of countries, ensuring South Africa is primary (first)
+  const dbCountries = await db.country.findMany();
+  const countries = dbCountries.sort((a, b) =>
+    a.code === "ZA" ? -1 : b.code === "ZA" ? 1 : a.name.localeCompare(b.name)
+  );
 
   // Get cookies from the store
   const cookieStore = cookies();
   const userCountryCookie = (await cookieStore).get("userCountry");
 
-  // Set default country if cookie is missing
+  // Set default country to South Africa
   let userCountry: Country = {
-    name: "United States",
-    city: "",
-    code: "US",
-    region: "",
+    name: "South Africa",
+    city: "Johannesburg",
+    code: "ZA",
+    region: "Gauteng",
   };
 
   // If cookie exists, update the user country

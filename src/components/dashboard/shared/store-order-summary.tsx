@@ -5,6 +5,7 @@ import OrderStatusSelect from "../forms/order-status-select";
 // ProductStatusTag unused here (selection handled via ProductStatusSelect)
 import ProductStatusSelect from "../forms/product-status-select";
 import { getShippingDatesRange } from "@/lib/utils";
+import BobGoTrackingManager from "../forms/bobgo-tracking-manager";
 
 interface Props {
   group: StoreOrderType;
@@ -110,6 +111,12 @@ const StoreOrderSummary = ({ group }: Props) => {
             </h6>
           </div>
         </div>
+        {/* Bob Go Shipment & Tracking Manager */}
+        <BobGoTrackingManager
+          storeId={group.storeId}
+          orderGroupId={group.id}
+          currentShippingService={group.shippingService}
+        />
         {/* Products */}
         {group.items.map((product, index) => (
           <div

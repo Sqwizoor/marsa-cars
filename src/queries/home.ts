@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { api, convexQuery, isConvexEnabled } from "@/lib/convex";
 import {
   ProductSimpleVariantType,
   ProductSize,
@@ -24,72 +25,66 @@ type PropertyMapping = {
   [key: string]: string;
 };
 
-// Cached internal function for single param fetch
-// Cache key depends on args automatically via unstable_cache mechanism if used inside a cached function
-// BUT unstable_cache requires explicit key part if we want to granularly control it or invalidate it.
 const getCachedProductData = async (property: string, value: string, type: FormatType, limit: number = 20) => {
   return await unstable_cache(
     async () => {
-        // Define mappings
-        const propertyMapping: PropertyMapping = {
+      const propertyMapping: PropertyMapping = {
         category: "category.url",
         subCategory: "subCategory.url",
         offer: "offerTag.url",
-        };
+      };
 
-        const mapProperty = (prop: string): string => {
+      const mapProperty = (prop: string): string => {
         if (!propertyMapping[prop]) {
-            throw new Error(
+          throw new Error(
             `Invalid property: ${prop} . Must be one of: category, subCategory, offer.`
-            );
+          );
         }
         return propertyMapping[prop];
-        };
+      };
 
-        const dbField = mapProperty(property);
+      const dbField = mapProperty(property);
 
-        // Construct where clause
-        const whereClause: any = {
+      const whereClause: any = {
         status: "APPROVED",
-        };
+      };
 
-        if (dbField === "offerTag.url") {
+      if (dbField === "offerTag.url") {
         whereClause.offerTag = { url: value };
-        } else if (dbField === "category.url") {
+      } else if (dbField === "category.url") {
         whereClause.category = { url: value };
-        } else if (dbField === "subCategory.url") {
+      } else if (dbField === "subCategory.url") {
         whereClause.subCategory = { url: value };
-        }
+      }
 
-        // Query products
-        const products = await db.product.findMany({
+      const products = await db.product.findMany({
         where: whereClause,
         take: limit,
         orderBy: { createdAt: "desc" },
         select: {
-            id: true,
-            slug: true,
-            name: true,
-            rating: true,
-            sales: true,
-            numReviews: true,
-            variants: {
+          id: true,
+          slug: true,
+          name: true,
+          rating: true,
+          sales: true,
+          numReviews: true,
+          variants: {
             select: {
-                id: true,
-                variantName: true,
-                variantImage: true,
-                slug: true,
-                sizes: true,
-                images: true,
+              id: true,
+              variantName: true,
+              variantImage: true,
+              slug: true,
+              sizes: true,
+              images: true,
             },
-            },
+          },
         },
-        });
+      });
 
-        return formatProductData(products as ProductWithVariants[], type);
+      return formatProductData(products as ProductWithVariants[], type);
     },
-    [`home-product-data-${property}-${value}-${type}-${limit}`], // Unique key per combo
-    { revalidate: 1800, tags: ['products', 'home'] } // 30 mins
+    [`home-product-data-${property}-${value}-${type}-${limit}`],
+    { revalidate: 1800, tags: ["products", "home"] }
   )();
 };
 
@@ -178,9 +173,12 @@ export const getHomeDataDynamic = async (
     throw new Error("Invalid input: params must be a non-empty array.");
   }
 
+  if (isConvexEnabled()) {
+    return await convexQuery(api.products.getHomeDataDynamic, { params });
+  }
+
   const results = await Promise.all(
     params.map(async ({ property, value, type, limit }) => {
-      // Use cached fetcher for each param
       const data = await getCachedProductData(property, value, type, limit || 20);
       const outputKey = `products_${value.replace(/-/g, "_")}`;
       return { [outputKey]: data };
@@ -237,11 +235,15 @@ const getCachedCategories = unstable_cache(
       take: 6,
     });
   },
-  ['home-featured-categories'],
-  { revalidate: 3600, tags: ['categories', 'home'] } // 1 hour
+  ["home-featured-categories"],
+  { revalidate: 3600, tags: ["categories", "home"] }
 );
 
 export const getHomeFeaturedCategories = async () => {
+  if (isConvexEnabled()) {
+    return await convexQuery(api.categories.getHomeFeaturedCategories, {});
+  }
+
   const featuredCategories = await getCachedCategories();
 
   return featuredCategories.map((category) => ({

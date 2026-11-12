@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { api, convexMutation, convexQuery, isConvexEnabled } from "@/lib/convex";
 import { CartItem, Country as CountryDB } from "@prisma/client";
 import { CartProductType, CartWithCartItemsType } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
@@ -30,6 +31,13 @@ export const followStore = async (storeId: string): Promise<boolean> => {
 
     // Ensure the user is authenticated
     if (!user) throw new Error("Unauthenticated");
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.users.followStore, {
+        storeId,
+        userId: user.id,
+      });
+    }
 
     // Check if the store exists
     const store = await db.store.findUnique({
@@ -114,6 +122,16 @@ export const saveUserCart = async (
   if (!user) throw new Error("Unauthenticated.");
 
   const userId = user.id;
+
+  if (isConvexEnabled()) {
+    return await convexMutation(api.users.saveUserCart, {
+      userId,
+      userName: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
+      userEmail: user.emailAddresses[0]?.emailAddress ?? "",
+      userPicture: user.imageUrl,
+      cartProducts,
+    });
+  }
 
   // Ensure the user exists in our database before proceeding.
   // This prevents foreign key errors if the user record was not created yet.
@@ -205,7 +223,7 @@ export const saveUserCart = async (
       };
 
       if (countryCookie) {
-        const country = countryCookie ? JSON.parse(await countryCookie as string) : null;
+        const country = countryCookie ? JSON.parse((await countryCookie) as string) : null;
         const temp_details = await getShippingDetails(
           product.shippingFeeMethod,
           country,
@@ -276,9 +294,9 @@ export const saveUserCart = async (
           productSlug: item.productSlug,
           variantSlug: item.variantSlug,
           name: item.name,
-            image: item.image,
-            quantity: item.quantity,
-            size: item.size,
+          image: item.image,
+          quantity: item.quantity,
+          size: item.size,
           price: item.price,
           shippingFee: item.shippingFee,
           totalPrice: item.totalPrice,
@@ -306,6 +324,12 @@ export const getUserShippingAddresses = async () => {
 
     // Ensure user is authenticated
     if (!user) throw new Error("Unauthenticated.");
+
+    if (isConvexEnabled()) {
+      return await convexQuery(api.users.getUserShippingAddresses, {
+        userId: user.id,
+      });
+    }
 
     // Retrieve all shipping addresses for the specified user
     const shippingAddresses = await db.shippingAddress.findMany({
@@ -336,6 +360,25 @@ export const upsertShippingAddress = async (address: ShippingAddress) => {
 
     // Ensure address data is provided
     if (!address) throw new Error("Please provide address data.");
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.users.upsertShippingAddress, {
+        userId: user.id,
+        address: {
+          id: address.id,
+          firstName: address.firstName,
+          lastName: address.lastName,
+          phone: address.phone,
+          address1: address.address1,
+          address2: address.address2,
+          state: address.state,
+          city: address.city,
+          zip_code: address.zip_code,
+          default: address.default,
+          countryId: address.countryId,
+        },
+      });
+    }
 
     // Handle making the rest of addresses default false when we are adding a new default
     if (address.default) {
@@ -394,6 +437,16 @@ export const placeOrder = async (
   if (!user) throw new Error("Unauthenticated.");
 
   const userId = user.id;
+
+  if (isConvexEnabled()) {
+    return await convexMutation(api.orders.placeOrder, {
+      userId,
+      shippingAddressId: shippingAddress.id,
+      cartId,
+      shippingFeeOverride,
+      shippingServiceOverride,
+    });
+  }
 
   // Fetch user's cart with all items
   const cart = await db.cart.findUnique({
@@ -587,19 +640,17 @@ export const placeOrder = async (
     if (check && cartCoupon) {
       discountedAmount = (groupedTotalPrice * cartCoupon.discount) / 100;
     }
-    
-    // Override shipping fees if provided (Logic: Apply override to the first group, or split?
-    // For simplicity, if override exists, we ignore the calculated groupShippingFees for the TOTAL calculation,
-    // but we still need to assign something to the group.
-    // If we assume single-shipment for the whole order, we might assign the fee to the order and 0 to groups unless we want to track it per store.
-    // Let's use the override if it's the ONLY group, or just use the calculated one if override is not passed.
-    // actually, let's respect the override strictly.
-    
-    const finalGroupShippingFee = shippingFeeOverride !== undefined 
-        ? (Object.keys(groupedItems).length === 1 || Object.keys(groupedItems).indexOf(storeId) === 0 ? shippingFeeOverride : 0) // Assign full fee to first group if multiple? This is messy but keeping it simple.
+
+    const finalGroupShippingFee =
+      shippingFeeOverride !== undefined
+        ? Object.keys(groupedItems).length === 1 ||
+          Object.keys(groupedItems).indexOf(storeId) === 0
+          ? shippingFeeOverride
+          : 0
         : groupShippingFees;
-        
-    const finalShippingService = shippingServiceOverride || shippingService || "International Delivery";
+
+    const finalShippingService =
+      shippingServiceOverride || shippingService || "International Delivery";
 
     // Calculate the total after applying the discount
     const totalAfterDiscount = groupedTotalPrice - discountedAmount;
@@ -642,8 +693,6 @@ export const placeOrder = async (
       });
     }
 
-    // Update order totals
-    // If override is present, we handle shipping fee accumulation via the finalGroupShippingFee logic above (assigned to first group)
     orderTotalPrice += totalAfterDiscount + finalGroupShippingFee;
     orderShippingFee += finalGroupShippingFee;
   }
@@ -660,15 +709,6 @@ export const placeOrder = async (
     },
   });
 
-  // Delete cart
-  /*
-  await db.cart.delete({
-    where: {
-      id: cartId,
-    },
-  });
-  */
-
   return {
     orderId: order.id,
   };
@@ -681,6 +721,10 @@ export const emptyUserCart = async () => {
     if (!user) throw new Error("Unauthenticated.");
 
     const userId = user.id;
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.users.emptyUserCart, { userId });
+    }
 
     const res = await db.cart.delete({
       where: {
@@ -705,6 +749,10 @@ export const emptyUserCart = async () => {
 export const updateCartWithLatest = async (
   cartProducts: CartProductType[]
 ): Promise<CartProductType[]> => {
+  if (isConvexEnabled()) {
+    return cartProducts;
+  }
+
   // Fetch product, variant, and size data from the database for validation
   const validatedCartItems = await Promise.all(
     cartProducts.map(async (cartProduct) => {
@@ -764,7 +812,7 @@ export const updateCartWithLatest = async (
       };
 
       if (countryCookie) {
-        const country = JSON.parse(await countryCookie as string);
+        const country = JSON.parse((await countryCookie) as string);
         const temp_details = await getShippingDetails(
           product.shippingFeeMethod,
           country,
@@ -829,15 +877,24 @@ export const addToWishlist = async (
   const user = await currentUser();
 
   if (!user) {
-    return { 
-      ok: false as const, 
-      error: "Please sign in to add items to your wishlist" 
+    return {
+      ok: false as const,
+      error: "Please sign in to add items to your wishlist",
     };
   }
 
   const userId = user.id;
 
   try {
+    if (isConvexEnabled()) {
+      return await convexMutation(api.users.addToWishlist, {
+        userId,
+        productId,
+        variantId,
+        sizeId,
+      });
+    }
+
     const existingWishlistItem = await db.wishlist.findFirst({
       where: {
         userId,
@@ -847,9 +904,9 @@ export const addToWishlist = async (
     });
 
     if (existingWishlistItem) {
-      return { 
-        ok: false as const, 
-        error: "Product is already in your wishlist" 
+      return {
+        ok: false as const,
+        error: "Product is already in your wishlist",
       };
     }
 
@@ -865,9 +922,9 @@ export const addToWishlist = async (
     return { ok: true as const, item };
   } catch (error) {
     console.error("addToWishlist error:", error);
-    return { 
-      ok: false as const, 
-      error: "Failed to add to wishlist. Please try again." 
+    return {
+      ok: false as const,
+      error: "Failed to add to wishlist. Please try again.",
     };
   }
 };
@@ -938,7 +995,7 @@ export const updateCheckoutProductstWithLatest = async (
       const country = address
         ? address
         : countryCookie
-        ? JSON.parse(await countryCookie as string)
+        ? JSON.parse((await countryCookie) as string)
         : null;
 
       if (!country) {
@@ -977,9 +1034,9 @@ export const updateCheckoutProductstWithLatest = async (
           },
           data: {
             name: `${product.name} ${variant.variantName && variant.variantName !== product.name ? `· ${variant.variantName}` : ""}`,
-          image: variant.images && variant.images.length > 0 ? variant.images[0].url : "",
-          price,
-          quantity: validated_qty,
+            image: variant.images && variant.images.length > 0 ? variant.images[0].url : "",
+            price,
+            quantity: validated_qty,
             shippingFee,
             totalPrice,
           },

@@ -67,39 +67,56 @@ const ShippingAddressCard = ({
         </span>
         <input type="checkbox" hidden id={address.id} />
       </label>
-      {/* Address */}
-      <div className="w-full border-t pt-2">
-        {/* Full name - Phone number */}
-        <div className="flex max-w-[328px] overflow-hidden text-ellipsis whitespace-nowrap">
-          <span className="mr-4 text-sm text-black font-semibold capitalize">
-            {address.firstName} {address.lastName}
-          </span>
-          <span>{address.phone}</span>
+      {/* Address Content */}
+      <div className="w-full border-t border-slate-100 pt-2 pb-1">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 pr-1">
+          {/* Full name - Phone number */}
+          <div className="flex flex-wrap items-center gap-x-2 text-sm">
+            <span className="text-slate-900 font-semibold capitalize">
+              {address.firstName} {address.lastName}
+            </span>
+            <span className="text-slate-500 font-medium text-xs sm:text-sm">
+              {address.phone}
+            </span>
+            {address.default && (
+              <span className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-medium">
+                Default
+              </span>
+            )}
+          </div>
+
+          {/* Action Links (Visible on mobile and desktop) */}
+          <div className="flex items-center gap-x-3 text-xs pt-1 sm:pt-0">
+            <button
+              type="button"
+              className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer"
+              onClick={() => setShow(true)}
+            >
+              Edit
+            </button>
+            {isSelected && !address.default && (
+              <button
+                type="button"
+                className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer"
+                onClick={() => handleMakeDefault()}
+              >
+                Save as default
+              </button>
+            )}
+          </div>
         </div>
+
         {/* Address 1 - Address 2 */}
-        <div className="text-sm max-w-[90%] text-gray-600 leading-4 overflow-hidden text-ellipsis whitespace-nowrap">
+        <div className="text-xs sm:text-sm text-slate-600 mt-1 leading-snug break-words">
           {address.address1}
           {address.address2 && `, ${address.address2}`}
         </div>
+
         {/* State - City - Country - Zipcode */}
-        <div className="text-sm max-w-[90%] text-gray-600 leading-4 overflow-hidden text-ellipsis whitespace-nowrap">
-          {address.state}, {address.city}, {address.country.name},&nbsp;
-          {address.zip_code}
+        <div className="text-xs sm:text-sm text-slate-500 leading-snug break-words">
+          {address.city}, {address.state}, {address.country.name} {address.zip_code}
         </div>
-        {/* Save as default - Edit */}
-        <div className="absolute right-0 top-1/2 flex items-center gap-x-3">
-          <div
-            className="cursor-pointer hidden group-hover:block"
-            onClick={() => setShow(true)}
-          >
-            <span className="text-xs text-[#27f]">Edit</span>
-          </div>
-          {isSelected && !address.default && (
-            <div className="cursor-pointer" onClick={() => handleMakeDefault()}>
-              <span className="text-xs text-[#27f]">Save as default</span>
-            </div>
-          )}
-        </div>
+
         {show && (
           <Modal title="Edit Shipping Address" show={show} setShow={setShow}>
             <AddressDetails

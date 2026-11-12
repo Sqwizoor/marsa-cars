@@ -71,7 +71,7 @@ const CheckoutContainer: FC<Props> = ({
             local_area: selectedAddress.city, // Approximation
             city: selectedAddress.city,
             zone: selectedAddress.state,
-            country: "South Africa", // Assuming SA for BobGo
+            country: activeCountry?.code || "ZA",
             code: selectedAddress.zip_code,
         };
 
@@ -122,6 +122,20 @@ const CheckoutContainer: FC<Props> = ({
       void hydrateCheckoutCart();
     }
   }, [activeCountry, cartItems]);
+  const effectiveCountryName =
+    activeCountry?.name ||
+    (selectedAddress?.countryId
+      ? countries.find((c) => c.id === selectedAddress.countryId)?.name
+      : undefined) ||
+    (addresses.length > 0 && addresses[0]?.country?.name
+      ? addresses[0].country.name
+      : undefined) ||
+    (userCountry?.name &&
+    userCountry.name !== "United States" &&
+    userCountry.name !== "United Kingdom"
+      ? userCountry.name
+      : "South Africa");
+
   return (
     <div className="flex flex-col lg:flex-row px-3 lg:px-0 gap-4">
       <div className="flex-1 order-2 lg:order-1">
@@ -132,9 +146,7 @@ const CheckoutContainer: FC<Props> = ({
           setSelectedAddress={setSelectedAddress}
         />
         <div className="my-2">
-          <CountryNote
-            country={activeCountry ? activeCountry.name : userCountry.name}
-          />
+          <CountryNote country={effectiveCountryName} />
         </div>
         <div className="w-full py-4 px-2 sm:px-4 bg-white my-3 rounded-lg">
           <div className="relative">

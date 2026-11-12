@@ -19,6 +19,7 @@ import {
   User,
   Calendar,
   DollarSign,
+  Truck,
 } from "lucide-react";
 
 export type AdminOrder = {
@@ -177,6 +178,15 @@ export const columns: ColumnDef<AdminOrder>[] = [
             >
               <ExternalLink className="w-4 h-4" />
               View Customer Order
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              href={`/track-order?orderId=${row.original.id}`}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <Truck className="w-4 h-4" />
+              Track via Bob Go
             </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>

@@ -63,13 +63,15 @@ const AddressDetails: FC<AddressDetailsProps> = ({
 
   // State for selected country
   const defaultValues = useMemo(() => {
-    // Ensure countryId is always a valid country ID from the database
-    // Priority: existing address -> first available country
+    // Priority: existing address -> South Africa -> first available country
+    const saCountry = countries?.find(
+      (c) => c.code === "ZA" || c.name.toLowerCase() === "south africa"
+    );
     let countryId = data?.countryId;
     
-    // If no existing countryId, use the first country's id
-    if (!countryId && countries?.length > 0) {
-      countryId = countries[0].id;
+    // If no existing countryId, default to South Africa
+    if (!countryId) {
+      countryId = saCountry?.id || (countries?.length > 0 ? countries[0].id : "");
     }
     
     return {
@@ -161,18 +163,28 @@ const AddressDetails: FC<AddressDetailsProps> = ({
   return (
     <div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <FormLabel>Contact information</FormLabel>
-            <div className="flex items-center justify-between gap-3">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+          {/* Contact Information */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-slate-900 border-b pb-1.5">
+              Contact Information
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField
                 disabled={isLoading}
                 control={form.control}
                 name="firstName"
                 render={({ field }) => (
-                  <FormItem className="flex-1">
+                  <FormItem className="w-full">
+                    <FormLabel className="text-xs font-semibold text-slate-700">
+                      First Name *
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="First name*" {...field} />
+                      <Input
+                        placeholder="First name"
+                        className="h-10 sm:h-11 rounded-lg text-sm"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -183,115 +195,154 @@ const AddressDetails: FC<AddressDetailsProps> = ({
                 control={form.control}
                 name="lastName"
                 render={({ field }) => (
-                  <FormItem className="flex-1">
+                  <FormItem className="w-full">
+                    <FormLabel className="text-xs font-semibold text-slate-700">
+                      Last Name *
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="Last name*" {...field} />
+                      <Input
+                        placeholder="Last name"
+                        className="h-10 sm:h-11 rounded-lg text-sm"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+
             <FormField
               disabled={isLoading}
               control={form.control}
               name="phone"
               render={({ field }) => (
-                <FormItem className="flex-1 w-[calc(50%-8px)] !mt-3">
+                <FormItem className="w-full sm:w-[calc(50%-6px)]">
+                  <FormLabel className="text-xs font-semibold text-slate-700">
+                    Phone Number *
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Phone number*" {...field} />
+                    <Input
+                      placeholder="e.g. 082 123 4567"
+                      className="h-10 sm:h-11 rounded-lg text-sm"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-          <div className="space-y-2">
-            <FormLabel>Address</FormLabel>
-            <div>
-              <FormField
-                disabled={isLoading}
-                control={form.control}
-                name="countryId"
-                render={({ field }) => {
-                  // Find selected country by ID
-                  const selectedCountry = countries?.find((c) => c.id === field.value);
-                  
-                  // Display the selected country or default to first
-                  const displayCountry = selectedCountry || (countries?.length > 0 ? countries[0] : null);
-                  
-                  const selectedValue = displayCountry
-                    ? { name: displayCountry.name, code: displayCountry.code }
-                    : { name: "Select Country", code: "ZA" };
 
-                  return (
-                    <FormItem className="flex-1 w-[calc(50%-8px)] !mt-3">
-                      <FormControl>
-                        <CountrySelector
-                          id="countries"
-                          open={isOpen}
-                          onToggle={() => setIsOpen((prev) => !prev)}
-                          onChange={(val) => {
-                            const selected = countries?.find(
-                              (c) => c.name === val
-                            );
-                            if (selected?.id) {
-                              field.onChange(selected.id);
-                            }
-                          }}
-                          selectedValue={selectedValue as SelectMenuOption}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
-              />
-            </div>
-            <div className="!mt-3 flex items-center justify-between gap-3">
-              <FormField
-                disabled={isLoading}
-                control={form.control}
-                name="address1"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
+          {/* Delivery Address */}
+          <div className="space-y-3 pt-1">
+            <h3 className="text-sm font-semibold text-slate-900 border-b pb-1.5">
+              Delivery Address
+            </h3>
+
+            {/* Country */}
+            <FormField
+              disabled={isLoading}
+              control={form.control}
+              name="countryId"
+              render={({ field }) => {
+                const selectedCountry = countries?.find((c) => c.id === field.value);
+                const saCountry = countries?.find(
+                  (c) => c.code === "ZA" || c.name.toLowerCase() === "south africa"
+                );
+                const displayCountry =
+                  selectedCountry || saCountry || (countries?.length > 0 ? countries[0] : null);
+
+                const selectedValue = displayCountry
+                  ? { name: displayCountry.name, code: displayCountry.code }
+                  : { name: "South Africa", code: "ZA" };
+
+                return (
+                  <FormItem className="w-full sm:w-[calc(50%-6px)]">
+                    <FormLabel className="text-xs font-semibold text-slate-700">
+                      Country *
+                    </FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Street, house/apartment/unit*"
-                        {...field}
+                      <CountrySelector
+                        id="countries"
+                        open={isOpen}
+                        onToggle={() => setIsOpen((prev) => !prev)}
+                        onChange={(val) => {
+                          const selected = countries?.find((c) => c.name === val);
+                          if (selected?.id) {
+                            field.onChange(selected.id);
+                          }
+                        }}
+                        selectedValue={selectedValue as SelectMenuOption}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
-              <FormField
-                disabled={isLoading}
-                control={form.control}
-                name="address2"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                      <Input
-                        placeholder="Apt, suite, unit, etc (optional）"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                );
+              }}
+            />
 
-            <div className="!mt-3 flex items-center justify-between gap-3">
+            {/* Street Address 1 (Full Width) */}
+            <FormField
+              disabled={isLoading}
+              control={form.control}
+              name="address1"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-xs font-semibold text-slate-700">
+                    Street Address *
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="House / building number, street name"
+                      className="h-10 sm:h-11 rounded-lg text-sm"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Address 2 (Full Width) */}
+            <FormField
+              disabled={isLoading}
+              control={form.control}
+              name="address2"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-xs font-semibold text-slate-700">
+                    Apartment / Suite / Unit (Optional)
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Apt, suite, unit, floor, complex (optional)"
+                      className="h-10 sm:h-11 rounded-lg text-sm"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Province/State & City */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField
                 disabled={isLoading}
                 control={form.control}
                 name="state"
                 render={({ field }) => (
-                  <FormItem className="flex-1">
+                  <FormItem className="w-full">
+                    <FormLabel className="text-xs font-semibold text-slate-700">
+                      Province / State *
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="State*" {...field} />
+                      <Input
+                        placeholder="e.g. Gauteng"
+                        className="h-10 sm:h-11 rounded-lg text-sm"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -302,39 +353,86 @@ const AddressDetails: FC<AddressDetailsProps> = ({
                 control={form.control}
                 name="city"
                 render={({ field }) => (
-                  <FormItem className="flex-1">
+                  <FormItem className="w-full">
+                    <FormLabel className="text-xs font-semibold text-slate-700">
+                      City / Town *
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="City*" {...field} />
+                      <Input
+                        placeholder="e.g. Johannesburg"
+                        className="h-10 sm:h-11 rounded-lg text-sm"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+
+            {/* Postal Code */}
             <FormField
               disabled={isLoading}
               control={form.control}
               name="zip_code"
               render={({ field }) => (
-                <FormItem className="flex-1 w-[calc(50%-8px)] !mt-3">
+                <FormItem className="w-full sm:w-[calc(50%-6px)]">
+                  <FormLabel className="text-xs font-semibold text-slate-700">
+                    Postal Code *
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Zip code*" {...field} />
+                    <Input
+                      placeholder="e.g. 2000"
+                      className="h-10 sm:h-11 rounded-lg text-sm"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {/* Default Address Checkbox */}
+            <FormField
+              control={form.control}
+              name="default"
+              render={({ field }) => (
+                <FormItem className="flex items-center gap-2 space-y-0 pt-2 cursor-pointer">
+                  <FormControl>
+                    <input
+                      type="checkbox"
+                      id="default-address-checkbox"
+                      checked={field.value}
+                      onChange={field.onChange}
+                      className="w-4 h-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500 cursor-pointer"
+                    />
+                  </FormControl>
+                  <FormLabel
+                    htmlFor="default-address-checkbox"
+                    className="text-xs sm:text-sm font-medium text-slate-700 cursor-pointer select-none"
+                  >
+                    Set as default shipping address
+                  </FormLabel>
+                </FormItem>
+              )}
+            />
           </div>
 
-          <Button type="submit" disabled={isLoading} className="rounded-md">
-            {isLoading ? (
-              <Skeleton className="h-4 w-28 bg-white/40" />
-            ) : data?.id ? (
-              "Save address information"
-            ) : (
-              "Create address"
-            )}
-          </Button>
+          <div className="pt-2">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full sm:w-auto h-11 sm:h-12 px-8 bg-pink-600 hover:bg-pink-700 text-white font-bold text-sm sm:text-base rounded-xl transition shadow-md flex items-center justify-center cursor-pointer"
+            >
+              {isLoading ? (
+                <Skeleton className="h-4 w-28 bg-white/40" />
+              ) : data?.id ? (
+                "Save Address Information"
+              ) : (
+                "Create Address"
+              )}
+            </Button>
+          </div>
         </form>
       </Form>
     </div>

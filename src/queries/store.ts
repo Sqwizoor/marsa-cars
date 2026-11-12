@@ -2,6 +2,7 @@
 
 // DB
 import { db } from "@/lib/db";
+import { api, convexMutation, convexQuery, isConvexEnabled } from "@/lib/convex";
 import {
   StoreDefaultShippingType,
   StoreStatus,
@@ -27,38 +28,49 @@ export type UpsertStoreResult =
   | { store: Store; error?: undefined }
   | { store?: undefined; error: string };
 
-// Function: upsertStore
-// Description: Upserts store details into the database, ensuring uniqueness of name,url, email, and phone number.
-// Access Level: Seller Only
-// Parameters:
-//   - store: Partial store object containing details of the store to be upserted.
-// Returns: Updated or newly created store details.
 export const upsertStore = async (store: Store): Promise<UpsertStoreResult> => {
   try {
-    // Get current user
     const user = await currentUser();
-
-    // Ensure user is authenticated
     if (!user) return { error: "Unauthenticated." };
-
-    // Verify seller permission
-    // if (user.privateMetadata.role !== "SELLER")
-    //   throw new Error(
-    //     "Unauthorized Access: Seller Privileges Required for Entry."
-    //   );
 
     await ensureSellerSubscription(user.id);
 
-    // Ensure store data is provided
     if (!store) return { error: "Please provide store data." };
 
-    // Ensure user exists in database (sync from Clerk if needed)
+    if (isConvexEnabled()) {
+      return await convexMutation(api.stores.upsertStore, {
+        store: {
+          id: store.id,
+          name: store.name,
+          description: store.description,
+          email: store.email,
+          phone: store.phone,
+          url: store.url,
+          logo: store.logo,
+          cover: store.cover,
+          status: store.status,
+          featured: store.featured,
+          returnPolicy: store.returnPolicy,
+          defaultShippingService: store.defaultShippingService,
+          defaultShippingFeePerItem: store.defaultShippingFeePerItem,
+          defaultShippingFeeForAdditionalItem: store.defaultShippingFeeForAdditionalItem,
+          defaultShippingFeePerKg: store.defaultShippingFeePerKg,
+          defaultShippingFeeFixed: store.defaultShippingFeeFixed,
+          defaultDeliveryTimeMin: store.defaultDeliveryTimeMin,
+          defaultDeliveryTimeMax: store.defaultDeliveryTimeMax,
+        },
+        userId: user.id,
+        userName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",
+        userEmail: user.emailAddresses[0]?.emailAddress || "",
+        userPicture: user.imageUrl || "",
+      });
+    }
+
     let dbUser = await db.user.findUnique({
       where: { id: user.id },
     });
 
     if (!dbUser) {
-      // Create user in database if not exists
       dbUser = await db.user.create({
         data: {
           id: user.id,
@@ -70,7 +82,6 @@ export const upsertStore = async (store: Store): Promise<UpsertStoreResult> => {
       });
     }
 
-    // Check if store with same name, email,url, or phone number already exists
     const existingStore = await db.store.findFirst({
       where: {
         AND: [
@@ -91,7 +102,6 @@ export const upsertStore = async (store: Store): Promise<UpsertStoreResult> => {
       },
     });
 
-    // If a store with same name, email, or phone number already exists, throw an error
     if (existingStore) {
       let errorMessage = "";
       if (existingStore.name === store.name) {
@@ -106,7 +116,6 @@ export const upsertStore = async (store: Store): Promise<UpsertStoreResult> => {
       return { error: errorMessage };
     }
 
-    // Upsert store details into the database
     const storeDetails = await db.store.upsert({
       where: {
         id: store.id,
@@ -131,18 +140,17 @@ export const upsertStore = async (store: Store): Promise<UpsertStoreResult> => {
   }
 };
 
-// Function: getStoreDefaultShippingDetails
-// Description: Fetches the default shipping details for a store based on the store URL.
-// Parameters:
-//   - storeUrl: The URL of the store to fetch default shipping details for.
-// Returns: An object containing default shipping details, including shipping service, fees, delivery times, and return policy.
 export const getStoreDefaultShippingDetails = async (storeUrl: string) => {
   try {
-    // Ensure the store URL is provided
     if (!storeUrl) throw new Error("Store URL is required.");
     const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
 
-    // Fetch the store and its default shipping details
+    if (isConvexEnabled()) {
+      return await convexQuery(api.stores.getStoreDefaultShippingDetails, {
+        storeUrl: normalizedStoreUrl,
+      });
+    }
+
     const store = await db.store.findFirst({
       where: {
         url: {
@@ -162,58 +170,47 @@ export const getStoreDefaultShippingDetails = async (storeUrl: string) => {
       },
     });
 
-    // Throw an error if the store is not found
     if (!store) throw new Error("Store not found.");
 
     return store;
   } catch (error) {
-    // Log and re-throw any errors
     console.log(error);
     throw error;
   }
 };
 
-// Function: updateStoreDefaultShippingDetails
-// Description: Updates the default shipping details for a store based on the store URL.
-// Parameters:
-//   - storeUrl: The URL of the store to update.
-//   - details: An object containing the new shipping details (shipping service, fees, delivery times, and return policy).
-// Returns: The updated store object with the new default shipping details.
 export const updateStoreDefaultShippingDetails = async (
   storeUrl: string,
   details: StoreDefaultShippingType
 ) => {
   try {
-    // Get current user
     const user = await currentUser();
-
-    // Ensure user is authenticated
     if (!user) throw new Error("Unauthenticated.");
-
-    // Verify seller permission
-    // if (user.privateMetadata.role !== "SELLER")
-    //   throw new Error(
-    //     "Unauthorized Access: Seller Privileges Required for Entry."
-    //   );
 
     await ensureSellerSubscription(user.id);
 
-    // Ensure the store URL is provided
     if (!storeUrl) throw new Error("Store URL is required.");
     const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
 
-    // Ensure at least one detail is provided for update
     if (!details) {
       throw new Error("No shipping details provided to update.");
     }
-    // Check DB user for role as fallback
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.stores.updateStoreDefaultShippingDetails, {
+        storeUrl: normalizedStoreUrl,
+        details,
+        userId: user.id,
+        isAdmin: user.privateMetadata?.role === "ADMIN",
+      });
+    }
+
     const dbUser = await db.user.findUnique({
       where: { id: user.id },
       select: { role: true },
     });
     const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
 
-    // Make sure seller is updating their own store
     const check_ownership = await db.store.findFirst({
       where: {
         url: {
@@ -231,8 +228,6 @@ export const updateStoreDefaultShippingDetails = async (
         "Make sure you have the permissions to update this store"
       );
 
-    // Find and update the store based on storeUrl
-    // We first find the ID to ensure we update the correct record regardless of URL casing
     const storeToUpdate = await db.store.findFirst({
       where: {
         url: {
@@ -254,47 +249,35 @@ export const updateStoreDefaultShippingDetails = async (
 
     return updatedStore;
   } catch (error) {
-    // Log and re-throw any errors
     console.log(error);
     throw error;
   }
 };
 
-/**
- * Function: getStoreShippingRates
- * Description: Retrieves all countries and their shipping rates for a specific store.
- *              If a country does not have a shipping rate, it is still included in the result with a null shippingRate.
- * Permission Level: Public
- * Returns: Array of objects where each object contains a country and its associated shippingRate, sorted by country name.
- */
 export const getStoreShippingRates = async (storeUrl: string) => {
   try {
-    // Get current user
     const user = await currentUser();
-
-    // Ensure user is authenticated
     if (!user) throw new Error("Unauthenticated.");
-
-    // Verify seller permission
-    // if (user.privateMetadata.role !== "SELLER")
-    //   throw new Error(
-    //     "Unauthorized Access: Seller Privileges Required for Entry."
-    //   );
 
     await ensureSellerSubscription(user.id);
 
-    // Ensure the store URL is provided
     if (!storeUrl) throw new Error("Store URL is required.");
     const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
 
-    // Check DB user for role as fallback
+    if (isConvexEnabled()) {
+      return await convexQuery(api.stores.getStoreShippingRates, {
+        storeUrl: normalizedStoreUrl,
+        userId: user.id,
+        isAdmin: user.privateMetadata?.role === "ADMIN",
+      });
+    }
+
     const dbUserRole = await db.user.findUnique({
       where: { id: user.id },
       select: { role: true },
     });
     const isAdminUser = user.privateMetadata?.role === "ADMIN" || dbUserRole?.role === "ADMIN";
 
-    // Make sure seller is updating their own store
     const check_ownership = await db.store.findFirst({
       where: {
         url: {
@@ -312,7 +295,6 @@ export const getStoreShippingRates = async (storeUrl: string) => {
         "Make sure you have the permissions to update this store"
       );
 
-    // Get store details
     const store = await db.store.findFirst({
       where: {
         url: {
@@ -327,32 +309,33 @@ export const getStoreShippingRates = async (storeUrl: string) => {
 
     if (!store) throw new Error("Store could not be found.");
 
-    // Retrieve all countries
     const countries = await db.country.findMany({
       orderBy: {
         name: "asc",
       },
     });
 
-    // Retrieve all shipping rates for the specified store
     const shippingRates = await db.shippingRate.findMany({
       where: {
         storeId: store.id,
       },
     });
 
-    // Create a map for quick lookup of shipping rates by country ID
     const rateMap = new Map();
     shippingRates.forEach((rate) => {
       rateMap.set(rate.countryId, rate);
     });
 
-    // Map countries to their shipping rates
     const result = countries.map((country) => ({
       countryId: country.id,
       countryName: country.name,
       shippingRate: rateMap.get(country.id) || null,
     }));
+
+    // Ensure South Africa is first as the main country
+    result.sort((a, b) =>
+      a.countryName === "South Africa" ? -1 : b.countryName === "South Africa" ? 1 : a.countryName.localeCompare(b.countryName)
+    );
 
     return result;
   } catch (error) {
@@ -361,41 +344,44 @@ export const getStoreShippingRates = async (storeUrl: string) => {
   }
 };
 
-// Function: upsertShippingRate
-// Description: Upserts a shipping rate for a specific country, updating if it exists or creating a new one if not.
-// Permission Level: Seller only
-// Parameters:
-//   - storeUrl: Url of the store you are trying to update.
-//   - shippingRate: ShippingRate object containing the details of the shipping rate to be upserted.
-// Returns: Updated or newly created shipping rate details.
 export const upsertShippingRate = async (
   storeUrl: string,
   shippingRate: ShippingRate
 ) => {
   try {
-    // Get current user
     const user = await currentUser();
-
-    // Ensure user is authenticated
     if (!user) throw new Error("Unauthenticated.");
-
-    // Verify seller permission
-    // if (user.privateMetadata.role !== "SELLER")
-    //   throw new Error(
-    //     "Unauthorized Access: Seller Privileges Required for Entry."
-    //   );
 
     await ensureSellerSubscription(user.id);
 
-    // Check DB user for role as fallback
+    const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.stores.upsertShippingRate, {
+        storeUrl: normalizedStoreUrl,
+        shippingRate: {
+          id: shippingRate.id,
+          shippingService: shippingRate.shippingService,
+          shippingFeePerItem: shippingRate.shippingFeePerItem,
+          shippingFeeForAdditionalItem: shippingRate.shippingFeeForAdditionalItem,
+          shippingFeePerKg: shippingRate.shippingFeePerKg,
+          shippingFeeFixed: shippingRate.shippingFeeFixed,
+          deliveryTimeMin: shippingRate.deliveryTimeMin,
+          deliveryTimeMax: shippingRate.deliveryTimeMax,
+          returnPolicy: shippingRate.returnPolicy,
+          countryId: shippingRate.countryId,
+        },
+        userId: user.id,
+        isAdmin: user.privateMetadata?.role === "ADMIN",
+      });
+    }
+
     const dbUser = await db.user.findUnique({
       where: { id: user.id },
       select: { role: true },
     });
     const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
-    const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
 
-    // Make sure seller is updating their own store
     const check_ownership = await db.store.findFirst({
       where: {
         url: {
@@ -413,14 +399,10 @@ export const upsertShippingRate = async (
         "Make sure you have the permissions to update this store"
       );
 
-    // Ensure shipping rate data is provided
     if (!shippingRate) throw new Error("Please provide shipping rate data.");
-
-    // Ensure countryId is provided
     if (!shippingRate.countryId)
       throw new Error("Please provide a valid country ID.");
 
-    // Get store id
     const store = await db.store.findFirst({
       where: {
         url: {
@@ -431,7 +413,6 @@ export const upsertShippingRate = async (
     });
     if (!store) throw new Error("Please provide a valid store URL.");
 
-    // Upsert the shipping rate into the database
     const shippingRateDetails = await db.shippingRate.upsert({
       where: {
         id: shippingRate.id,
@@ -442,37 +423,28 @@ export const upsertShippingRate = async (
 
     return shippingRateDetails;
   } catch (error) {
-    // Log and re-throw any errors
     console.log(error);
     throw error;
   }
 };
 
-/**
- * @name getStoreOrders
- * @description - Retrieves all orders for a specific store.
- *              - Returns order that include items, order details.
- * @access User
- * @param storeUrl - The url of the store whose order groups are being retrieved.
- * @returns {Array} - Array of order groups, including items.
- */
 export const getStoreOrders = async (storeUrl: string) => {
   try {
-    // Retrieve current user
     const user = await currentUser();
-
-    // Check if user is authenticated
     if (!user) throw new Error("Unauthenticated.");
-
-    // Verify seller permission
-    // if (user.privateMetadata.role !== "SELLER")
-    //   throw new Error(
-    //     "Unauthorized Access: Seller Privileges Required for Entry."
-    //   );
 
     await ensureSellerSubscription(user.id);
 
     const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
+
+    if (isConvexEnabled()) {
+      return await convexQuery(api.stores.getStoreOrders, {
+        storeUrl: normalizedStoreUrl,
+        userId: user.id,
+        isAdmin: user.privateMetadata?.role === "ADMIN",
+      });
+    }
+
     const store = (await db.store.findFirst({
       where: {
         url: {
@@ -485,22 +457,19 @@ export const getStoreOrders = async (storeUrl: string) => {
       },
     })) as (Store & { members: { id: string }[] }) | null;
 
-    // Ensure store existence
     if (!store) throw new Error("Store not found.");
 
-    // Verify ownership or membership
     const isMember = store.members.some((m) => m.id === user.id);
     const dbUser = await db.user.findUnique({
       where: { id: user.id },
       select: { role: true },
     });
     const isAdmin = user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
-    
+
     if (user.id !== store.userId && !isMember && !isAdmin) {
       throw new Error("You don't have persmission to access this store.");
     }
 
-    // Retrieve order groups for the specified store and user
     const orders = await db.orderGroup.findMany({
       where: {
         storeId: store.id,
@@ -511,7 +480,6 @@ export const getStoreOrders = async (storeUrl: string) => {
         order: {
           select: {
             paymentStatus: true,
-
             shippingAddress: {
               include: {
                 country: true,
@@ -538,23 +506,27 @@ export const getStoreOrders = async (storeUrl: string) => {
 };
 
 export const applySeller = async (store: StoreType) => {
-  console.log("store", store);
   try {
-    // Get current user
     const user = await currentUser();
-
-    // Ensure user is authenticated
     if (!user) throw new Error("Unauthenticated.");
 
     const primaryEmail = user.emailAddresses[0]?.emailAddress || "";
 
-    // Ensure user exists in database (sync from Clerk if needed)
+    if (isConvexEnabled()) {
+      return await convexMutation(api.stores.applySeller, {
+        store,
+        userId: user.id,
+        userName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",
+        userEmail: primaryEmail,
+        userPicture: user.imageUrl || "",
+      });
+    }
+
     let dbUser = await db.user.findUnique({
       where: { id: user.id },
     });
 
     if (!dbUser) {
-      // If a user already exists with this email, reuse/update that record
       const existingByEmail = primaryEmail
         ? await db.user.findUnique({ where: { email: primaryEmail } })
         : null;
@@ -592,10 +564,8 @@ export const applySeller = async (store: StoreType) => {
       }
     }
 
-    // Ensure store data is provided
     if (!store) throw new Error("Please provide store data.");
 
-    // Save or update draft application instead of creating store immediately
     await db.storeApplication.upsert({
       where: { userId: user.id },
       create: {
@@ -607,7 +577,6 @@ export const applySeller = async (store: StoreType) => {
       },
     });
 
-    // Check if store with same name, email,url, or phone number already exists
     const existingStore = await db.store.findFirst({
       where: {
         AND: [
@@ -623,7 +592,6 @@ export const applySeller = async (store: StoreType) => {
       },
     });
 
-    // If a store with same name, email, or phone number already exists, throw an error
     if (existingStore) {
       let errorMessage = "";
       if (existingStore.name === store.name) {
@@ -638,7 +606,6 @@ export const applySeller = async (store: StoreType) => {
       throw new Error(errorMessage);
     }
 
-    // Store creation is handled after successful PayFast trial payment
     return { id: "draft", status: "PENDING" } as any;
   } catch (error) {
     console.log(error);
@@ -646,27 +613,21 @@ export const applySeller = async (store: StoreType) => {
   }
 };
 
-// Function: getAllStores
-// Description: Retrieves all stores from the database.
-// Permission Level: Admin only
-// Parameters: None
-// Returns: An array of store details.
 export const getAllStores = async () => {
   try {
-    // Get current user
     const user = await currentUser();
-
-    // Ensure user is authenticated
     if (!user) throw new Error("Unauthenticated.");
 
-    // Verify admin permission
     if (user.privateMetadata.role !== "ADMIN") {
       throw new Error(
         "Unauthorized Access: Admin Privileges Required to View Stores."
       );
     }
 
-    // Fetch all stores from the database
+    if (isConvexEnabled()) {
+      return await convexQuery(api.stores.getAllStores, {});
+    }
+
     const stores = await db.store.findMany({
       include: {
         user: true,
@@ -677,7 +638,6 @@ export const getAllStores = async () => {
     });
     return stores;
   } catch (error) {
-    // Log and re-throw any errors
     console.log(error);
     throw error;
   }
@@ -687,17 +647,20 @@ export const updateStoreStatus = async (
   storeId: string,
   status: StoreStatus
 ) => {
-  // Retrieve current user
   const user = await currentUser();
-
-  // Check if user is authenticated
   if (!user) throw new Error("Unauthenticated.");
 
-  // Verify admin permission
   if (user.privateMetadata.role !== "ADMIN")
     throw new Error(
       "Unauthorized Access: Admin Privileges Required for Entry."
     );
+
+  if (isConvexEnabled()) {
+    return await convexMutation(api.stores.updateStoreStatus, {
+      storeId,
+      status,
+    });
+  }
 
   const store = await db.store.findUnique({
     where: {
@@ -705,7 +668,6 @@ export const updateStoreStatus = async (
     },
   });
 
-  // Verify seller ownership
   if (!store) {
     throw new Error("Store not found !");
   }
@@ -713,14 +675,13 @@ export const updateStoreStatus = async (
   if (status === "ACTIVE") {
     try {
       await ensureSellerSubscription(store.userId);
-    } catch (error) {
+    } catch {
       throw new Error(
         "Store owner must activate a subscription before approval."
       );
     }
   }
 
-  // Retrieve the order to be updated
   const updatedStore = await db.store.update({
     where: {
       id: storeId,
@@ -730,7 +691,6 @@ export const updateStoreStatus = async (
     },
   });
 
-  // Update the user role
   if (store.status === "PENDING" && updatedStore.status === "ACTIVE") {
     await db.user.update({
       where: {
@@ -745,30 +705,22 @@ export const updateStoreStatus = async (
   return updatedStore.status;
 };
 
-// Function: deleteStore
-// Description: Permanently deletes a store and all related data from the database.
-// Permission Level: Admin only
-// Parameters:
-//   - storeId: The ID of the store to be deleted.
-// Returns: Response indicating success or failure of the deletion operation.
 export const deleteStore = async (storeId: string) => {
   try {
-    // Get current user
     const user = await currentUser();
-
-    // Check if user is authenticated
     if (!user) throw new Error("Unauthenticated.");
 
-    // Verify admin permission
     if (user.privateMetadata.role !== "ADMIN")
       throw new Error(
         "Unauthorized Access: Admin Privileges Required for Entry."
       );
 
-    // Ensure store ID is provided
     if (!storeId) throw new Error("Please provide store ID.");
 
-    // Verify store exists
+    if (isConvexEnabled()) {
+      return await convexMutation(api.stores.deleteStore, { storeId });
+    }
+
     const store = await db.store.findUnique({
       where: { id: storeId },
       include: {
@@ -780,114 +732,91 @@ export const deleteStore = async (storeId: string) => {
 
     if (!store) throw new Error("Store not found.");
 
-    // Use a transaction to ensure all deletions succeed or none
     const response = await db.$transaction(async (tx) => {
-      // 1. Delete all product-related data first
       for (const product of store.products) {
-        // Delete product variants and their related data
         const variants = await tx.productVariant.findMany({
           where: { productId: product.id },
           select: { id: true },
         });
 
         for (const variant of variants) {
-          // Delete sizes
           await tx.size.deleteMany({
             where: { productVariantId: variant.id },
           });
 
-          // Delete images
           await tx.productVariantImage.deleteMany({
             where: { productVariantId: variant.id },
           });
 
-          // Delete colors
           await tx.color.deleteMany({
             where: { productVariantId: variant.id },
           });
 
-          // Delete specs
           await tx.spec.deleteMany({
             where: { variantId: variant.id },
           });
 
-          // Delete wishlist entries for this variant
           await tx.wishlist.deleteMany({
             where: { variantId: variant.id },
           });
         }
 
-        // Delete all variants
         await tx.productVariant.deleteMany({
           where: { productId: product.id },
         });
 
-        // Delete product questions
         await tx.question.deleteMany({
           where: { productId: product.id },
         });
 
-        // Delete product reviews
         await tx.review.deleteMany({
           where: { productId: product.id },
         });
 
-        // Delete product specs
         await tx.spec.deleteMany({
           where: { productId: product.id },
         });
 
-        // Delete product wishlist entries
         await tx.wishlist.deleteMany({
           where: { productId: product.id },
         });
 
-        // Delete free shipping config if exists
         await tx.freeShipping.deleteMany({
           where: { productId: product.id },
         });
       }
 
-      // Delete all products
       await tx.product.deleteMany({
         where: { storeId },
       });
 
-      // 2. Delete order-related data
-      // First get all order groups for this store
       const orderGroups = await tx.orderGroup.findMany({
         where: { storeId },
         select: { id: true },
       });
 
-      // Delete order items
       for (const group of orderGroups) {
         await tx.orderItem.deleteMany({
           where: { orderGroupId: group.id },
         });
       }
 
-      // Delete order groups
       await tx.orderGroup.deleteMany({
         where: { storeId },
       });
 
-      // 3. Delete cart items for this store
       await tx.cartItem.deleteMany({
         where: { storeId },
       });
 
-      // 4. Delete coupons for this store
       await tx.coupon.deleteMany({
         where: { storeId },
       });
 
-      // 5. Delete shipping rates for this store
       await tx.shippingRate.deleteMany({
         where: { storeId },
       });
 
-      // 6. Finally, delete the store itself
       const deletedStore = await tx.store.delete({
         where: { id: storeId },
       });
@@ -895,7 +824,6 @@ export const deleteStore = async (storeId: string) => {
       return deletedStore;
     });
 
-    console.log("Store and all related data deleted successfully:", storeId);
     return response;
   } catch (error) {
     console.error("Error deleting store:", error);
@@ -905,7 +833,13 @@ export const deleteStore = async (storeId: string) => {
 
 export const getStorePageDetails = async (storeUrl: string) => {
   const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
-  // Fetch the store details from the database
+
+  if (isConvexEnabled()) {
+    return await convexQuery(api.stores.getStorePageDetails, {
+      storeUrl: normalizedStoreUrl,
+    });
+  }
+
   const store = await db.store.findFirst({
     where: {
       url: {
@@ -925,7 +859,6 @@ export const getStorePageDetails = async (storeUrl: string) => {
     },
   });
 
-  // Handle case where the store is not found
   if (!store) {
     throw new Error(`Store with URL "${storeUrl}" not found.`);
   }
@@ -938,7 +871,15 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
     if (!user) throw new Error("Unauthenticated.");
     const normalizedStoreUrl = normalizeStoreUrl(storeUrl);
 
-    // Check DB user for role as fallback
+    if (isConvexEnabled()) {
+      return await convexQuery(api.stores.getStoreDashboardStats, {
+        storeUrl: normalizedStoreUrl,
+        days,
+        userId: user.id,
+        isAdmin: user.privateMetadata?.role === "ADMIN",
+      });
+    }
+
     const dbUser = await db.user.findUnique({
       where: { id: user.id },
       select: { role: true },
@@ -959,7 +900,6 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
 
     if (!store) throw new Error("Store not found.");
 
-    // Check permissions
     const isOwner = store.userId === user.id;
     const isMember = store.members.some((member) => member.id === user.id);
 
@@ -967,7 +907,6 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
       throw new Error("Unauthorized Access: You do not have permission to view this store dashboard.");
     }
 
-    // 1. Total Revenue (from paid orders)
     const revenueResult = await db.orderGroup.aggregate({
       where: {
         storeId: store.id,
@@ -981,21 +920,18 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
     });
     const totalRevenue = revenueResult._sum.total || 0;
 
-    // 2. Total Orders
     const totalOrders = await db.orderGroup.count({
       where: {
         storeId: store.id,
       },
     });
 
-    // 3. Total Products
     const totalProducts = await db.product.count({
       where: {
         storeId: store.id,
       },
     });
 
-    // 4. Recent Orders
     const recentOrders = await db.orderGroup.findMany({
       where: {
         storeId: store.id,
@@ -1021,7 +957,6 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
       take: 5,
     });
 
-    // 5. Graph Data (configurable days)
     const daysAgo = new Date();
     daysAgo.setDate(daysAgo.getDate() - days);
 
@@ -1037,18 +972,16 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
       },
     });
 
-    // Aggregate by date
     const graphDataMap = new Map<string, { total: number; orders: number }>();
     ordersInRange.forEach((order) => {
       const date = order.createdAt.toISOString().split("T")[0];
       const current = graphDataMap.get(date) || { total: 0, orders: 0 };
-      graphDataMap.set(date, { 
+      graphDataMap.set(date, {
         total: current.total + order.total,
-        orders: current.orders + 1
+        orders: current.orders + 1,
       });
     });
 
-    // Fill in missing days
     const graphData = [];
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
@@ -1062,21 +995,18 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
       });
     }
 
-    // 6. Additional Analytics
     const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-    
-    // Order status breakdown
+
     const ordersByStatus = await db.orderGroup.groupBy({
-      by: ['status'],
+      by: ["status"],
       where: {
         storeId: store.id,
       },
       _count: true,
     });
 
-    // Revenue growth comparison (current vs previous period)
     const previousPeriodStart = new Date();
-    previousPeriodStart.setDate(previousPeriodStart.getDate() - (days * 2));
+    previousPeriodStart.setDate(previousPeriodStart.getDate() - days * 2);
     const previousPeriodEnd = new Date();
     previousPeriodEnd.setDate(previousPeriodEnd.getDate() - days);
 
@@ -1089,9 +1019,12 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
       _sum: { total: true },
     });
 
-    const revenueGrowth = previousRevenue._sum.total && previousRevenue._sum.total > 0
-      ? ((totalRevenue - (previousRevenue._sum.total || 0)) / (previousRevenue._sum.total || 1)) * 100
-      : 0;
+    const revenueGrowth =
+      previousRevenue._sum.total && previousRevenue._sum.total > 0
+        ? ((totalRevenue - (previousRevenue._sum.total || 0)) /
+            (previousRevenue._sum.total || 1)) *
+          100
+        : 0;
 
     return {
       totalRevenue,
@@ -1100,7 +1033,10 @@ export const getStoreDashboardStats = async (storeUrl: string, days: number = 30
       recentOrders,
       graphData,
       avgOrderValue,
-      ordersByStatus: ordersByStatus.map(s => ({ status: s.status, count: s._count })),
+      ordersByStatus: ordersByStatus.map((s) => ({
+        status: s.status,
+        count: s._count,
+      })),
       revenueGrowth,
     };
   } catch (error) {

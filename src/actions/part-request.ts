@@ -1,7 +1,7 @@
-
 "use server";
 
 import { db } from "@/lib/db";
+import { api, convexMutation, isConvexEnabled } from "@/lib/convex";
 
 interface PartRequestInput {
   partName: string;
@@ -19,6 +19,16 @@ export async function submitPartRequest({
   contactInfo,
 }: PartRequestInput) {
   try {
+    if (isConvexEnabled()) {
+      return await convexMutation(api.partRequests.submitPartRequest, {
+        partName,
+        partNumber: partNumber || undefined,
+        vehicleDetails,
+        userName,
+        contactInfo,
+      });
+    }
+
     await db.partRequest.create({
       data: {
         partName,

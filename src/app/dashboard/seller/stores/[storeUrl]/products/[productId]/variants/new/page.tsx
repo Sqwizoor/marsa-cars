@@ -22,11 +22,10 @@ export default async function SellerNewProductVariantPage({
   const offerTags = await getAllOfferTags();
   const product = await getProductMainInfo(productId);
   if (!product) return null;
-  const countries = await db.country.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
+  const dbCountries = await db.country.findMany();
+  const countries = dbCountries.sort((a, b) =>
+    a.code === "ZA" ? -1 : b.code === "ZA" ? 1 : a.name.localeCompare(b.name)
+  );
   return (
     <div>
       <ProductDetails

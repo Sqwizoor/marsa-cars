@@ -11,6 +11,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 //toast imports
 import { Toaster } from "@/components/ui/toaster";
 import ModalProvider from "./providers/modal-provider";
+import ConvexClientProvider from "./providers/convex-client-provider";
 import { PostHogIdentifier } from "@/components/analytics/PostHogIdentifier";
 
 // Fonts
@@ -49,19 +50,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${barlow.variable} ${inter.variable} antialiased`}
         >
-      <ThemeProvider
+          <ThemeProvider
             attribute="class"
             defaultTheme="light"
             enableSystem={false}
             disableTransitionOnChange
           >
             <PostHogIdentifier />
-            <ModalProvider>{children}</ModalProvider>
+            <ConvexClientProvider>
+              <ModalProvider>{children}</ModalProvider>
+            </ConvexClientProvider>
             <Toaster />
           </ThemeProvider>
 
           {/* <p> Opse not active</p> */}
-      
         </body>
       </html>
     </ClerkProvider>

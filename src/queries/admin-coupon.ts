@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { api, convexMutation, convexQuery, isConvexEnabled } from "@/lib/convex";
 import { currentUser } from "@clerk/nextjs/server";
 
 /**
@@ -12,6 +13,10 @@ export const getAllCoupons = async () => {
 
   if (!user || user.privateMetadata.role !== "ADMIN") {
     throw new Error("Unauthorized: Admin access required");
+  }
+
+  if (isConvexEnabled()) {
+    return await convexQuery(api.coupons.getAllCoupons, {});
   }
 
   const coupons = await db.coupon.findMany({
@@ -47,6 +52,10 @@ export const adminDeleteCoupon = async (couponId: string) => {
 
   if (!user || user.privateMetadata.role !== "ADMIN") {
     throw new Error("Unauthorized: Admin access required");
+  }
+
+  if (isConvexEnabled()) {
+    return await convexMutation(api.coupons.adminDeleteCoupon, { couponId });
   }
 
   const response = await db.coupon.delete({

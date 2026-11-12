@@ -7,7 +7,9 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "convex:dev": "convex dev",
+    "convex:migrate": "npx tsx scripts/migrate-neon-to-convex.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.12.6",
@@ -57,6 +59,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "colorthief": "^2.6.0",
+    "convex": "^1.48.0",
     "cookies-next": "^5.1.0",
     "date-fns": "3.6.0",
     "dompurify": "^3.2.4",

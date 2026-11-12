@@ -17,11 +17,10 @@ export default async function SellerNewProductPage({
   
   const categories = await getAllCategories();
   const offerTags = await getAllOfferTags();
-  const countries = await db.country.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
+  const dbCountries = await db.country.findMany();
+  const countries = dbCountries.sort((a, b) =>
+    a.code === "ZA" ? -1 : b.code === "ZA" ? 1 : a.name.localeCompare(b.name)
+  );
 
   return (
     <div className="w-full">

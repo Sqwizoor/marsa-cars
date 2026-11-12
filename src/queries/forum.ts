@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { api, convexMutation, convexQuery, isConvexEnabled } from "@/lib/convex";
 import { revalidatePath } from "next/cache";
 import {
   ThreadStatus,
@@ -17,6 +18,10 @@ import {
 
 export async function getForumCategories() {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getForumCategories, {});
+    }
+
     const categories = await db.forumCategory.findMany({
       where: { isActive: true },
       include: {
@@ -44,6 +49,10 @@ export async function getForumCategories() {
 
 export async function getCategoryBySlug(slug: string) {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getCategoryBySlug, { slug });
+    }
+
     const category = await db.forumCategory.findUnique({
       where: { slug },
       include: {
@@ -65,6 +74,10 @@ export async function getCategoryBySlug(slug: string) {
 
 export async function getSubforumBySlug(slug: string) {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getSubforumBySlug, { slug });
+    }
+
     const subforum = await db.forumSubforum.findUnique({
       where: { slug },
       include: {
@@ -103,6 +116,19 @@ export async function getThreads({
   tags?: string[];
 }) {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getThreads, {
+        categoryId,
+        subforumId,
+        page,
+        limit,
+        sortBy,
+        order,
+        searchQuery,
+        tags,
+      });
+    }
+
     const where: Prisma.ForumThreadWhereInput = {
       ...(categoryId && { categoryId }),
       ...(subforumId && { subforumId }),
@@ -112,11 +138,12 @@ export async function getThreads({
           { content: { contains: searchQuery, mode: "insensitive" } },
         ],
       }),
-      ...(tags && tags.length > 0 && {
-        tags: {
-          hasSome: tags,
-        },
-      }),
+      ...(tags &&
+        tags.length > 0 && {
+          tags: {
+            hasSome: tags,
+          },
+        }),
     };
 
     const [threads, total] = await Promise.all([
@@ -154,10 +181,7 @@ export async function getThreads({
             select: { posts: true },
           },
         },
-        orderBy: [
-          { isPinned: "desc" },
-          { [sortBy]: order },
-        ],
+        orderBy: [{ isPinned: "desc" }, { [sortBy]: order }],
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -178,7 +202,10 @@ export async function getThreads({
 
 export async function getThreadBySlug(slug: string) {
   try {
-    // Increment views
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getThreadBySlug, { slug });
+    }
+
     await db.forumThread.update({
       where: { slug },
       data: { views: { increment: 1 } },
@@ -227,15 +254,28 @@ export async function createThread({
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "") + 
-      "-" + 
+    if (isConvexEnabled()) {
+      const res = await convexMutation(api.forum.createThread, {
+        userId,
+        title,
+        content,
+        categoryId,
+        subforumId,
+        tags,
+      });
+      revalidatePath("/forum");
+      return res;
+    }
+
+    const slug =
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "") +
+      "-" +
       Date.now().toString(36);
 
     const thread = await db.$transaction(async (tx) => {
-      // Create thread
       const newThread = await tx.forumThread.create({
         data: {
           title,
@@ -259,13 +299,12 @@ export async function createThread({
         },
       });
 
-      // Update user stats
       await tx.forumUserStats.upsert({
         where: { userId },
         create: {
           userId,
           threadCount: 1,
-          reputation: 5, // Bonus for creating thread
+          reputation: 5,
         },
         update: {
           threadCount: { increment: 1 },
@@ -273,7 +312,6 @@ export async function createThread({
         },
       });
 
-      // Update subforum stats if applicable
       if (subforumId) {
         await tx.forumSubforum.update({
           where: { id: subforumId },
@@ -307,6 +345,18 @@ export async function updateThread({
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
+    if (isConvexEnabled()) {
+      const res = await convexMutation(api.forum.updateThread, {
+        userId,
+        threadId,
+        title,
+        content,
+        tags,
+      });
+      revalidatePath(`/forum`);
+      return res;
+    }
+
     const thread = await db.forumThread.findUnique({
       where: { id: threadId },
       select: { authorId: true, slug: true },
@@ -338,6 +388,15 @@ export async function deleteThread(threadId: string) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
+    if (isConvexEnabled()) {
+      const res = await convexMutation(api.forum.deleteThread, {
+        userId,
+        threadId,
+      });
+      revalidatePath("/forum");
+      return res;
+    }
+
     const thread = await db.forumThread.findUnique({
       where: { id: threadId },
       select: { authorId: true, subforumId: true },
@@ -348,18 +407,15 @@ export async function deleteThread(threadId: string) {
     }
 
     await db.$transaction(async (tx) => {
-      // Delete thread and all related data (cascading)
       await tx.forumThread.delete({
         where: { id: threadId },
       });
 
-      // Update user stats
       await tx.forumUserStats.update({
         where: { userId },
         data: { threadCount: { decrement: 1 } },
       });
 
-      // Update subforum stats if applicable
       if (thread.subforumId) {
         await tx.forumSubforum.update({
           where: { id: thread.subforumId },
@@ -388,11 +444,15 @@ export async function getPosts({
   limit?: number;
 }) {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getPosts, { threadId, page, limit });
+    }
+
     const [posts, total] = await Promise.all([
       db.forumPost.findMany({
         where: {
           threadId,
-          parentPostId: null, // Only get top-level posts
+          parentPostId: null,
           status: PostStatus.ACTIVE,
         },
         include: {
@@ -436,10 +496,7 @@ export async function getPosts({
             select: { replies: true, reactions: true },
           },
         },
-        orderBy: [
-          { isAcceptedAnswer: "desc" },
-          { createdAt: "asc" },
-        ],
+        orderBy: [{ isAcceptedAnswer: "desc" }, { createdAt: "asc" }],
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -479,8 +536,18 @@ export async function createPost({
       return { success: false, error: "Unauthorized" };
     }
 
+    if (isConvexEnabled()) {
+      const res = await convexMutation(api.forum.createPost, {
+        userId,
+        threadId,
+        content,
+        parentPostId,
+      });
+      revalidatePath(`/forum/thread`);
+      return res;
+    }
+
     const post = await db.$transaction(async (tx) => {
-      // Check if thread is locked
       const thread = await tx.forumThread.findUnique({
         where: { id: threadId },
         select: { isLocked: true, subforumId: true },
@@ -490,7 +557,6 @@ export async function createPost({
         throw new Error("Thread is locked");
       }
 
-      // Create post
       const newPost = await tx.forumPost.create({
         data: {
           content,
@@ -510,7 +576,6 @@ export async function createPost({
         },
       });
 
-      // Update thread stats
       await tx.forumThread.update({
         where: { id: threadId },
         data: {
@@ -520,7 +585,6 @@ export async function createPost({
         },
       });
 
-      // Update parent post reply count if this is a reply
       if (parentPostId) {
         await tx.forumPost.update({
           where: { id: parentPostId },
@@ -528,13 +592,12 @@ export async function createPost({
         });
       }
 
-      // Update user stats
       await tx.forumUserStats.upsert({
         where: { userId },
         create: {
           userId,
           postCount: 1,
-          reputation: 2, // Bonus for posting
+          reputation: 2,
         },
         update: {
           postCount: { increment: 1 },
@@ -543,7 +606,6 @@ export async function createPost({
         },
       });
 
-      // Update subforum stats if applicable
       if (thread?.subforumId) {
         await tx.forumSubforum.update({
           where: { id: thread.subforumId },
@@ -576,6 +638,16 @@ export async function updatePost({
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
+    if (isConvexEnabled()) {
+      const res = await convexMutation(api.forum.updatePost, {
+        userId,
+        postId,
+        content,
+      });
+      revalidatePath(`/forum/thread`);
+      return res;
+    }
+
     const post = await db.forumPost.findUnique({
       where: { id: postId },
       select: { authorId: true, threadId: true },
@@ -607,6 +679,15 @@ export async function deletePost(postId: string) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
+    if (isConvexEnabled()) {
+      const res = await convexMutation(api.forum.deletePost, {
+        userId,
+        postId,
+      });
+      revalidatePath(`/forum/thread`);
+      return res;
+    }
+
     const post = await db.forumPost.findUnique({
       where: { id: postId },
       select: {
@@ -621,19 +702,16 @@ export async function deletePost(postId: string) {
     }
 
     await db.$transaction(async (tx) => {
-      // Soft delete the post
       await tx.forumPost.update({
         where: { id: postId },
         data: { status: PostStatus.DELETED },
       });
 
-      // Update thread stats
       await tx.forumThread.update({
         where: { id: post.threadId },
         data: { postCount: { decrement: 1 } },
       });
 
-      // Update parent post reply count if this is a reply
       if (post.parentPostId) {
         await tx.forumPost.update({
           where: { id: post.parentPostId },
@@ -641,7 +719,6 @@ export async function deletePost(postId: string) {
         });
       }
 
-      // Update user stats
       await tx.forumUserStats.update({
         where: { userId },
         data: { postCount: { decrement: 1 } },
@@ -669,6 +746,16 @@ export async function toggleReaction({
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
+    if (isConvexEnabled()) {
+      const res = await convexMutation(api.forum.toggleReaction, {
+        userId,
+        postId,
+        reactionType,
+      });
+      revalidatePath(`/forum/thread`);
+      return res;
+    }
+
     const existing = await db.forumReaction.findUnique({
       where: {
         userId_postId_type: {
@@ -680,7 +767,6 @@ export async function toggleReaction({
     });
 
     if (existing) {
-      // Remove reaction
       await db.$transaction(async (tx) => {
         await tx.forumReaction.delete({
           where: { id: existing.id },
@@ -695,7 +781,6 @@ export async function toggleReaction({
       revalidatePath(`/forum/thread`);
       return { success: true, action: "removed" };
     } else {
-      // Add reaction
       const result = await db.$transaction(async (tx) => {
         const reaction = await tx.forumReaction.create({
           data: {
@@ -710,7 +795,6 @@ export async function toggleReaction({
           data: { reactionCount: { increment: 1 } },
         });
 
-        // Award reputation if it's a helpful reaction
         if (reactionType === ReactionType.HELPFUL) {
           const post = await tx.forumPost.findUnique({
             where: { id: postId },
@@ -742,6 +826,10 @@ export async function toggleReaction({
 
 export async function getPostReactions(postId: string) {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getPostReactions, { postId });
+    }
+
     const reactions = await db.forumReaction.findMany({
       where: { postId },
       include: {
@@ -755,7 +843,6 @@ export async function getPostReactions(postId: string) {
       },
     });
 
-    // Group by type
     const grouped = reactions.reduce(
       (acc, reaction) => {
         if (!acc[reaction.type]) {
@@ -786,6 +873,14 @@ export async function toggleBookmark({
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.forum.toggleBookmark, {
+        userId,
+        threadId,
+        notes,
+      });
+    }
 
     const existing = await db.forumBookmark.findUnique({
       where: {
@@ -821,6 +916,10 @@ export async function toggleBookmark({
 
 export async function getUserBookmarks(userId: string) {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getUserBookmarks, { userId });
+    }
+
     const bookmarks = await db.forumBookmark.findMany({
       where: { userId },
       include: {
@@ -852,6 +951,10 @@ export async function getUserBookmarks(userId: string) {
 
 export async function getUserForumStats(userId: string) {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getUserForumStats, { userId });
+    }
+
     const stats = await db.forumUserStats.findUnique({
       where: { userId },
     });
@@ -865,6 +968,13 @@ export async function getUserForumStats(userId: string) {
 
 export async function getUserForumActivity(userId: string, limit = 10) {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getUserForumActivity, {
+        userId,
+        limit,
+      });
+    }
+
     const [threads, posts, badges] = await Promise.all([
       db.forumThread.findMany({
         where: { authorId: userId },
@@ -912,6 +1022,10 @@ export async function getUserForumActivity(userId: string, limit = 10) {
 
 export async function searchForum(query: string) {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.searchForum, { query });
+    }
+
     const [threads, posts] = await Promise.all([
       db.forumThread.findMany({
         where: {
@@ -984,6 +1098,16 @@ export async function reportContent({
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
+    if (isConvexEnabled()) {
+      return await convexMutation(api.forum.reportContent, {
+        userId,
+        threadId,
+        postId,
+        reason,
+        description,
+      });
+    }
+
     const report = await db.forumReport.create({
       data: {
         reporterId: userId,
@@ -1003,6 +1127,10 @@ export async function reportContent({
 
 export async function getPendingReports() {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getPendingReports, {});
+    }
+
     const reports = await db.forumReport.findMany({
       where: { status: ReportStatus.PENDING },
       include: {
@@ -1050,8 +1178,14 @@ export async function pinThread(threadId: string, isPinned: boolean) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    // Check if user is moderator or admin
-    // This should be enhanced with proper role checking
+    if (isConvexEnabled()) {
+      const res = await convexMutation(api.forum.pinThread, {
+        threadId,
+        isPinned,
+      });
+      revalidatePath("/forum");
+      return res;
+    }
 
     await db.forumThread.update({
       where: { id: threadId },
@@ -1071,6 +1205,15 @@ export async function lockThread(threadId: string, isLocked: boolean) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
+    if (isConvexEnabled()) {
+      const res = await convexMutation(api.forum.lockThread, {
+        threadId,
+        isLocked,
+      });
+      revalidatePath("/forum");
+      return res;
+    }
+
     await db.forumThread.update({
       where: { id: threadId },
       data: { isLocked },
@@ -1088,6 +1231,10 @@ export async function lockThread(threadId: string, isLocked: boolean) {
 
 export async function checkAndAwardBadges(userId: string) {
   try {
+    if (isConvexEnabled()) {
+      return;
+    }
+
     const stats = await db.forumUserStats.findUnique({
       where: { userId },
     });
@@ -1096,7 +1243,6 @@ export async function checkAndAwardBadges(userId: string) {
 
     const badges: { type: BadgeType; name: string; description: string }[] = [];
 
-    // Check for badges based on stats
     if (stats.postCount >= 1 && stats.postCount < 10) {
       badges.push({
         type: BadgeType.NEWBIE,
@@ -1133,7 +1279,6 @@ export async function checkAndAwardBadges(userId: string) {
       });
     }
 
-    // Award badges that don't exist yet
     for (const badge of badges) {
       const existing = await db.forumBadge.findFirst({
         where: {
@@ -1162,10 +1307,14 @@ export async function checkAndAwardBadges(userId: string) {
 
 export async function getTrendingThreads(limit = 10) {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getTrendingThreads, { limit });
+    }
+
     const threads = await db.forumThread.findMany({
       where: {
         createdAt: {
-          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
         },
       },
       include: {
@@ -1182,10 +1331,7 @@ export async function getTrendingThreads(limit = 10) {
           select: { posts: true },
         },
       },
-      orderBy: [
-        { views: "desc" },
-        { postCount: "desc" },
-      ],
+      orderBy: [{ views: "desc" }, { postCount: "desc" }],
       take: limit,
     });
 
@@ -1198,6 +1344,10 @@ export async function getTrendingThreads(limit = 10) {
 
 export async function getForumStats() {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.forum.getForumStats, {});
+    }
+
     const [totalThreads, totalPosts, totalUsers, recentThreads] =
       await Promise.all([
         db.forumThread.count(),

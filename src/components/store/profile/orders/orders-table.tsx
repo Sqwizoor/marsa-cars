@@ -148,11 +148,18 @@ export default function OrdersTable({
                         </td>
                         <td className="p-4">{formatCurrencyZAR(order.total)}</td>
                         <td className="p-4">
-                          <Link href={`/order/${order.id}`}>
-                            <span className="text-xs text-blue-primary cursor-pointer hover:underline">
-                              View
-                            </span>
-                          </Link>
+                          <div className="flex items-center gap-3">
+                            <Link href={`/order/${order.id}`}>
+                              <span className="text-xs text-blue-primary cursor-pointer hover:underline font-medium">
+                                View
+                              </span>
+                            </Link>
+                            <Link href={`/track-order?orderId=${order.id}`}>
+                              <span className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full cursor-pointer hover:bg-blue-100 font-semibold transition">
+                                Track
+                              </span>
+                            </Link>
+                          </div>
                         </td>
                       </tr>
                     );

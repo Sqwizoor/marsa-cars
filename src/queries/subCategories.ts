@@ -1,38 +1,31 @@
 "use server";
 
-// Clerk
 import { currentUser } from "@clerk/nextjs/server";
-
-// DB
 import { db } from "@/lib/db";
-
-// Prisma model
 import { SubCategory } from "@prisma/client";
+import { api, convexQuery, convexMutation, isConvexEnabled } from "@/lib/convex";
 
-// Function: upsertSubCategory
-// Description: Upserts a subCategory into the database, updating if it exists or creating a new one if not.
-// Permission Level: Admin only
-// Parameters:
-//   - SubCategory: subCategory object containing details of the subCategory to be upserted.
-// Returns: Updated or newly created subCategory details.
 export const upsertSubCategory = async (subCategory: SubCategory) => {
   try {
-    // Get current user
     const user = await currentUser();
-
-    // Ensure user is authenticated
     if (!user) throw new Error("Unauthenticated.");
-
-    // Verify admin permission
     if (user.privateMetadata.role !== "ADMIN")
       throw new Error(
         "Unauthorized Access: Admin Privileges Required for Entry."
       );
-
-    // Ensure SubCategory data is provided
     if (!subCategory) throw new Error("Please provide subCategory data.");
 
-    // Throw error if category with same name or URL already exists
+    if (isConvexEnabled()) {
+      return (await convexMutation(api.subCategories.upsertSubCategory, {
+        id: subCategory.id,
+        name: subCategory.name,
+        image: subCategory.image,
+        url: subCategory.url,
+        featured: subCategory.featured,
+        categoryId: subCategory.categoryId,
+      })) as any;
+    }
+
     const existingSubCategory = await db.subCategory.findFirst({
       where: {
         AND: [
@@ -48,7 +41,6 @@ export const upsertSubCategory = async (subCategory: SubCategory) => {
       },
     });
 
-    // Throw error if category with same name or URL already exists
     if (existingSubCategory) {
       let errorMessage = "";
       if (existingSubCategory.name === subCategory.name) {
@@ -59,7 +51,6 @@ export const upsertSubCategory = async (subCategory: SubCategory) => {
       throw new Error(errorMessage);
     }
 
-    // Upsert SubCategory into the database
     const subCategoryDetails = await db.subCategory.upsert({
       where: {
         id: subCategory.id,
@@ -69,18 +60,16 @@ export const upsertSubCategory = async (subCategory: SubCategory) => {
     });
     return subCategoryDetails;
   } catch (error) {
-    // Log and re-throw any errors
     console.log(error);
     throw error;
   }
 };
 
-// Function: getAllSubCategories
-// Description: Retrieves all subCategories from the database.
-// Permission Level: Public
-// Returns: Array of categories sorted by updatedAt date in descending order.
 export const getAllSubCategories = async () => {
-  // Retrieve all subCategories from the database
+  if (isConvexEnabled()) {
+    return (await convexQuery(api.subCategories.getAllSubCategories, {})) as any[];
+  }
+
   const subCategories = await db.subCategory.findMany({
     include: {
       category: true,
@@ -92,17 +81,15 @@ export const getAllSubCategories = async () => {
   return subCategories;
 };
 
-// Function: getSubCategory
-// Description: Retrieves a specific SubCategory from the database.
-// Access Level: Public
-// Parameters:
-//   - SubCategoryId: The ID of the SubCategory to be retrieved.
-// Returns: Details of the requested SubCategory.
 export const getSubCategory = async (subCategoryId: string) => {
-  // Ensure subCategory ID is provided
   if (!subCategoryId) throw new Error("Please provide suCategory ID.");
 
-  // Retrieve subCategory
+  if (isConvexEnabled()) {
+    return (await convexQuery(api.subCategories.getSubCategory, {
+      subCategoryId,
+    })) as any;
+  }
+
   const subCategory = await db.subCategory.findUnique({
     where: {
       id: subCategoryId,
@@ -111,29 +98,21 @@ export const getSubCategory = async (subCategoryId: string) => {
   return subCategory;
 };
 
-// Function: deleteSubCategory
-// Description: Deletes a SubCategory from the database.
-// Permission Level: Admin only
-// Parameters:
-//   - SubCategoryId: The ID of the SubCategory to be deleted.
-// Returns: Response indicating success or failure of the deletion operation.
 export const deleteSubCategory = async (subCategoryId: string) => {
-  // Get current user
   const user = await currentUser();
-
-  // Check if user is authenticated
   if (!user) throw new Error("Unauthenticated.");
-
-  // Verify admin permission
   if (user.privateMetadata.role !== "ADMIN")
     throw new Error(
       "Unauthorized Access: Admin Privileges Required for Entry."
     );
-
-  // Ensure subCategory ID is provided
   if (!subCategoryId) throw new Error("Please provide category ID.");
 
-  // Delete subCategory from the database
+  if (isConvexEnabled()) {
+    return (await convexMutation(api.subCategories.deleteSubCategory, {
+      subCategoryId,
+    })) as any;
+  }
+
   const response = await db.subCategory.delete({
     where: {
       id: subCategoryId,
@@ -142,32 +121,28 @@ export const deleteSubCategory = async (subCategoryId: string) => {
   return response;
 };
 
-// Function: getSubcategories
-// Description: Retrieves subcategories from the database, with options for limiting results and random selection.
-// Parameters:
-//   - limit: Number indicating the maximum number of subcategories to retrieve.
-//   - random: Boolean indicating whether to return random subcategories.
-// Returns: List of subcategories based on the provided options.
 export const getSubcategories = async (
   limit: number | null,
   random: boolean = false
 ): Promise<SubCategory[]> => {
-  // Define SortOrder enum
   enum SortOrder {
     asc = "asc",
     desc = "desc",
   }
   try {
-    // Define the query options
+    if (isConvexEnabled()) {
+      return (await convexQuery(api.subCategories.getSubcategories, {
+        limit: limit || undefined,
+        random,
+      })) as any[];
+    }
+
     const queryOptions = {
-      take: limit || undefined, // Use the provided limit or undefined for no limit
-  // When not random, order by newest first. If random is true we won't use orderBy.
-  orderBy: random ? undefined : { createdAt: SortOrder.desc }, // Use SortOrder for ordering
+      take: limit || undefined,
+      orderBy: random ? undefined : { createdAt: SortOrder.desc },
     };
 
-    // If random selection is required, use a raw query to randomize
     if (random) {
-      // Use Postgres-compatible random ordering and quote the mixed-case table name
       const subcategories = await db.$queryRaw<SubCategory[]>`
     SELECT * FROM "SubCategory"
     ORDER BY RANDOM()
@@ -175,12 +150,10 @@ export const getSubcategories = async (
     `;
       return subcategories;
     } else {
-      // Otherwise, fetch subcategories based on the defined query options
       const subcategories = await db.subCategory.findMany(queryOptions);
       return subcategories;
     }
   } catch (error) {
-    // Log and re-throw any errors
     console.error("Error fetching subcategories:", error);
     throw error;
   }

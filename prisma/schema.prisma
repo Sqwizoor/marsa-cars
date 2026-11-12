@@ -408,16 +408,17 @@ model Order {
   updatedAt         DateTime        @updatedAt
   shippingAddress   ShippingAddress @relation("ShippingAddressToOrder", fields: [shippingAddressId], references: [id])
   user              User            @relation("UserOrders", fields: [userId], references: [id])
-  groups            OrderGroup[]    @relation("OrderGroupToOrder")
-  paymentDetails    PaymentDetails? @relation("PaymentDetailsToOrder")
+  groups            OrderGroup[]       @relation("OrderGroupToOrder")
+  paymentDetails    PaymentDetails?    @relation("PaymentDetailsToOrder")
+  shipments         ShipmentTracking[] @relation("OrderToShipmentTracking")
 
   @@index([shippingAddressId])
   @@index([userId])
 }
 
 model OrderGroup {
-  id                  String      @id @default(uuid())
-  status              OrderStatus @default(Pending)
+  id                  String            @id @default(uuid())
+  status              OrderStatus       @default(Pending)
   shippingService     String
   shippingDeliveryMin Int
   shippingDeliveryMax Int
@@ -427,16 +428,44 @@ model OrderGroup {
   orderId             String
   storeId             String
   couponId            String?
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
-  coupon              Coupon?     @relation("CouponToOrderGroup", fields: [couponId], references: [id])
-  order               Order       @relation("OrderGroupToOrder", fields: [orderId], references: [id])
-  store               Store       @relation("OrderGroupToStore", fields: [storeId], references: [id])
-  items               OrderItem[] @relation("OrderItemToGroup")
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  coupon              Coupon?           @relation("CouponToOrderGroup", fields: [couponId], references: [id])
+  order               Order             @relation("OrderGroupToOrder", fields: [orderId], references: [id])
+  store               Store             @relation("OrderGroupToStore", fields: [storeId], references: [id])
+  items               OrderItem[]       @relation("OrderItemToGroup")
+  shipmentTracking    ShipmentTracking? @relation("OrderGroupToShipmentTracking")
 
   @@index([orderId])
   @@index([storeId])
   @@index([couponId])
+}
+
+model ShipmentTracking {
+  id                        String      @id @default(uuid())
+  orderId                   String
+  orderGroupId              String?     @unique
+  trackingReference         String
+  providerTrackingReference String?
+  bobgoShipmentId           String?
+  courierName               String?
+  courierCode               String?
+  serviceLevel              String?
+  status                    String      @default("pending-collection")
+  statusFriendly            String      @default("Awaiting Collection")
+  trackingUrl               String?
+  estimatedDeliveryFrom     DateTime?
+  estimatedDeliveryTo       DateTime?
+  lastCheckpointTime        DateTime?
+  checkpoints               Json?
+  movementEvents            Json?
+  createdAt                 DateTime    @default(now())
+  updatedAt                 DateTime    @updatedAt
+  order                     Order       @relation("OrderToShipmentTracking", fields: [orderId], references: [id], onDelete: Cascade)
+  orderGroup                OrderGroup? @relation("OrderGroupToShipmentTracking", fields: [orderGroupId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([trackingReference])
 }
 
 model OrderItem {

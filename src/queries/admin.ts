@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { api, convexQuery, isConvexEnabled } from "@/lib/convex";
 import { currentUser } from "@clerk/nextjs/server";
 
 /**
@@ -12,6 +13,10 @@ export const getAdminDashboardStats = async () => {
 
   if (!user || user.privateMetadata.role !== "ADMIN") {
     throw new Error("Unauthorized: Admin access required");
+  }
+
+  if (isConvexEnabled()) {
+    return await convexQuery(api.admin.getAdminDashboardStats, {});
   }
 
   // Get current date ranges
@@ -164,6 +169,10 @@ export const getRevenueChartData = async () => {
     throw new Error("Unauthorized: Admin access required");
   }
 
+  if (isConvexEnabled()) {
+    return await convexQuery(api.admin.getRevenueChartData, {});
+  }
+
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -207,6 +216,10 @@ export const getOrdersChartData = async () => {
 
   if (!user || user.privateMetadata.role !== "ADMIN") {
     throw new Error("Unauthorized: Admin access required");
+  }
+
+  if (isConvexEnabled()) {
+    return await convexQuery(api.admin.getOrdersChartData, {});
   }
 
   const thirtyDaysAgo = new Date();
@@ -253,6 +266,10 @@ export const getTopProducts = async (limit: number = 5) => {
     throw new Error("Unauthorized: Admin access required");
   }
 
+  if (isConvexEnabled()) {
+    return await convexQuery(api.admin.getTopProducts, { limit });
+  }
+
   const topProducts = await db.product.findMany({
     take: limit,
     orderBy: {
@@ -278,6 +295,10 @@ export const getTopStores = async (limit: number = 5) => {
 
   if (!user || user.privateMetadata.role !== "ADMIN") {
     throw new Error("Unauthorized: Admin access required");
+  }
+
+  if (isConvexEnabled()) {
+    return await convexQuery(api.admin.getTopStores, { limit });
   }
 
   // Get stores with their order groups to calculate earnings
@@ -316,6 +337,7 @@ export const getTopStores = async (limit: number = 5) => {
 
   return topStores;
 };
+
 /**
  * Get all orders for admin view
  * @returns All orders with user, store, and item details
@@ -325,6 +347,10 @@ export const getAllAdminOrders = async () => {
 
   if (!user || user.privateMetadata.role !== "ADMIN") {
     throw new Error("Unauthorized: Admin access required");
+  }
+
+  if (isConvexEnabled()) {
+    return await convexQuery(api.admin.getAllAdminOrders, {});
   }
 
   const orders = await db.order.findMany({
@@ -388,6 +414,15 @@ export const getAdminOrders = async (
 
   if (!user || user.privateMetadata.role !== "ADMIN") {
     throw new Error("Unauthorized: Admin access required");
+  }
+
+  if (isConvexEnabled()) {
+    return await convexQuery(api.admin.getAdminOrders, {
+      status,
+      page,
+      pageSize,
+      search,
+    });
   }
 
   // Build where clause

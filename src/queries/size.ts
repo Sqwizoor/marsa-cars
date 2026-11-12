@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { api, convexQuery, isConvexEnabled } from "@/lib/convex";
 
 // Function: getFilteredSizes
 // Description: Retrieves all sizes that exist in a product based on the filters (category, subCategory, offer).
@@ -16,6 +17,13 @@ export const getFilteredSizes = async (
   },
   take = 10
 ) => {
+  if (isConvexEnabled()) {
+    return await convexQuery(api.products.getFilteredSizes, {
+      filters,
+      take,
+    });
+  }
+
   const { category, subCategory, offer, storeUrl } = filters;
 
   let storeId: string | undefined;

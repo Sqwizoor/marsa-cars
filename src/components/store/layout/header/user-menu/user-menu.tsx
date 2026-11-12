@@ -205,6 +205,10 @@ const extraLinks = [
     link: "/profile",
   },
   {
+    title: "Track Order",
+    link: "/track-order",
+  },
+  {
     title: "Settings",
     link: "/",
   },

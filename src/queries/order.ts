@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { api, convexMutation, convexQuery, isConvexEnabled } from "@/lib/convex";
 import { ensureSellerSubscription } from "@/lib/subscription-guard";
 import { OrderStatus, ProductStatus } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
@@ -17,6 +18,13 @@ export const getOrder = async (orderId: string) => {
 
   // Check if user is authenticated
   if (!user) throw new Error("Unauthenticated.");
+
+  if (isConvexEnabled()) {
+    return await convexQuery(api.orders.getOrder, {
+      orderId,
+      userId: user.id,
+    });
+  }
 
   // Get order details, with groups, poroduct items, and ordered by total price
   const order = await db.order.findUnique({
@@ -75,13 +83,16 @@ export const updateOrderGroupStatus = async (
   // Check if user is authenticated
   if (!user) throw new Error("Unauthenticated.");
 
-  // Verify seller permission
-  // if (user.privateMetadata.role !== "SELLER")
-  //   throw new Error(
-  //     "Unauthorized Access: Seller Privileges Required for Entry."
-  //   );
-
   await ensureSellerSubscription(user.id);
+
+  if (isConvexEnabled()) {
+    return await convexMutation(api.orders.updateOrderGroupStatus, {
+      storeId,
+      groupId,
+      status,
+      userId: user.id,
+    });
+  }
 
   const store = await db.store.findUnique({
     where: {
@@ -130,13 +141,16 @@ export const updateOrderItemStatus = async (
   // Check if user is authenticated
   if (!user) throw new Error("Unauthenticated.");
 
-  // Verify seller permission
-  // if (user.privateMetadata.role !== "SELLER")
-  //   throw new Error(
-  //     "Unauthorized Access: Seller Privileges Required for Entry."
-  //   );
-
   await ensureSellerSubscription(user.id);
+
+  if (isConvexEnabled()) {
+    return await convexMutation(api.orders.updateOrderItemStatus, {
+      storeId,
+      orderItemId,
+      status,
+      userId: user.id,
+    });
+  }
 
   const store = await db.store.findUnique({
     where: {

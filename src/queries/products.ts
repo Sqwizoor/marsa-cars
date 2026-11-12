@@ -2,6 +2,7 @@
 
 // DB
 import { db } from "@/lib/db";
+import { api, convexMutation, convexQuery, isConvexEnabled } from "@/lib/convex";
 import { ensureSellerSubscription } from "@/lib/subscription-guard";
 
 // Types
@@ -47,16 +48,17 @@ export const upsertProduct = async (
     // Check if user is authenticated
     if (!user) throw new Error("Unauthenticated.");
 
-    // Ensure user has seller privileges
-    // if (user.privateMetadata.role !== "SELLER")
-    //   throw new Error(
-    //     "Unauthorized Access: Seller Privileges Required for Entry."
-    //   );
-
-    // await ensureSellerSubscription(user.id);
-
     // Ensure product data is provided
     if (!product) throw new Error("Please provide product data.");
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.products.upsertProduct, {
+        product,
+        storeUrl,
+        userId: user.id,
+        isAdmin: user.privateMetadata?.role === "ADMIN",
+      });
+    }
 
     // Find the store by URL
     const store = await db.store.findFirst({
@@ -78,14 +80,16 @@ export const upsertProduct = async (
       where: { id: user.id },
       select: { role: true },
     });
-    
+
     const isOwner = store.userId === user.id;
     const isMember = store.members.some((member) => member.id === user.id);
     const isAdmin =
       user.privateMetadata?.role === "ADMIN" || dbUser?.role === "ADMIN";
 
     if (!isOwner && !isMember && !isAdmin) {
-      throw new Error("Unauthorized Access: You do not have permission to manage products for this store.");
+      throw new Error(
+        "Unauthorized Access: You do not have permission to manage products for this store."
+      );
     }
 
     // Check if the product already exists
@@ -221,22 +225,22 @@ const handleProductCreate = async (
     "productVariant"
   );
 
-    // Filter out empty specs
-    const validSpecs = product.product_specs.filter(
-      (spec) => spec.name.trim() !== "" && spec.value.trim() !== ""
-    );
+  // Filter out empty specs
+  const validSpecs = product.product_specs.filter(
+    (spec) => spec.name.trim() !== "" && spec.value.trim() !== ""
+  );
 
-    // Filter out empty questions
-    const validQuestions = product.questions.filter(
-      (q) => q.question.trim() !== "" && q.answer.trim() !== ""
-    );
+  // Filter out empty questions
+  const validQuestions = product.questions.filter(
+    (q) => q.question.trim() !== "" && q.answer.trim() !== ""
+  );
 
-    // Filter out empty variant specs
-    const validVariantSpecs = (product.variant_specs || []).filter(
-      (spec) => spec.name.trim() !== "" && spec.value.trim() !== ""
-    );
+  // Filter out empty variant specs
+  const validVariantSpecs = (product.variant_specs || []).filter(
+    (spec) => spec.name.trim() !== "" && spec.value.trim() !== ""
+  );
 
-    const productData = {
+  const productData = {
     id: product.productId,
     name: product.name,
     description: product.description,
@@ -378,18 +382,17 @@ const handleCreateVariant = async (product: ProductWithVariantType) => {
   return new_variant;
 };
 
-// Function: getProductVariant
-// Description: Retrieves details of a specific product variant from the database.
-// Access Level: Public
-// Parameters:
-//   - productId: The id of the product to which the variant belongs.
-//   - variantId: The id of the variant to be retrieved.
-// Returns: Details of the requested product variant.
 export const getProductVariant = async (
   productId: string,
   variantId: string
 ) => {
-  // Retrieve product variant details from the database
+  if (isConvexEnabled()) {
+    return await convexQuery(api.products.getProductVariant, {
+      productId,
+      variantId,
+    });
+  }
+
   const product = await db.product.findUnique({
     where: {
       id: productId,
@@ -440,14 +443,11 @@ export const getProductVariant = async (
   };
 };
 
-// Function: getProductMainInfo
-// Description: Retrieves the main information of a specific product from the database.
-// Access Level: Public
-// Parameters:
-//   - productId: The ID of the product to be retrieved.
-// Returns: An object containing the main information of the product or null if the product is not found.
 export const getProductMainInfo = async (productId: string) => {
-  // Retrieve the product from the database
+  if (isConvexEnabled()) {
+    return await convexQuery(api.products.getProductMainInfo, { productId });
+  }
+
   const product = await db.product.findUnique({
     where: {
       id: productId,
@@ -459,7 +459,6 @@ export const getProductMainInfo = async (productId: string) => {
   });
   if (!product) return null;
 
-  // Return the main information of the product
   return {
     productId: product.id,
     name: product.name,
@@ -481,14 +480,11 @@ export const getProductMainInfo = async (productId: string) => {
   };
 };
 
-// Function: getAllStoreProducts
-// Description: Retrieves all products from a specific store based on the store URL.
-// Access Level: Public
-// Parameters:
-//   - storeUrl: The URL of the store whose products are to be retrieved.
-// Returns: Array of products from the specified store, including category, subcategory, and variant details.
 export const getAllStoreProducts = async (storeUrl: string) => {
-  // Retrieve store details from the database using the store URL
+  if (isConvexEnabled()) {
+    return await convexQuery(api.products.getAllStoreProducts, { storeUrl });
+  }
+
   const store = await db.store.findFirst({
     where: {
       url: {
@@ -499,7 +495,6 @@ export const getAllStoreProducts = async (storeUrl: string) => {
   });
   if (!store) throw new Error("Please provide a valid store URL.");
 
-  // Retrieve all products associated with the store
   const products = await db.product.findMany({
     where: {
       storeId: store.id,
@@ -527,44 +522,22 @@ export const getAllStoreProducts = async (storeUrl: string) => {
   return products;
 };
 
-// Function: deleteProduct
-// Description: Deletes a product from the database.
-// Permission Level: Seller only
-// Parameters:
-//   - productId: The ID of the product to be deleted.
-// Returns: Response indicating success or failure of the deletion operation.
 export const deleteProduct = async (productId: string) => {
-  // Get current user
   const user = await currentUser();
-
-  // Check if user is authenticated
   if (!user) throw new Error("Unauthenticated.");
-
-  // Ensure user has seller privileges
-  // if (user.privateMetadata.role !== "SELLER")
-  //   throw new Error(
-  //     "Unauthorized Access: Seller Privileges Required for Entry."
-  //   );
 
   await ensureSellerSubscription(user.id);
 
-  // Ensure product data is provided
   if (!productId) throw new Error("Please provide product id.");
 
-  // Delete product from the database
+  if (isConvexEnabled()) {
+    return await convexMutation(api.products.deleteProduct, { productId });
+  }
+
   const response = await db.product.delete({ where: { id: productId } });
   return response;
 };
 
-// Function: getProducts
-// Description: Retrieves products based on various filters and returns only variants that match the filters. Supports pagination.
-// Access Level: Public
-// Parameters:
-//   - filters: An object containing filter options (category, subCategory, offerTag, size, onSale, onDiscount, brand, color).
-//   - sortBy: Sort the filtered results (Most popular, New Arivals, Top Rated...).
-//   - page: The current page number for pagination (default = 1).
-//   - pageSize: The number of products per page (default = 10).
-// Returns: An object containing paginated products, filtered variants, and pagination metadata (totalPages, currentPage, pageSize, totalCount).
 export const getProducts = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   filters: any = {},
@@ -572,18 +545,24 @@ export const getProducts = async (
   page: number = 1,
   pageSize: number = 10
 ) => {
-  // Default values for page and pageSize
+  if (isConvexEnabled()) {
+    return await convexQuery(api.products.getProducts, {
+      filters,
+      sortBy,
+      page,
+      pageSize,
+    });
+  }
+
   const currentPage = page;
   const limit = pageSize;
   const skip = (currentPage - 1) * limit;
 
-  // Construct the base query
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wherClause: any = {
     AND: [{ status: "APPROVED" } as any],
   };
 
-  // Apply store filter (using store URL)
   if (filters.store) {
     const store = await db.store.findFirst({
       where: {
@@ -599,7 +578,6 @@ export const getProducts = async (
     }
   }
 
-  // Apply category filter (using category URL)
   if (filters.category) {
     const category = await db.category.findUnique({
       where: {
@@ -612,7 +590,6 @@ export const getProducts = async (
     }
   }
 
-  // Apply subCategory filter (using subCategory URL)
   if (filters.subCategory) {
     const subCategory = await db.subCategory.findUnique({
       where: {
@@ -625,7 +602,6 @@ export const getProducts = async (
     }
   }
 
-  // Apply size filter (using array of sizes)
   if (filters.size && Array.isArray(filters.size)) {
     wherClause.AND.push({
       variants: {
@@ -642,7 +618,6 @@ export const getProducts = async (
     });
   }
 
-  // Apply Offer filter (using offer URL)
   if (filters.offer) {
     const offer = await db.offerTag.findUnique({
       where: {
@@ -655,7 +630,6 @@ export const getProducts = async (
     }
   }
 
-  // Apply search filter (search term in product name or description)
   if (filters.search) {
     wherClause.AND.push({
       OR: [
@@ -677,7 +651,6 @@ export const getProducts = async (
     });
   }
 
-  // Define the sort order
   let orderBy: Record<string, SortOrder> = {};
   switch (sortBy) {
     case "most-popular":
@@ -693,12 +666,11 @@ export const getProducts = async (
       orderBy = { views: "desc" };
   }
 
-  // Get all filtered, sorted products
   const products = await db.product.findMany({
     where: wherClause,
     orderBy,
-    take: limit, // Limit to page size
-    skip: skip, // Skip the products of previous pages
+    take: limit,
+    skip: skip,
     include: {
       variants: {
         include: {
@@ -712,9 +684,7 @@ export const getProducts = async (
 
   type VariantWithSizes = ProductVariant & { sizes: Size[] };
 
-  // Product price sorting
   products.sort((a, b) => {
-    // Helper function to get the minimum price from a product's variants
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const getMinPrice = (product: any) =>
       Math.min(
@@ -725,30 +695,24 @@ export const getProducts = async (
             return discountedPrice;
           })
         ),
-        Infinity // Default to Infinity if no sizes exist
+        Infinity
       );
 
-    // Get minimum prices for both products
     const minPriceA = getMinPrice(a);
     const minPriceB = getMinPrice(b);
 
-    // Explicitly check for price sorting conditions
     if (sortBy === "price-low-to-high") {
-      return minPriceA - minPriceB; // Ascending order
+      return minPriceA - minPriceB;
     } else if (sortBy === "price-high-to-low") {
-      return minPriceB - minPriceA; // Descending order
+      return minPriceB - minPriceA;
     }
 
-    // If no price sort option is provided, return 0 (no sorting by price)
     return 0;
   });
 
-  // Transform the products with filtered variants into ProductCardType structure
   const productsWithFilteredVariants = products.map((product) => {
-    // Filter the variants based on the filters
     const filteredVariants = product.variants;
 
-    // Transform the filtered variants into the VariantSimplified structure
     const variants: VariantSimplified[] = filteredVariants.map((variant) => ({
       variantId: variant.id,
       variantSlug: variant.slug,
@@ -757,7 +721,6 @@ export const getProducts = async (
       sizes: variant.sizes,
     }));
 
-    // Extract variant images for the product
     const variantImages: VariantImageType[] = filteredVariants.map(
       (variant) => ({
         url: `/product/${product.slug}/${variant.slug}`,
@@ -767,7 +730,6 @@ export const getProducts = async (
       })
     );
 
-    // Return the product in the ProductCardType structure
     return {
       id: product.id,
       slug: product.slug,
@@ -780,18 +742,9 @@ export const getProducts = async (
     };
   });
 
-  // /*
-  // const totalCount = await db.product.count({
-  //   where: wherClause,
-  // });
- 
-
   const totalCount = products.length;
-
-  // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  // Return the paginated data along with metadata
   return {
     products: productsWithFilteredVariants,
     totalPages,
@@ -801,29 +754,18 @@ export const getProducts = async (
   };
 };
 
-// Function: getProductPageData
-// Description: Retrieves details of a specific product variant from the database.
-// Access Level: Public
-// Parameters:
-//   - productId: The slug of the product to which the variant belongs.
-//   - variantId: The slug of the variant to be retrieved.
-// Returns: Details of the requested product variant.
 export const getProductPageData = async (
   productSlug: string,
   variantSlug: string
 ) => {
   try {
-    // Get current user
     const user = await currentUser();
 
-    // Retrieve product variant details from the database
     const product = await retrieveProductDetails(productSlug, variantSlug);
     if (!product) return null;
 
-    // Retrieve user country
     const userCountry = await getUserCountry();
 
-    // Calculate and retrieve the shipping details
     const productShippingDetails = await getShippingDetails(
       product.shippingFeeMethod,
       userCountry,
@@ -831,19 +773,15 @@ export const getProductPageData = async (
       product.freeShipping
     );
 
-    // Fetch store followers count
     const storeFollwersCount = await getStoreFollowersCount(product.storeId);
 
-    // Check if user is following store
     const isUserFollowingStore = await checkIfUserFollowingStore(
       product.storeId,
       user?.id
     );
 
-    // Handle product views
     await incrementProductViews(product.id);
 
-    // Reviews stats
     const ratingStatistics = await getRatingStatistics(product.id);
 
     return formatProductResponse(
@@ -859,11 +797,17 @@ export const getProductPageData = async (
   }
 };
 
-// Helper functions
 export const retrieveProductDetails = async (
   productSlug: string,
   variantSlug: string
 ) => {
+  if (isConvexEnabled()) {
+    return await convexQuery(api.products.retrieveProductDetails, {
+      productSlug,
+      variantSlug,
+    });
+  }
+
   const product = await db.product.findFirst({
     where: {
       slug: productSlug,
@@ -902,10 +846,7 @@ export const retrieveProductDetails = async (
     },
   });
 
-  // console.log(product);
-
   if (!product) return null;
-  // Get variants info
   const variantsInfo = await db.productVariant.findMany({
     where: {
       productId: product.id,
@@ -935,9 +876,9 @@ export const retrieveProductDetails = async (
 };
 
 const getUserCountry = async () => {
-  const userCountryCookie = await getCookie("userCountry", { cookies }) || "";
-  const defaultCountry = { name: "United States", code: "US", city: "" };
-  
+  const userCountryCookie = (await getCookie("userCountry", { cookies })) || "";
+  const defaultCountry = { name: "South Africa", code: "ZA", city: "Johannesburg" };
+
   try {
     const parsedCountry = JSON.parse(userCountryCookie);
     if (
@@ -949,7 +890,7 @@ const getUserCountry = async () => {
       return {
         name: parsedCountry.name,
         code: parsedCountry.code,
-        city: parsedCountry.city || ""
+        city: parsedCountry.city || "",
       };
     }
     return defaultCountry;
@@ -1016,6 +957,8 @@ const formatProductResponse = (
 };
 
 const getStoreFollowersCount = async (storeId: string) => {
+  if (isConvexEnabled()) return 0;
+
   const storeFollwersCount = await db.store.findUnique({
     where: {
       id: storeId,
@@ -1035,6 +978,8 @@ const checkIfUserFollowingStore = async (
   storeId: string,
   userId: string | undefined
 ) => {
+  if (isConvexEnabled()) return false;
+
   let isUserFollowingStore = false;
   if (userId) {
     const storeFollowersInfo = await db.store.findUnique({
@@ -1044,9 +989,9 @@ const checkIfUserFollowingStore = async (
       select: {
         followers: {
           where: {
-            id: userId, // Check if this user is following the store
+            id: userId,
           },
-          select: { id: true }, // Select the user id if following
+          select: { id: true },
         },
       },
     });
@@ -1059,6 +1004,10 @@ const checkIfUserFollowingStore = async (
 };
 
 export const getRatingStatistics = async (productId: string) => {
+  if (isConvexEnabled()) {
+    return await convexQuery(api.products.getRatingStatistics, { productId });
+  }
+
   const ratingStats = await db.review.groupBy({
     by: ["rating"],
     where: { productId },
@@ -1096,14 +1045,6 @@ export const getRatingStatistics = async (productId: string) => {
   };
 };
 
-// Function: getShippingDetails
-// Description: Retrieves and calculates shipping details based on user country and product.
-// Access Level: Public
-// Parameters:
-//   - shippingFeeMethod: The shipping fee method of the product.
-//   - userCountry: The parsed user country object from cookies.
-//   - store :  store details.
-// Returns: Calculated shipping details.
 export const getShippingDetails = async (
   shippingFeeMethod: string,
   userCountry: { name: string; code: string; city: string },
@@ -1112,17 +1053,22 @@ export const getShippingDetails = async (
 ) => {
   let shippingDetails = {
     shippingFeeMethod,
-    shippingService: "",
+    shippingService: store?.defaultShippingService || "",
     shippingFee: 0,
     extraShippingFee: 0,
-    deliveryTimeMin: 0,
-    deliveryTimeMax: 0,
-    returnPolicy: "",
+    deliveryTimeMin: store?.defaultDeliveryTimeMin || 0,
+    deliveryTimeMax: store?.defaultDeliveryTimeMax || 0,
+    returnPolicy: store?.returnPolicy || "",
     countryCode: userCountry.code,
     countryName: userCountry.name,
     city: userCountry.city,
     isFreeShipping: false,
   };
+
+  if (isConvexEnabled()) {
+    return shippingDetails;
+  }
+
   const country = await db.country.findUnique({
     where: {
       name: userCountry.name,
@@ -1131,7 +1077,6 @@ export const getShippingDetails = async (
   });
 
   if (country) {
-    // Retrieve shipping rate for the country
     const shippingRate = await db.shippingRate.findFirst({
       where: {
         countryId: country.id,
@@ -1156,7 +1101,6 @@ export const getShippingDetails = async (
     const deliveryTimeMax =
       shippingRate?.deliveryTimeMax || store.defaultDeliveryTimeMax;
 
-    // Check for free shipping
     if (freeShipping) {
       const free_shipping_countries = freeShipping.eligibaleCountries;
       const check_free_shipping = free_shipping_countries.find(
@@ -1203,21 +1147,10 @@ export const getShippingDetails = async (
 
     return shippingDetails;
   }
-  
-  // Return default shipping details if country not found
+
   return shippingDetails;
 };
 
-// Function: getProductFilteredReviews
-// Description: Retrieves filtered and sorted reviews for a product from the database, based on rating, presence of images, and sorting options.
-// Access Level: Public
-// Parameters:
-//   - productId: The ID of the product for which reviews are being fetched.
-//   - filters: An object containing the filter options such as rating and whether reviews include images.
-//   - sort: An object defining the sort order, such as latest, oldest, or highest rating.
-//   - page: The page number for pagination (1-based index).
-//   - pageSize: The number of reviews to retrieve per page.
-// Returns: A paginated list of reviews that match the filter and sort criteria.
 export const getProductFilteredReviews = async (
   productId: string,
   filters: { rating?: number; hasImages?: boolean },
@@ -1225,12 +1158,21 @@ export const getProductFilteredReviews = async (
   page: number = 1,
   pageSize: number = 4
 ) => {
+  if (isConvexEnabled()) {
+    return await convexQuery(api.products.getProductFilteredReviews, {
+      productId,
+      filters,
+      sort,
+      page,
+      pageSize,
+    });
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const reviewFilter: any = {
     productId,
   };
 
-  // Apply rating filter if provided
   if (filters.rating) {
     const rating = filters.rating;
     reviewFilter.rating = {
@@ -1238,14 +1180,12 @@ export const getProductFilteredReviews = async (
     };
   }
 
-  // Apply image filter if provided
   if (filters.hasImages) {
     reviewFilter.images = {
       some: {},
     };
   }
 
-  // Set sorting order using local SortOrder type
   const sortOption: { createdAt?: SortOrder; rating?: SortOrder } =
     sort && sort.orderBy === "latest"
       ? { createdAt: "desc" }
@@ -1253,11 +1193,9 @@ export const getProductFilteredReviews = async (
       ? { createdAt: "asc" }
       : { rating: "desc" };
 
-  // Calculate pagination parameters
   const skip = (page - 1) * pageSize;
   const take = pageSize;
 
-  // Fetch reviews from the database
   const reviews = await db.review.findMany({
     where: reviewFilter,
     include: {
@@ -1265,8 +1203,8 @@ export const getProductFilteredReviews = async (
       user: true,
     },
     orderBy: sortOption,
-    skip, // Skip records for pagination
-    take, // Take records for pagination
+    skip,
+    take,
   });
 
   return reviews;
@@ -1276,7 +1214,14 @@ export const getDeliveryDetailsForStoreByCountry = async (
   storeId: string,
   countryId: string
 ) => {
-  // Get shipping rate
+  if (isConvexEnabled()) {
+    return {
+      shippingService: "International Delivery",
+      deliveryTimeMin: 7,
+      deliveryTimeMax: 15,
+    };
+  }
+
   const shippingRate = await db.shippingRate.findFirst({
     where: {
       countryId,
@@ -1317,17 +1262,6 @@ export const getDeliveryDetailsForStoreByCountry = async (
   };
 };
 
-// Function: getProductShippingFee
-// Description: Retrieves and calculates shipping fee based on user country and product.
-// Access Level: Public
-// Parameters:
-//   - shippingFeeMethod: The shipping fee method of the product.
-//   - userCountry: The parsed user country object from cookies.
-//   - store :  store details.
-//   - freeShipping.
-//   - weight.
-//   - quantity.
-// Returns: Calculated total shipping fee for product.
 export const getProductShippingFee = async (
   shippingFeeMethod: string,
   userCountry: Country,
@@ -1336,7 +1270,10 @@ export const getProductShippingFee = async (
   weight: number,
   quantity: number
 ) => {
-  // Fetch country information based on userCountry.name and userCountry.code
+  if (isConvexEnabled()) {
+    return store?.defaultShippingFeeFixed || 0;
+  }
+
   const country = await db.country.findUnique({
     where: {
       name: userCountry.name,
@@ -1345,18 +1282,16 @@ export const getProductShippingFee = async (
   });
 
   if (country) {
-    // Check if the user qualifies for free shipping
     if (freeShipping) {
       const free_shipping_countries = freeShipping.eligibaleCountries;
       const isEligableForFreeShipping = free_shipping_countries.some(
         (c) => c.countryId === country.name
       );
       if (isEligableForFreeShipping) {
-        return 0; // Free shipping
+        return 0;
       }
     }
 
-    // Fetch shipping rate from the database for the given store and country
     const shippingRate = await db.shippingRate.findFirst({
       where: {
         countryId: country.id,
@@ -1364,7 +1299,6 @@ export const getProductShippingFee = async (
       },
     });
 
-    // Destructure the shippingRate with defaults
     const {
       shippingFeePerItem = store.defaultShippingFeePerItem,
       shippingFeeForAdditionalItem = store.defaultShippingFeeForAdditionalItem,
@@ -1372,18 +1306,8 @@ export const getProductShippingFee = async (
       shippingFeeFixed = store.defaultShippingFeeFixed,
     } = shippingRate || {};
 
-    // Calculate the additional quantity (excluding the first item)
     const additionalItemsQty = quantity - 1;
 
-    // Log values for debugging (remove in production)
-    /*
-    console.log("Shipping fee details:");
-    console.log("Per Item Fee:", shippingFeePerItem);
-    console.log("Additional Item Fee:", shippingFeeForAdditionalItem);
-    console.log("Per Kg Fee:", shippingFeePerKg);
-    */
-
-    // Define fee calculation methods in a map (using functions)
     const feeCalculators: Record<string, () => number> = {
       ITEM: () =>
         shippingFeePerItem + shippingFeeForAdditionalItem * additionalItemsQty,
@@ -1391,50 +1315,44 @@ export const getProductShippingFee = async (
       FIXED: () => shippingFeeFixed,
     };
 
-    // Check if the fee calculation method exists and calculate the fee
     const calculateFee = feeCalculators[shippingFeeMethod];
     if (calculateFee) {
-      return calculateFee(); // Execute the corresponding calculation
+      return calculateFee();
     }
 
-    // If no valid shipping method is found, return 0
     return 0;
   }
 
-  // Return 0 if the country is not found
   return 0;
 };
 
-/**
- * Retrieves product details based on an array of product ids.
- *
- * @param ids - An array of product ids to fetch details for.
- * @returns A promise that resolves to an array of product objects.
- *          If a id doesn't exist in the database, it will be skipped.
- * @throws An error if the database query fails.
- */
 export const getProductsByIds = async (
   ids: string[],
   page: number = 1,
   pageSize: number = 10
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ products: any; totalPages: number }> => {
-  // Check if ids array is empty
   if (!ids || ids.length === 0) {
     throw new Error("Ids are undefined");
   }
 
-  // Default values for page and pageSize
+  if (isConvexEnabled()) {
+    return await convexQuery(api.products.getProductsByIds, {
+      ids,
+      page,
+      pageSize,
+    });
+  }
+
   const currentPage = page;
   const limit = pageSize;
   const skip = (currentPage - 1) * limit;
 
   try {
-    // Query the database for products with the specified ids
     const variants = await db.productVariant.findMany({
       where: {
         id: {
-          in: ids, // Filter products whose idds are in the provided array
+          in: ids,
         },
       },
       select: {
@@ -1479,12 +1397,11 @@ export const getProductsByIds = async (
       variantImages: [],
     }));
 
-    // Return products sorted in the order of ids provided
     const ordered_products = ids
       .map((id) =>
         new_products.find((product) => product.variants[0].variantId === id)
       )
-      .filter(Boolean); // Filter out undefined values
+      .filter(Boolean);
 
     const allProducts = await db.productVariant.count({
       where: {
@@ -1507,10 +1424,11 @@ export const getProductsByIds = async (
 };
 
 const incrementProductViews = async (productId: string) => {
+  if (isConvexEnabled()) return;
+
   const isProductAlreadyViewed = getCookie(`viewedProduct_${productId}`, {
     cookies,
   });
-  // console.log("isProductAlreadyViewed", isProductAlreadyViewed);
 
   if (!isProductAlreadyViewed) {
     await db.product.update({

@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { api, convexMutation, isConvexEnabled } from "@/lib/convex";
 import { ReviewDetailsType } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
 
@@ -25,6 +26,24 @@ export const upsertReview = async (
     // Ensure productId and review data are provided
     if (!productId) throw new Error("Product ID is required.");
     if (!review) throw new Error("Please provide review data.");
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.products.upsertReview, {
+        productId,
+        userId: user.id,
+        review: {
+          id: review.id,
+          variant: review.variant,
+          variantImage: (review as any).variantImage || "",
+          review: review.review,
+          rating: review.rating,
+          size: review.size,
+          quantity: review.quantity,
+          color: review.color,
+          images: (review.images || []).map((img) => ({ url: img.url })),
+        },
+      });
+    }
 
     // check for existing review
     const existingReview = await db.review.findFirst({

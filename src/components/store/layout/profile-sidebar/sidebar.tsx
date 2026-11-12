@@ -49,6 +49,10 @@ const menu = [
     link: "/profile/orders",
   },
   {
+    title: "Track Order",
+    link: "/track-order",
+  },
+  {
     title: "Payment",
     link: "/profile/payment",
   },

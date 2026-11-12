@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { api, convexMutation, convexQuery, isConvexEnabled } from "@/lib/convex";
 import { ensureSellerSubscription } from "@/lib/subscription-guard";
 import { CartWithCartItemsType } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
@@ -21,16 +22,24 @@ export const upsertCoupon = async (coupon: Coupon, storeUrl: string) => {
     // Ensure user is authenticated
     if (!user) throw new Error("Unauthenticated.");
 
-    // Verify seller permission
-    // if (user.privateMetadata.role !== "SELLER")
-    //   throw new Error(
-    //     "Unauthorized Access: Seller Privileges Required for Entry."
-    //   );
     await ensureSellerSubscription(user.id);
 
     // Ensure coupon data and storeUrl are provided
     if (!coupon) throw new Error("Please provide coupon data.");
     if (!storeUrl) throw new Error("Store URL is required.");
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.coupons.upsertCoupon, {
+        coupon: {
+          id: coupon.id,
+          code: coupon.code,
+          startDate: coupon.startDate,
+          endDate: coupon.endDate,
+          discount: coupon.discount,
+        },
+        storeUrl,
+      });
+    }
 
     // Retrieve store ID using storeUrl
     const store = await db.store.findUnique({
@@ -90,15 +99,17 @@ export const getStoreCoupons = async (storeUrl: string) => {
     // Ensure user is authenticated
     if (!user) throw new Error("Unauthenticated.");
 
-    // Verify seller permission
-    // if (user.privateMetadata.role !== "SELLER")
-    //   throw new Error(
-    //     "Unauthorized Access: Seller Privileges Required for Entry."
-    //   );
     await ensureSellerSubscription(user.id);
 
     // Ensure storeUrl is provided
     if (!storeUrl) throw new Error("Store URL is required.");
+
+    if (isConvexEnabled()) {
+      return await convexQuery(api.coupons.getStoreCoupons, {
+        storeUrl,
+        userId: user.id,
+      });
+    }
 
     // Retrieve store ID using storeUrl and ensure it belongs to the current user
     const store = (await db.store.findUnique({
@@ -142,6 +153,10 @@ export const getCoupon = async (couponId: string) => {
     // Ensure coupon ID is provided
     if (!couponId) throw new Error("Please provide coupon ID.");
 
+    if (isConvexEnabled()) {
+      return await convexQuery(api.coupons.getCoupon, { couponId });
+    }
+
     // Retrieve coupon
     const coupon = await db.coupon.findUnique({
       where: {
@@ -172,14 +187,19 @@ export const deleteCoupon = async (couponId: string, storeUrl: string) => {
     // Check if user is authenticated
     if (!user) throw new Error("Unauthenticated.");
 
-    // Verify seller permission
-    // if (user.privateMetadata.role !== "SELLER")
-    //   throw new Error("Unauthorized Access: Seller Privileges Required.");
     await ensureSellerSubscription(user.id);
 
     // Ensure coupon ID and store URL are provided
     if (!couponId || !storeUrl)
       throw new Error("Please provide coupon ID and store URL.");
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.coupons.deleteCoupon, {
+        couponId,
+        storeUrl,
+        userId: user.id,
+      });
+    }
 
     // Get the store associated with the provided store URL
     const store = await db.store.findUnique({
@@ -230,6 +250,13 @@ export const applyCoupon = async (
   cartId: string
 ): Promise<{ message: string; cart: CartWithCartItemsType }> => {
   try {
+    if (isConvexEnabled()) {
+      return await convexMutation(api.coupons.applyCoupon, {
+        couponCode,
+        cartId,
+      });
+    }
+
     // Step 1: Fetch the coupon details
     const coupon = await db.coupon.findUnique({
       where: {

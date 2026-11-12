@@ -20,7 +20,7 @@ export default async function ProductVariantPage({
 
   const categories = await getAllCategories();
   const offerTags = await getAllOfferTags();
-  const countries = await db.country.findMany({
+  const dbCountries = await db.country.findMany({
     select: {
       id: true,
       name: true,
@@ -29,6 +29,9 @@ export default async function ProductVariantPage({
       updatedAt: true,
     },
   });
+  const countries = dbCountries.sort((a, b) =>
+    a.code === "ZA" ? -1 : b.code === "ZA" ? 1 : a.name.localeCompare(b.name)
+  );
   const productDetails = await getProductVariant(productId, variantId);
   if (!productDetails) return;
   return (

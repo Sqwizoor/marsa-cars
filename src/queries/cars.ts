@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { api, convexMutation, convexQuery, isConvexEnabled } from "@/lib/convex";
 import { currentUser } from "@clerk/nextjs/server";
 import {
   CarSubscription,
@@ -34,6 +35,12 @@ export const getActiveCarSubscription = async (
 
     if (!targetUserId) return null;
 
+    if (isConvexEnabled()) {
+      return await convexQuery(api.cars.getActiveCarSubscription, {
+        userId: targetUserId,
+      });
+    }
+
     const subscription = await db.carSubscription.findFirst({
       where: {
         userId: targetUserId,
@@ -63,6 +70,25 @@ export const createCarSubscription = async (
       return { error: "Unauthenticated" };
     }
 
+    const plan = getCarSubscriptionPlanByTier(tier);
+    if (!plan) {
+      return { error: "Invalid subscription tier" };
+    }
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.cars.createCarSubscription, {
+        userId: user.id,
+        userName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",
+        userEmail: user.emailAddresses[0]?.emailAddress || "",
+        userPicture: user.imageUrl || "",
+        tier,
+        sellerType,
+        amount: plan.price,
+        listingLimit: plan.listingLimit,
+        sponsoredLimit: plan.sponsoredLimit,
+      });
+    }
+
     // Check if user already has an active subscription
     const existingSubscription = await db.carSubscription.findFirst({
       where: {
@@ -73,11 +99,6 @@ export const createCarSubscription = async (
 
     if (existingSubscription) {
       return { error: "You already have an active car subscription" };
-    }
-
-    const plan = getCarSubscriptionPlanByTier(tier);
-    if (!plan) {
-      return { error: "Invalid subscription tier" };
     }
 
     // Ensure user exists in database
@@ -101,8 +122,8 @@ export const createCarSubscription = async (
     const startDate = new Date();
     const endDate =
       tier === "INDIVIDUAL"
-        ? null // Free tier doesn't expire
-        : new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+        ? null
+        : new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     const subscription = await db.carSubscription.create({
       data: {
@@ -135,6 +156,14 @@ export const createCarSubscription = async (
 export const ensureCarSubscription = async (
   userId: string
 ): Promise<CarSubscription> => {
+  if (isConvexEnabled()) {
+    const sub = await convexQuery(api.cars.getActiveCarSubscription, { userId });
+    if (!sub) {
+      throw new Error("You need an active car subscription to perform this action");
+    }
+    return sub;
+  }
+
   const subscription = await db.carSubscription.findFirst({
     where: {
       userId,
@@ -184,6 +213,14 @@ export const getCarListings = async (
   limit: number = 20
 ): Promise<{ listings: CarListingWithImages[]; total: number }> => {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.cars.getCarListings, {
+        filters,
+        page,
+        limit,
+      });
+    }
+
     const where: any = {
       status: "ACTIVE",
     };
@@ -240,6 +277,10 @@ export const getSponsoredCarListings = async (
   limit: number = 6
 ): Promise<CarListingWithImages[]> => {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.cars.getSponsoredCarListings, { limit });
+    }
+
     const now = new Date();
 
     const listings = await db.carListing.findMany({
@@ -273,6 +314,14 @@ export const getCarListingBySlug = async (
   slug: string
 ): Promise<CarListingWithImages | null> => {
   try {
+    if (isConvexEnabled()) {
+      const listing = await convexQuery(api.cars.getCarListingBySlug, { slug });
+      if (listing) {
+        await convexMutation(api.cars.incrementCarListingViews, { slug });
+      }
+      return listing;
+    }
+
     const listing = await db.carListing.findUnique({
       where: { slug },
       include: {
@@ -307,6 +356,10 @@ export const getUserCarListings = async (): Promise<CarListingWithImages[]> => {
     const user = await currentUser();
 
     if (!user) return [];
+
+    if (isConvexEnabled()) {
+      return await convexQuery(api.cars.getUserCarListings, { userId: user.id });
+    }
 
     const listings = await db.carListing.findMany({
       where: { userId: user.id },
@@ -365,6 +418,13 @@ export const createCarListing = async (
 
     if (!user) {
       return { error: "Unauthenticated" };
+    }
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.cars.createCarListing, {
+        userId: user.id,
+        input,
+      });
     }
 
     // Get active subscription
@@ -455,6 +515,14 @@ export const updateCarListing = async (
       return { error: "Unauthenticated" };
     }
 
+    if (isConvexEnabled()) {
+      return await convexMutation(api.cars.updateCarListing, {
+        listingId,
+        userId: user.id,
+        input,
+      });
+    }
+
     // Verify ownership
     const existingListing = await db.carListing.findFirst({
       where: { id: listingId, userId: user.id },
@@ -467,7 +535,6 @@ export const updateCarListing = async (
     const updateData: any = { ...input };
     delete updateData.images;
 
-    // If features is provided, ensure it's a proper array
     if (input.features) {
       updateData.features = input.features;
     }
@@ -479,10 +546,8 @@ export const updateCarListing = async (
 
     // Update images if provided
     if (input.images && input.images.length > 0) {
-      // Delete existing images
       await db.carImage.deleteMany({ where: { carListingId: listingId } });
 
-      // Create new images
       await db.carImage.createMany({
         data: input.images.map((img, index) => ({
           carListingId: listingId,
@@ -513,9 +578,16 @@ export const deleteCarListing = async (
       return { error: "Unauthenticated" };
     }
 
-    // Verify ownership or admin access
     const isAdmin = user.privateMetadata?.role === "ADMIN";
-    
+
+    if (isConvexEnabled()) {
+      return await convexMutation(api.cars.deleteCarListing, {
+        listingId,
+        userId: user.id,
+        isAdmin,
+      });
+    }
+
     const where: any = { id: listingId };
     if (!isAdmin) {
       where.userId = user.id;
@@ -530,10 +602,8 @@ export const deleteCarListing = async (
       return { error: "Listing not found or unauthorized" };
     }
 
-    // Delete listing (images cascade)
     await db.carListing.delete({ where: { id: listingId } });
 
-    // Decrement listings used if subscription exists
     if (listing.carSubscription) {
       await db.carSubscription.update({
         where: { id: listing.carSubscriptionId },
@@ -564,10 +634,16 @@ export const sponsorCarListing = async (
       return { error: "Unauthenticated" };
     }
 
-    // Get subscription
+    if (isConvexEnabled()) {
+      return await convexMutation(api.cars.sponsorCarListing, {
+        listingId,
+        userId: user.id,
+        durationDays,
+      });
+    }
+
     const subscription = await ensureCarSubscription(user.id);
 
-    // Check sponsored limit
     if (subscription.sponsoredUsed >= subscription.sponsoredLimit) {
       return {
         error:
@@ -575,7 +651,6 @@ export const sponsorCarListing = async (
       };
     }
 
-    // Verify ownership
     const listing = await db.carListing.findFirst({
       where: { id: listingId, userId: user.id },
     });
@@ -619,6 +694,13 @@ export const createCarInquiry = async (
   data: { name: string; email: string; phone?: string; message: string }
 ): Promise<{ success?: boolean; error?: string }> => {
   try {
+    if (isConvexEnabled()) {
+      return await convexMutation(api.cars.createCarInquiry, {
+        listingId,
+        data,
+      });
+    }
+
     const listing = await db.carListing.findUnique({ where: { id: listingId } });
 
     if (!listing) {
@@ -635,7 +717,6 @@ export const createCarInquiry = async (
       },
     });
 
-    // Increment inquiries count
     await db.carListing.update({
       where: { id: listingId },
       data: { inquiries: { increment: 1 } },
@@ -656,6 +737,10 @@ export const getCarInquiries = async () => {
     const user = await currentUser();
 
     if (!user) return [];
+
+    if (isConvexEnabled()) {
+      return await convexQuery(api.cars.getCarInquiries, { userId: user.id });
+    }
 
     const inquiries = await db.carInquiry.findMany({
       where: {
@@ -689,7 +774,13 @@ export const markInquiryAsRead = async (
       return { error: "Unauthenticated" };
     }
 
-    // Verify ownership through listing
+    if (isConvexEnabled()) {
+      return await convexMutation(api.cars.markInquiryAsRead, {
+        inquiryId,
+        userId: user.id,
+      });
+    }
+
     const inquiry = await db.carInquiry.findFirst({
       where: { id: inquiryId },
       include: { carListing: true },
@@ -711,10 +802,6 @@ export const markInquiryAsRead = async (
   }
 };
 
-/**
- * Get featured cars for homepage
- */
-// Cached version of getFeaturedCars
 const getCachedFeaturedCars = unstable_cache(
   async (limit: number) => {
     return await db.carListing.findMany({
@@ -733,8 +820,8 @@ const getCachedFeaturedCars = unstable_cache(
       take: limit,
     });
   },
-  ['featured-cars'],
-  { revalidate: 900, tags: ['cars', 'featured'] } // 15 mins
+  ["featured-cars"],
+  { revalidate: 900, tags: ["cars", "featured"] }
 );
 
 /**
@@ -744,6 +831,10 @@ export const getFeaturedCars = async (
   limit: number = 8
 ): Promise<CarListingWithImages[]> => {
   try {
+    if (isConvexEnabled()) {
+      return await convexQuery(api.cars.getFeaturedCars, { limit });
+    }
+
     const listings = await getCachedFeaturedCars(limit);
     return listings as CarListingWithImages[];
   } catch (error) {
@@ -760,6 +851,10 @@ export const getCarListingStats = async () => {
     const user = await currentUser();
 
     if (!user) return null;
+
+    if (isConvexEnabled()) {
+      return await convexQuery(api.cars.getCarListingStats, { userId: user.id });
+    }
 
     const [subscription, listings, inquiriesCount] = await Promise.all([
       db.carSubscription.findFirst({
@@ -788,14 +883,12 @@ export const getCarListingStats = async () => {
     const activeListings = listings.filter((l) => l.status === "ACTIVE").length;
     const sponsoredListings = listings.filter((l) => l.isSponsored).length;
 
-    // 1. Top Cars by Views
     const topCars = listings.slice(0, 5).map((car) => ({
       name: car.title.length > 25 ? car.title.substring(0, 25) + "..." : car.title,
       views: car.views,
       inquiries: car.inquiries,
     }));
 
-    // 2. Status Distribution
     const statusMap: Record<string, number> = {};
     listings.forEach((car) => {
       statusMap[car.status] = (statusMap[car.status] || 0) + 1;
@@ -805,29 +898,26 @@ export const getCarListingStats = async () => {
       value: statusMap[key],
     }));
 
-    // 3. Monthly Growth (Last 6 Months)
-    const growthMap: Record<string, number> = {};
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const today = new Date();
-    
-    // Initialize chart keys for last 6 months to ensure order
+
     const growthData: { name: string; value: number; fullDate: Date }[] = [];
     for (let i = 5; i >= 0; i--) {
-        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-        const name = `${months[d.getMonth()]}`;
-        growthData.push({ name, value: 0, fullDate: d }); // value to be filled
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const name = `${months[d.getMonth()]}`;
+      growthData.push({ name, value: 0, fullDate: d });
     }
 
     listings.forEach((car) => {
-        const d = new Date(car.createdAt);
-        // Find matching month bin
-        const bin = growthData.find(g => 
-            g.fullDate.getMonth() === d.getMonth() && 
-            g.fullDate.getFullYear() === d.getFullYear()
-        );
-        if (bin) {
-            bin.value++;
-        }
+      const d = new Date(car.createdAt);
+      const bin = growthData.find(
+        (g) =>
+          g.fullDate.getMonth() === d.getMonth() &&
+          g.fullDate.getFullYear() === d.getFullYear()
+      );
+      if (bin) {
+        bin.value++;
+      }
     });
 
     const listingsGrowth = growthData.map(({ name, value }) => ({ name, value }));
@@ -859,7 +949,9 @@ export const getAdminCarListings = async (
   status?: CarListingStatus
 ): Promise<(CarListingWithImages & { user: { email: string } })[]> => {
   try {
-    // In a real app, check for admin role here or rely on page protection
+    if (isConvexEnabled()) {
+      return await convexQuery(api.cars.getAdminCarListings, { status });
+    }
 
     const where: any = {};
     if (status) {
@@ -893,8 +985,15 @@ export const updateCarListingStatus = async (
   status: CarListingStatus
 ): Promise<{ success?: boolean; error?: string }> => {
   try {
+    if (isConvexEnabled()) {
+      return await convexMutation(api.cars.updateCarListingStatus, {
+        listingId,
+        status,
+      });
+    }
+
     const listing = await db.carListing.findUnique({ where: { id: listingId } });
-    
+
     if (!listing) {
       return { error: "Listing not found" };
     }
@@ -921,38 +1020,37 @@ const getSponsoredCarIds = unstable_cache(
       select: { id: true },
     });
   },
-  ['sponsored-car-ids'],
-  { revalidate: 300, tags: ['cars', 'sponsored'] } // 5 mins
+  ["sponsored-car-ids"],
+  { revalidate: 300, tags: ["cars", "sponsored"] }
 );
 
 export const getSponsoredCars = async (sessionId?: string, limit: number = 8) => {
   try {
-    // First, get all IDs of sponsored cars (Cached)
+    if (isConvexEnabled()) {
+      return await convexQuery(api.cars.getSponsoredCars, { sessionId, limit });
+    }
+
     const allSponsoredIds = await getSponsoredCarIds();
 
     if (allSponsoredIds.length === 0) return [];
 
-    // Shuffle IDs using session-based seed for consistency per user
     const seed = sessionId || Math.random().toString();
     const shuffled = [...allSponsoredIds];
-    
-    // Simple seeded shuffle
+
     let hash = 0;
     for (let i = 0; i < seed.length; i++) {
-      hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+      hash = (hash << 5) - hash + seed.charCodeAt(i);
       hash = hash & hash;
     }
-    
+
     for (let i = shuffled.length - 1; i > 0; i--) {
       hash = (hash * 1103515245 + 12345) & 0x7fffffff;
       const j = hash % (i + 1);
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
 
-    // Take only the limited number of IDs
-    const selectedIds = shuffled.slice(0, limit).map(c => c.id);
+    const selectedIds = shuffled.slice(0, limit).map((c) => c.id);
 
-    // Fetch full car data for selected IDs
     const cars = await db.carListing.findMany({
       where: {
         id: { in: selectedIds },
@@ -967,11 +1065,10 @@ export const getSponsoredCars = async (sessionId?: string, limit: number = 8) =>
       },
     });
 
-    // Maintain the shuffled order
-    const carsMap = new Map(cars.map(c => [c.id, c]));
+    const carsMap = new Map(cars.map((c) => [c.id, c]));
     const orderedCars = selectedIds
-      .map(id => carsMap.get(id))
-      .filter((c): c is typeof cars[0] => !!c);
+      .map((id) => carsMap.get(id))
+      .filter((c): c is (typeof cars)[0] => !!c);
 
     return orderedCars;
   } catch (error) {
