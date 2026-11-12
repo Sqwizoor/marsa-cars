@@ -107,7 +107,7 @@ const StoreSummary = ({ store }: Props) => {
                     <p className="font-semibold">Shipping Fee per item</p>
                   </td>
                   <td className="p-3">
-                    <p>${store.defaultShippingFeePerItem}</p>
+                    <p>R{store.defaultShippingFeePerItem}</p>
                   </td>
                 </tr>
                 <tr className="border-b border-opacity-20 s">
@@ -117,7 +117,7 @@ const StoreSummary = ({ store }: Props) => {
                     </p>
                   </td>
                   <td className="p-3">
-                    <p>${store.defaultShippingFeeForAdditionalItem}</p>
+                    <p>R{store.defaultShippingFeeForAdditionalItem}</p>
                   </td>
                 </tr>
                 <tr className="border-b border-opacity-20 ">
@@ -125,7 +125,7 @@ const StoreSummary = ({ store }: Props) => {
                     <p className="font-semibold">Shipping Fee per kg</p>
                   </td>
                   <td className="p-3">
-                    <p>${store.defaultShippingFeePerKg}</p>
+                    <p>R{store.defaultShippingFeePerKg}</p>
                   </td>
                 </tr>
                 <tr className="border-b border-opacity-20 ">
@@ -133,7 +133,7 @@ const StoreSummary = ({ store }: Props) => {
                     <p className="font-semibold">Shipping fee fixed</p>
                   </td>
                   <td className="p-3">
-                    <p>${store.defaultShippingFeeFixed}</p>
+                    <p>R{store.defaultShippingFeeFixed}</p>
                   </td>
                 </tr>
                 <tr className="border-b border-opacity-20 ">

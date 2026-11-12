@@ -13,7 +13,7 @@ const FastDelivery: FC = () => {
       </div>
       <span className="text-xs ml-5 flex  gap-x-1">
         <Check className="w-3 -translate-y-[2px] stroke-green-400" />
-        <span>$5.00 coupon code if delayed</span>
+        <span>R100 coupon code if delayed</span>
       </span>
       <span className="text-xs ml-5 flex  gap-x-1">
         <Check className="w-3 -translate-y-[2px] stroke-green-400" />

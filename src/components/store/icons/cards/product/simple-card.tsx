@@ -19,7 +19,7 @@ export default function ProductCardSimple({
         />
         <div className="absolute bottom-6 mt-2 space-y-2">
           <div className="py-1.5 px-2 bg-[#ff4747] text-white font-bold text-sm rounded-lg">
-            ${product.price?.toFixed(2)}
+            R{product.price?.toFixed(2)}
           </div>
         </div>
       </div>

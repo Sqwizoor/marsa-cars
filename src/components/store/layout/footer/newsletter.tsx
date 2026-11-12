@@ -21,7 +21,7 @@ export default function Newsletter() {
                   <Sparkles className="w-5 h-5 animate-pulse" />
                 </span>
                 <span className="text-sm md:text-base opacity-90">
-                  ...and receive <b className="text-yellow-300">$10 coupon</b> for first shopping
+                  ...and receive <b className="text-yellow-300">R100 coupon</b> for first shopping
                 </span>
               </div>
             </div>
