@@ -155,18 +155,7 @@ export default function ReviewDetails({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <div className="flex items-center gap-x-2">
-                          {/* <ReactStars
-                            count={5}
-                            size={40}
-                            color="#e2dfdf"
-                            activeColor="#FFD804"
-                            value={field.value}
-                            changeRating={field.onChange}
-                            isHalf
-                            edit={true}
-                          /> */}
-
+                        <div className="flex flex-wrap items-center gap-2">
                           <StarRatings
                             rating={field.value}
                             starRatedColor="#ffb400" // Active star color (yellow)
@@ -176,14 +165,14 @@ export default function ReviewDetails({
                             starSpacing="2px"
                             changeRating={field.onChange}
                           />
-                          <span>({ratingValue.toFixed(1)} out of 5.0)</span>
+                          <span className="text-sm">({ratingValue.toFixed(1)} out of 5.0)</span>
                         </div>
                       </FormControl>
                     </FormItem>
                   )}
                 />
-                <div className="w-full flex flex-wrap gap-x-4">
-                  <div className="flex items-center flex-wrap gap-2">
+                <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="w-full">
                     <FormField
                       control={form.control}
                       name="variantName"
@@ -206,7 +195,7 @@ export default function ReviewDetails({
                     control={form.control}
                     name="size"
                     render={({ field }) => (
-                      <FormItem className="flex-1">
+                      <FormItem className="w-full">
                         <FormControl>
                           <Select
                             value={field.value}
@@ -223,7 +212,7 @@ export default function ReviewDetails({
                     control={form.control}
                     name="quantity"
                     render={({ field }) => (
-                      <FormItem className="flex-1">
+                      <FormItem className="w-full">
                         <FormControl>
                           <Input
                             name="quantity"
@@ -289,7 +278,7 @@ export default function ReviewDetails({
                 {errors.review && <p>{errors.review.message}</p>}
               </div>
               <div className="w-full flex justify-end">
-                <Button type="submit" className="w-36 h-12">
+                <Button type="submit" className="w-full sm:w-36 h-12">
                   {isLoading ? (
                     <Skeleton className="h-4 w-24 bg-white/40" />
                   ) : (

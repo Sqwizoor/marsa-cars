@@ -35,12 +35,12 @@ export default function OrderUserDetailsCard({
           <h2 className="text-center font-bold text-2xl tracking-wide capitalize">
             {firstName} {lastName}
           </h2>
-          <h6 className="text-center py-2 border-t border-neutral-400 border-dashed">
+          <h6 className="text-center py-2 border-t border-neutral-400 border-dashed break-all text-sm">
             {email}
           </h6>
-          <h6 className="text-center">{phone}</h6>
-          <p className="text-sm  py-2 border-t border-neutral-400 border-dashed">
-            {address1}, {address2} ,{city} , {state}, {zip_code}, {country.name}
+          <h6 className="text-center text-sm">{phone}</h6>
+          <p className="text-sm py-2 border-t border-neutral-400 border-dashed break-words">
+            {address1}, {address2 ? `${address2}, ` : ""}{city}, {state}, {zip_code}, {country.name}
           </p>
         </div>
       </section>

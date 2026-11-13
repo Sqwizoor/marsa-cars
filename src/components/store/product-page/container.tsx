@@ -16,6 +16,7 @@ import useFromStore from "@/hooks/useFromStore";
 import { setCookie } from "cookies-next";
 import FastDelivery from "../cards/fast-delivery";
 import { useRouter } from "next/navigation";
+import { saveUserCart } from "@/queries/user";
 
 interface Props {
   productData: ProductPageDataType;
@@ -81,6 +82,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     useState<CartProductType | null>(baseCartProduct);
 
   const [isProductValid, setIsProductValid] = useState<boolean>(false);
+  const [isBuyingNow, setIsBuyingNow] = useState<boolean>(false);
 
   // Get the store action to add items to cart
   const addToCart = useCartStore((state) => state.addToCart);
@@ -197,26 +199,48 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     toast.success("Product added to cart successfully.");
   };
 
-  const handleBuyNow = () => {
-    if (!productToBeAddedToCart) return;
+  const handleBuyNow = async () => {
+    if (!productToBeAddedToCart || isBuyingNow) return;
+
+    const inCart = cartItems?.find(
+      (p) =>
+        p.productId === productId &&
+        p.variantId === variantId &&
+        p.sizeId === sizeId
+    );
 
     // If we can add more to cart, do so
     if (maxQty > 0) {
       addToCart(productToBeAddedToCart);
-    } else {
-      // If maxQty is 0, check if it's because it's already in cart
-      const inCart = cartItems?.find(
-        (p) =>
-          p.productId === productId &&
-          p.variantId === variantId &&
-          p.sizeId === sizeId
-      );
-      // If not in cart and maxQty <= 0, it means out of stock (or error), so return
-      if (!inCart) return;
+    } else if (!inCart) {
+      // Out of stock and not in cart
+      return;
     }
-    
-    toast.success("Redirecting to checkout...");
-    router.push("/checkout");
+
+    try {
+      setIsBuyingNow(true);
+      const latestCart = useCartStore.getState().cart;
+      const saved = await saveUserCart(latestCart);
+      if (saved) {
+        toast.success("Redirecting to checkout...");
+        router.push("/checkout");
+      } else {
+        toast.error("Failed to prepare checkout. Redirecting to cart...");
+        router.push("/cart");
+      }
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to proceed to checkout";
+      if (message.toLowerCase().includes("unauthenticated")) {
+        toast.success("Please sign in to proceed to checkout");
+        router.push("/sign-in?redirect_url=/cart");
+      } else {
+        toast.error(message);
+        router.push("/cart");
+      }
+    } finally {
+      setIsBuyingNow(false);
+    }
   };
 
   const maxQty = useMemo(() => {
@@ -240,57 +264,64 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     return remaining < 0 ? 0 : remaining;
   }, [cartItems, productId, variantId, sizeId, stock]);
 
-  const ActionButtons = () => {
-    if (!productData) return null;
+  const isAlreadyInCart = Boolean(
+    cartItems?.find(
+      (p) =>
+        p.productId === productId &&
+        p.variantId === variantId &&
+        p.sizeId === sizeId
+    )
+  );
+  const canBuyNow = isProductValid && (maxQty > 0 || isAlreadyInCart) && !isBuyingNow;
+  const canAddToCart = isProductValid && maxQty > 0;
 
-    return (
-      <div className="mt-5 bg-white pb-4 space-y-3">
-        {/* Qty selector */}
-        {sizeId && productToBeAddedToCart && (
-          <div className="w-full flex justify-end mt-4">
-            <QuantitySelector
-              productId={productToBeAddedToCart.productId}
-              variantId={productToBeAddedToCart.variantId}
-              sizeId={productToBeAddedToCart.sizeId}
-              quantity={productToBeAddedToCart.quantity}
-              stock={productToBeAddedToCart.stock}
-              handleChange={handleChange}
-            />
-          </div>
+  const actionButtonsContent = productData ? (
+    <div className="mt-5 bg-white pb-4 space-y-3">
+      {/* Qty selector */}
+      {sizeId && productToBeAddedToCart && (
+        <div className="w-full flex justify-end mt-4">
+          <QuantitySelector
+            productId={productToBeAddedToCart.productId}
+            variantId={productToBeAddedToCart.variantId}
+            sizeId={productToBeAddedToCart.sizeId}
+            quantity={productToBeAddedToCart.quantity}
+            stock={productToBeAddedToCart.stock}
+            handleChange={handleChange}
+          />
+        </div>
+      )}
+      {/* Action buttons */}
+      <button
+        disabled={!canBuyNow}
+        className={cn(
+          "relative w-full py-2.5 min-w-20 bg-orange-background hover:bg-orange-hover text-white h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none",
+          {
+            "cursor-not-allowed opacity-50": !canBuyNow,
+          }
         )}
-        {/* Action buttons */}
-        <button
-          disabled={!isProductValid}
-          className={cn(
-            "relative w-full py-2.5 min-w-20 bg-orange-background hover:bg-orange-hover text-white h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none",
-            {
-              "cursor-not-allowed opacity-50": !isProductValid || (maxQty <= 0 && !cartItems?.find(p => p.productId === productId && p.variantId === variantId && p.sizeId === sizeId)),
-            }
-          )}
-          onClick={() => handleBuyNow()}
-        >
-          <span>Buy now</span>
-        </button>
-        <button
-          disabled={!isProductValid}
-          className={cn(
-            "relative w-full py-2.5 min-w-20 bg-orange-border hover:bg-[#e4cdce] text-orange-hover h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none",
-            {
-              "cursor-not-allowed": !isProductValid || maxQty <= 0,
-            }
-          )}
-          onClick={() => handleAddToCart()}
-        >
-          <span>Add to cart</span>
-        </button>
-        {/* Share to socials */}
-        <SocialShare
-          url={`/product/${productData.productSlug}/${productData.variantSlug}`}
-          quote={`${productData.name} · ${productData.variantName}`}
-        />
-      </div>
-    );
-  };
+        onClick={() => void handleBuyNow()}
+      >
+        <span>{isBuyingNow ? "Preparing checkout..." : "Buy now"}</span>
+      </button>
+      <button
+        disabled={!canAddToCart}
+        className={cn(
+          "relative w-full py-2.5 min-w-20 bg-orange-border hover:bg-[#e4cdce] text-orange-hover h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none",
+          {
+            "cursor-not-allowed opacity-50": !canAddToCart,
+          }
+        )}
+        onClick={() => handleAddToCart()}
+      >
+        <span>Add to cart</span>
+      </button>
+      {/* Share to socials */}
+      <SocialShare
+        url={`/product/${productData.productSlug}/${productData.variantSlug}`}
+        quote={`${productData.name} · ${productData.variantName}`}
+      />
+    </div>
+  ) : null;
 
   if (!productData) {
     return (
@@ -310,7 +341,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
           activeImage={activeImage || normalizedImages[0]}
           setActiveImage={setActiveImage}
         />
-        <div className="w-full mt-4 md:mt-0 flex flex-col gap-4 md:flex-row">
+        <div className="w-full mt-4 xl:mt-0 flex flex-col gap-4 md:flex-row">
           {/* Product main info */}
           <ProductInfo
             productData={productData}
@@ -321,14 +352,14 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
           />
           
           {/* Mobile Action Buttons - Visible only on mobile */}
-          <div className="block md:hidden w-full px-4">
-            <ActionButtons />
+          <div className="block md:hidden w-full">
+            {actionButtonsContent}
           </div>
 
           {/* Shipping details - buy actions buttons */}
-          <div className="md:w-[390px]">
+          <div className="w-full md:w-[340px] lg:w-[390px] md:shrink-0">
             <div className="relative z-[60]">
-              <div className="bg-white border rounded-md overflow-hidden overflow-y-auto p-4 pb-0">
+              <div className="bg-white border rounded-md overflow-hidden overflow-y-auto p-4 md:pb-0">
                 {shippingDetails && (
                   <>
                     <ShipTo
@@ -351,7 +382,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
                 )}
                 {/* Desktop Action Buttons - Hidden on mobile */}
                 <div className="hidden md:block">
-                  <ActionButtons />
+                  {actionButtonsContent}
                 </div>
               </div>
             </div>

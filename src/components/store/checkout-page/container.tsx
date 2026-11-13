@@ -2,7 +2,7 @@
 import { CartWithCartItemsType, UserShippingAddressType } from "@/lib/types";
 import { BobGoRate } from "@/lib/bobgo/types";
 import { Country, ShippingAddress } from "@prisma/client";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import UserShippingAddresses from "../shared/shipping-addresses/shipping-addresses";
 import CheckoutProductCard from "../cards/checkout-product";
 import PlaceOrderCard from "../cards/place-order";
@@ -31,6 +31,7 @@ const CheckoutContainer: FC<Props> = ({
   const [shippingRates, setShippingRates] = useState<BobGoRate[]>([]);
   const [loadingRates, setLoadingRates] = useState(false);
   const [selectedRate, setSelectedRate] = useState<BobGoRate | null>(null);
+  const selectedRateRef = useRef<BobGoRate | null>(null);
 
   const activeCountry = addresses.find(
     (add) => add.countryId === selectedAddress?.countryId
@@ -38,70 +39,114 @@ const CheckoutContainer: FC<Props> = ({
 
   const { cartItems } = cart;
 
+  const applyRateToCart = (
+    prev: CartWithCartItemsType,
+    rate: BobGoRate
+  ): CartWithCartItemsType => {
+    const discount = prev.coupon
+      ? (prev.subTotal * prev.coupon.discount) / 100
+      : 0;
+    return {
+      ...prev,
+      shippingFees: rate.total_charge,
+      total: Math.max(0, prev.subTotal + rate.total_charge - discount),
+    };
+  };
+
   useEffect(() => {
+    let cancelled = false;
+
     const fetchRates = async () => {
-      if (!selectedAddress || !cartItems.length) return;
-      
+      if (!selectedAddress || !cartItems.length) {
+        setShippingRates([]);
+        setSelectedRate(null);
+        selectedRateRef.current = null;
+        return;
+      }
+
       setLoadingRates(true);
+      setSelectedRate(null);
+      selectedRateRef.current = null;
+
       try {
-        // Construct rate request
-        // Using default dimensions as they are not on the ProductVariant model yet
-        const parcels = cartItems.map(item => ({
-          submitted_length_cm: 30, 
-          submitted_width_cm: 20, 
-          submitted_height_cm: 10, 
-          submitted_weight_kg: 1, // Default to 1kg if weight logic is complex to retrieve on client without extra data
+        // Construct rate request using cart quantities for parcel weight estimation
+        const parcels = cartItems.map((item) => ({
+          submitted_length_cm: 30,
+          submitted_width_cm: 20,
+          submitted_height_cm: 10,
+          submitted_weight_kg: Math.max(1, item.quantity || 1),
         }));
 
-        // In a real app, we'd need the store's address as collection_address
-        // For now, mocking collection address (e.g., main warehouse)
+        // Warehouse collection address (Johannesburg, ZA)
         const collection_address = {
-            street_address: "123 Main St",
-            local_area: "Sandton",
-            city: "Johannesburg",
-            zone: "Gauteng",
-            country: "South Africa",
-            code: "2196",
-            lat: 0,
-            lng: 0,
+          street_address: "123 Main St",
+          local_area: "Sandton",
+          city: "Johannesburg",
+          zone: "Gauteng",
+          country: "ZA",
+          code: "2196",
         };
 
         const delivery_address = {
-            street_address: selectedAddress.address1,
-            local_area: selectedAddress.city, // Approximation
-            city: selectedAddress.city,
-            zone: selectedAddress.state,
-            country: activeCountry?.code || "ZA",
-            code: selectedAddress.zip_code,
+          street_address: selectedAddress.address1,
+          local_area: selectedAddress.city,
+          city: selectedAddress.city,
+          zone: selectedAddress.state,
+          country: activeCountry?.code || "ZA",
+          code: selectedAddress.zip_code,
         };
 
-        const res = await fetch('/api/shipping/rates', {
-            method: 'POST',
-            body: JSON.stringify({ collection_address, delivery_address, parcels }),
+        const res = await fetch("/api/shipping/rates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            collection_address,
+            delivery_address,
+            parcels,
+          }),
         });
-        
+
         const data = await res.json();
-        if (data.rates) {
-            setShippingRates(data.rates);
+        if (cancelled) return;
+
+        if (Array.isArray(data.rates) && data.rates.length > 0) {
+          const sortedRates: BobGoRate[] = [...data.rates].sort(
+            (a, b) => a.total_charge - b.total_charge
+          );
+          setShippingRates(sortedRates);
+
+          // Automatically apply the cheapest location-based BobGo rate
+          const defaultRate = sortedRates[0];
+          setSelectedRate(defaultRate);
+          selectedRateRef.current = defaultRate;
+          setCartData((prev) => applyRateToCart(prev, defaultRate));
+        } else {
+          setShippingRates([]);
         }
       } catch (error) {
         console.error("Failed to fetch shipping rates:", error);
+        if (!cancelled) {
+          setShippingRates([]);
+        }
       } finally {
-        setLoadingRates(false);
+        if (!cancelled) {
+          setLoadingRates(false);
+        }
       }
     };
 
     fetchRates();
-  }, [selectedAddress, cartItems]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedAddress, cartItems, activeCountry?.code]);
 
   const handleRateSelect = (rate: BobGoRate) => {
     setSelectedRate(rate);
+    selectedRateRef.current = rate;
     // Update local cart data with new shipping fee
-    setCartData(prev => ({
-        ...prev,
-        shippingFees: rate.total_charge,
-        total: prev.subTotal + rate.total_charge - (prev.coupon ? (prev.subTotal * prev.coupon.discount / 100) : 0)
-    }));
+    setCartData((prev) => applyRateToCart(prev, rate));
   };
 
   useEffect(() => {
@@ -112,7 +157,11 @@ const CheckoutContainer: FC<Props> = ({
           cartItems,
           activeCountry
         );
-        setCartData(updatedCart);
+        setCartData(
+          selectedRateRef.current
+            ? applyRateToCart(updatedCart, selectedRateRef.current)
+            : updatedCart
+        );
       } catch (error) {
         console.error("Failed to fetch latest checkout cart:", error);
       }
@@ -137,8 +186,8 @@ const CheckoutContainer: FC<Props> = ({
       : "South Africa");
 
   return (
-    <div className="flex flex-col lg:flex-row px-3 lg:px-0 gap-4">
-      <div className="flex-1 order-2 lg:order-1">
+    <div className="flex flex-col lg:flex-row px-1 sm:px-3 lg:px-0 gap-4">
+      <div className="flex-1 min-w-0 order-1">
         <UserShippingAddresses
           addresses={addresses}
           countries={countries}
@@ -148,7 +197,7 @@ const CheckoutContainer: FC<Props> = ({
         <div className="my-2">
           <CountryNote country={effectiveCountryName} />
         </div>
-        <div className="w-full py-4 px-2 sm:px-4 bg-white my-3 rounded-lg">
+        <div className="w-full py-4 px-2 sm:px-4 bg-white my-3 rounded-xl shadow-sm border border-slate-100">
           <div className="relative">
             {cartData.cartItems.map((product) => (
               <CheckoutProductCard
@@ -160,7 +209,7 @@ const CheckoutContainer: FC<Props> = ({
           </div>
         </div>
       </div>
-      <div className="order-1 lg:order-2 w-full lg:w-auto">
+      <div className="order-2 w-full lg:w-[380px] shrink-0">
         <PlaceOrderCard
           cartData={cartData}
           setCartData={setCartData}

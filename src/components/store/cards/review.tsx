@@ -18,8 +18,8 @@ export default function ReviewCard({
   const { name } = user;
   const cesnoredName = `${name[0]}***${name[user.name.length - 1]}`;
   return (
-    <div className="border border-[#d8d8d8] rounded-xl flex h-fit relative py-4 px-2.5">
-      <div className="w-16 px- space-y-1">
+    <div className="border border-[#d8d8d8] rounded-xl flex h-fit relative py-4 px-2.5 sm:px-3 gap-2">
+      <div className="w-14 sm:w-16 shrink-0 space-y-1 flex flex-col items-center">
         <Image
           src={user.picture}
           alt="Profile image"
@@ -27,21 +27,12 @@ export default function ReviewCard({
           height={100}
           className="w-11 h-11 rounded-full object-cover"
         />
-        <span className="text-xs text-main-secondary">
+        <span className="text-xs text-main-secondary text-center break-all">
           {cesnoredName.toUpperCase()}
         </span>
       </div>
-      <div className="flex flex-1 flex-col justify-between leading-5 overflow-hidden px-1.5">
+      <div className="flex flex-1 min-w-0 flex-col justify-between leading-5 overflow-hidden px-1">
         <div className="space-y-2">
-          {/* <ReactStars
-            count={5}
-            size={24}
-            color="#F5F5F5"
-            activeColor="#FFD804"
-            value={review.rating}
-            isHalf
-            edit={false}
-          /> */}
           <StarRatings
             rating={review.rating}
             starRatedColor="#ffb400" // Active star color (yellow)
@@ -51,20 +42,20 @@ export default function ReviewCard({
             starSpacing="2px"
           />
 
-          <div className="flex items-center gap-x-2">
-            <div className="">
-            <ColorWheel colors={colors} size={24}  />
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <div className="shrink-0">
+              <ColorWheel colors={colors} size={24} />
             </div>
           
-            <div className="text-main-secondary text-sm">{review.variant}</div>
-            <span>.</span>
-            <div className="text-main-secondary text-sm">{review.size}</div>
-            <span>.</span>
-            <div className="text-main-secondary text-sm">
+            <div className="text-main-secondary text-xs sm:text-sm">{review.variant}</div>
+            <span>·</span>
+            <div className="text-main-secondary text-xs sm:text-sm">{review.size}</div>
+            <span>·</span>
+            <div className="text-main-secondary text-xs sm:text-sm">
               {review.quantity} PC
             </div>
           </div>
-          <p className="text-sm">{review.review}</p>
+          <p className="text-sm break-words">{review.review}</p>
           {images.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {images.map((img) => (

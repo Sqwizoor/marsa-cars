@@ -50,9 +50,9 @@ const StoreCard = ({ store }: Props) => {
   };
   return (
     <div className="w-full">
-      <div className="bg-[#f5f5f5] flex items-center justify-between rounded-xl py-3 px-4">
-        <div className="flex">
-          <Link href={`/store/${url}`}>
+      <div className="bg-[#f5f5f5] flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl py-4 px-4">
+        <div className="flex items-center min-w-0">
+          <Link href={`/store/${url}`} className="shrink-0">
             <Image
               src={logo}
               alt={name}
@@ -61,13 +61,13 @@ const StoreCard = ({ store }: Props) => {
               className="w-12 h-12 object-cover rounded-full"
             />
           </Link>
-          <div className="mx-2">
-            <div className="text-xl font-bold leading-6">
-              <Link href={`/store/${url}`} className="text-main-primary">
+          <div className="mx-3 min-w-0">
+            <div className="text-lg sm:text-xl font-bold leading-6 truncate">
+              <Link href={`/store/${url}`} className="text-main-primary hover:underline">
                 {name}
               </Link>
             </div>
-            <div className="text-sm leading-5 mt-1">
+            <div className="text-xs sm:text-sm leading-5 mt-1 text-gray-700">
               <strong>100%</strong>
               <span> Positive Feedback</span>&nbsp;|&nbsp;
               <strong>{storeFollowersCount}</strong>
@@ -75,10 +75,10 @@ const StoreCard = ({ store }: Props) => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row items-end md:items-center gap-2 md:gap-0 mt-2 md:mt-0">
+        <div className="flex flex-row items-center gap-2 w-full sm:w-auto shrink-0">
           <div
             className={cn(
-              "flex items-center justify-center border border-black rounded-full cursor-pointer text-base font-bold h-9 w-32 md:w-auto md:mx-2 px-4 hover:bg-black hover:text-white transition-all",
+              "flex-1 sm:flex-initial flex items-center justify-center border border-black rounded-full cursor-pointer text-sm sm:text-base font-bold h-9 px-4 hover:bg-black hover:text-white transition-all",
               {
                 "bg-black text-white": following,
               }
@@ -86,13 +86,13 @@ const StoreCard = ({ store }: Props) => {
             onClick={() => handleStoreFollow()}
           >
             {following ? (
-              <Check className="w-4 me-1" />
+              <Check className="w-4 me-1 shrink-0" />
             ) : (
-              <Plus className="w-4 me-1" />
+              <Plus className="w-4 me-1 shrink-0" />
             )}
             <span>{following ? "Following" : "Follow"}</span>
           </div>
-          <div className="flex items-center justify-center border border-[#25D366] rounded-full cursor-pointer text-base font-bold h-9 w-32 md:w-auto md:mx-2 px-4 bg-[#25D366] text-white hover:bg-[#128C7E] transition-all">
+          <div className="flex-1 sm:flex-initial flex items-center justify-center border border-[#25D366] rounded-full cursor-pointer text-sm sm:text-base font-bold h-9 px-4 bg-[#25D366] text-white hover:bg-[#128C7E] transition-all">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="18"

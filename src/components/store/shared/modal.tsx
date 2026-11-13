@@ -36,7 +36,7 @@ const Modal: FC<ModalProps> = ({
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
       <div
         ref={ref}
         className={`relative w-full ${maxWidth} bg-white rounded-2xl shadow-2xl flex flex-col my-auto max-h-[92vh] sm:max-h-[88vh] overflow-hidden border border-slate-100`}

@@ -45,54 +45,54 @@ const ProductShippingFee: FC<Props> = ({
             <thead className="w-full">
               {fee === extraFee || extraFee === 0 ? (
                 <tr
-                  className="grid gap-x-1 text-xs px-4"
-                  style={{ gridTemplateColumns: "4fr 1fr" }}
+                  className="grid gap-x-1 text-xs px-1 sm:px-2"
+                  style={{ gridTemplateColumns: "3fr 1fr" }}
                 >
                   <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm">
                     Fee per item
                   </td>
-                  <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm">
+                  <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm text-right">
                     {formatCurrencyZAR(fee)}
                   </td>
                 </tr>
               ) : (
-                <div className="space-y-1">
+                <>
                   <tr
-                    className="grid gap-x-1 text-xs px-4"
-                    style={{ gridTemplateColumns: "4fr 1fr" }}
+                    className="grid gap-x-1 text-xs px-1 sm:px-2"
+                    style={{ gridTemplateColumns: "3fr 1fr" }}
                   >
                     <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm">
                       Fee for First Item
                     </td>
-                    <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm">
+                    <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm text-right">
                       {formatCurrencyZAR(fee)}
                     </td>
                   </tr>
 
                   <tr
-                    className="grid gap-x-1 text-xs px-4"
-                    style={{ gridTemplateColumns: "4fr 1fr" }}
+                    className="grid gap-x-1 text-xs px-1 sm:px-2 mt-1"
+                    style={{ gridTemplateColumns: "3fr 1fr" }}
                   >
                     <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm">
                       Fee for Each Additional Item
                     </td>
-                    <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm ">
+                    <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm text-right">
                       {formatCurrencyZAR(extraFee)}
                     </td>
                   </tr>
-                </div>
+                </>
               )}
             </thead>
             <tbody>
               <tr
-                className="grid gap-x-1 text-xs px-4 mt-1"
-                style={{ gridTemplateColumns: "4fr 1fr" }}
+                className="grid gap-x-1 text-xs px-1 sm:px-2 mt-1"
+                style={{ gridTemplateColumns: "3fr 1fr" }}
               >
                 <td className="w-full bg-gray-50 px-2 py-0.5 ">Quantity</td>
-                <td className="w-full bg-gray-50 px-2 py-0.5 ">x{quantity}</td>
+                <td className="w-full bg-gray-50 px-2 py-0.5 text-right">x{quantity}</td>
               </tr>
-              <tr className="flex gap-x-1 text-xs px-4 mt-1 text-center font-semibold">
-                <td className="w-full bg-black text-white px-1 py-1">
+              <tr className="flex gap-x-1 text-xs px-1 sm:px-2 mt-1 text-center font-semibold">
+                <td className="w-full bg-black text-white px-2 py-1 rounded-sm">
                   {quantity === 1 || fee === extraFee ? (
                     <span>
                       {formatCurrencyZAR(fee)} (fee) x {quantity} (items) = {formatCurrencyZAR(fee * quantity)}
@@ -125,34 +125,34 @@ const ProductShippingFee: FC<Props> = ({
           <table className="w-full mt-1.5">
             <thead className="w-full">
               <tr
-                className="grid gap-x-1 text-xs px-4"
-                style={{ gridTemplateColumns: "4fr 1fr" }}
+                className="grid gap-x-1 text-xs px-1 sm:px-2"
+                style={{ gridTemplateColumns: "3fr 1fr" }}
               >
                 <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm">
                   Fee per kg (1kg = 2,205lbs)
                 </td>
-                <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm">
+                <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm text-right">
                   {formatCurrencyZAR(fee)}
                 </td>
               </tr>
             </thead>
             <tbody>
               <tr
-                className="grid gap-x-1 text-xs px-4 mt-1"
-                style={{ gridTemplateColumns: "4fr 1fr" }}
+                className="grid gap-x-1 text-xs px-1 sm:px-2 mt-1"
+                style={{ gridTemplateColumns: "3fr 1fr" }}
               >
                 <td className="w-full bg-gray-50 px-2 py-0.5 ">Quantity</td>
-                <td className="w-full bg-gray-50 px-2 py-0.5 ">x{quantity}</td>
+                <td className="w-full bg-gray-50 px-2 py-0.5 text-right">x{quantity}</td>
               </tr>
               <tr
-                className="grid gap-x-1 text-xs px-4 mt-1"
-                style={{ gridTemplateColumns: "4fr 1fr" }}
+                className="grid gap-x-1 text-xs px-1 sm:px-2 mt-1"
+                style={{ gridTemplateColumns: "3fr 1fr" }}
               >
                 <td className="w-full bg-gray-50 px-2 py-0.5 ">Weight</td>
-                <td className="w-full bg-gray-50 px-2 py-0.5 ">{weight}kg</td>
+                <td className="w-full bg-gray-50 px-2 py-0.5 text-right">{weight}kg</td>
               </tr>
-              <tr className="flex gap-x-1 text-xs px-4 mt-1 text-center font-semibold">
-                <td className="w-full bg-black text-white px-1 py-1">
+              <tr className="flex gap-x-1 text-xs px-1 sm:px-2 mt-1 text-center font-semibold">
+                <td className="w-full bg-black text-white px-2 py-1 rounded-sm">
                   <span>
                     {formatCurrencyZAR(fee)} (fee) x {weight}kg (weight) x {quantity} (items) = {formatCurrencyZAR(Number((fee * weight * quantity).toFixed(2)))}
                   </span>
@@ -178,27 +178,27 @@ const ProductShippingFee: FC<Props> = ({
           <table className="w-full mt-1.5">
             <thead className="w-full">
               <tr
-                className="grid gap-x-1 text-xs px-4"
-                style={{ gridTemplateColumns: "4fr 1fr" }}
+                className="grid gap-x-1 text-xs px-1 sm:px-2"
+                style={{ gridTemplateColumns: "3fr 1fr" }}
               >
                 <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm">
                   Fee
                 </td>
-                <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm">
+                <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm text-right">
                   {formatCurrencyZAR(fee)}
                 </td>
               </tr>
             </thead>
             <tbody>
               <tr
-                className="grid gap-x-1 text-xs px-4 mt-1"
-                style={{ gridTemplateColumns: "4fr 1fr" }}
+                className="grid gap-x-1 text-xs px-1 sm:px-2 mt-1"
+                style={{ gridTemplateColumns: "3fr 1fr" }}
               >
                 <td className="w-full bg-gray-50 px-2 py-0.5 ">Quantity</td>
-                <td className="w-full bg-gray-50 px-2 py-0.5 ">x{quantity}</td>
+                <td className="w-full bg-gray-50 px-2 py-0.5 text-right">x{quantity}</td>
               </tr>
-              <tr className="flex gap-x-1 text-xs px-4 mt-1 text-center font-semibold">
-                <td className="w-full bg-black text-white px-1 py-1">
+              <tr className="flex gap-x-1 text-xs px-1 sm:px-2 mt-1 text-center font-semibold">
+                <td className="w-full bg-black text-white px-2 py-1 rounded-sm">
                   <span>{formatCurrencyZAR(fee)} (quantity doesn&apos;t affect shipping fee.)</span>
                 </td>
               </tr>

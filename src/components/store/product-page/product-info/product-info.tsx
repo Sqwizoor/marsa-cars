@@ -81,17 +81,17 @@ const ProductInfo: FC<Props> = ({
       )}
       {/* Title */}
       <div>
-        <h1 className="text-main-primary inline font-bold leading-5">
+        <h1 className="text-main-primary text-lg sm:text-xl font-bold leading-snug break-words">
           {name}
           {variantInfo.length > 1 && variantName && variantName !== name && ` · ${variantName}`}
         </h1>
       </div>
       {/* Sku - Rating - Num reviews */}
-      <div className="flex items-center text-xs mt-2">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs mt-2">
         {/* Store details */}
         <Link
           href={`/store/${store.url}`}
-          className="hidden sm:inline-block md:hidden lg:inline-block mr-2 hover:underline"
+          className="inline-block hover:underline shrink-0"
         >
           <div className="w-full flex items-center gap-x-1">
             <Image
@@ -104,18 +104,18 @@ const ProductInfo: FC<Props> = ({
           </div>
         </Link>
         {/* Sku - Rating - Num reviews */}
-        <div className="whitespace-nowrap">
-          <span className="flex-1 overflow-hidden overflow-ellipsis whitespace-nowrap text-gray-500">
+        <div className="flex items-center min-w-0 max-w-full">
+          <span className="truncate text-gray-500">
             SKU: {sku}
           </span>
           <span
-            className="inline-block align-middle text-[#2F68A8] mx-1 cursor-pointer"
+            className="inline-block align-middle text-[#2F68A8] mx-1 cursor-pointer shrink-0"
             onClick={copySkuToClipboard}
           >
             <CopyIcon />
           </span>
         </div>
-        <div className="ml-4 flex items-center gap-x-2 flex-1 whitespace-nowrap">
+        <div className="flex items-center gap-x-2 whitespace-nowrap">
           {/* <ReactStars
             count={5}
             size={24}

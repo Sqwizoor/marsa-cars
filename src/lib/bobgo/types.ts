@@ -1,8 +1,11 @@
 export interface BobGoRate {
   service_level_id: number;
   service_level_name: string;
+  service_level_code?: string;
   courier_id: number;
   courier_name: string;
+  courier_slug?: string;
+  description?: string;
   total_charge: number;
   tax_amount: number;
   currency: string;
@@ -18,8 +21,8 @@ export interface BobGoRateRequest {
     zone: string;
     country: string;
     code: string;
-    lat: number;
-    lng: number;
+    lat?: number;
+    lng?: number;
   };
   delivery_address: {
     street_address: string;

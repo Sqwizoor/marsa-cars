@@ -59,17 +59,17 @@ const ShippingDetails: FC<Props> = ({ shippingDetails, quantity, weight }) => {
   return (
     <div>
       <div className="space-y-1">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-x-1">
-            <Truck className="w-4" />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-start sm:items-center gap-x-1.5 min-w-0">
+            <Truck className="w-4 shrink-0 mt-0.5 sm:mt-0" />
             {isFreeShipping ? (
-              <span className="text-sm font-bold flex items-center">
+              <span className="text-sm font-bold flex flex-wrap items-center">
                 <span>
                   Free Shipping to <span>{countryName}</span>
                 </span>
               </span>
             ) : (
-              <span className="text-sm font-bold flex items-center">
+              <span className="text-sm font-bold flex flex-wrap items-center">
                 <span>
                   Shipping to <span>{countryName}</span>
                 </span>
@@ -77,7 +77,7 @@ const ShippingDetails: FC<Props> = ({ shippingDetails, quantity, weight }) => {
               </span>
             )}
           </div>
-          <ChevronRight className="w-3" />
+          <ChevronRight className="w-3 shrink-0" />
         </div>
         <span className="flex items-center text-sm ml-5">
           Service:&nbsp;<strong className="text-sm">{shippingService}</strong>

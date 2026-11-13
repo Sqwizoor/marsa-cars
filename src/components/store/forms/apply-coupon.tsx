@@ -66,7 +66,7 @@ import {
                     <FormControl>
                       <input
                         type="text"
-                        className="w-full pl-8 pr-24 py-3 text-base text-main-primary bg-transparent rounded-lg focus:outline-none"
+                        className="w-full pl-4 sm:pl-6 pr-24 py-3 text-sm sm:text-base text-main-primary bg-transparent rounded-lg focus:outline-none"
                         placeholder="Coupon"
                         {...field}
                       />

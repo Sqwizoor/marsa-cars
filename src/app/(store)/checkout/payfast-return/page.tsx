@@ -9,13 +9,13 @@ export default async function PayFastReturnPage({
   const status = (params?.payment_status || "").toUpperCase();
 
   return (
-    <div className="max-w-2xl mx-auto p-8">
-      <h1 className="text-2xl font-bold text-main-primary">Payment received</h1>
+    <div className="max-w-2xl mx-auto p-4 sm:p-8">
+      <h1 className="text-xl sm:text-2xl font-bold text-main-primary">Payment received</h1>
       <p className="text-sm text-muted-foreground mt-2">
         We've received your payment response from PayFast. Your order will update once the payment notification is confirmed.
       </p>
 
-      <div className="mt-6 space-y-2 text-sm">
+      <div className="mt-6 space-y-2 text-sm break-all">
         {orderId && (
           <p>
             <span className="font-semibold">Order ID:</span> {orderId}
@@ -33,7 +33,7 @@ export default async function PayFastReturnPage({
         )}
       </div>
 
-      <div className="mt-8 flex items-center gap-3">
+      <div className="mt-8 flex flex-wrap items-center gap-3">
         {orderId ? (
           <a
             href={`/order/${orderId}`}

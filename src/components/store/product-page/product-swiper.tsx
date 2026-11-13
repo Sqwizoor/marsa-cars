@@ -40,7 +40,7 @@ export default function ProductSwiper({
     <div className="relative w-full">
       <div className="relative w-full flex flex-col-reverse xl:flex-row gap-4">
         {/* Thumbnails */}
-        <div className="flex flex-row xl:flex-col gap-3 overflow-x-auto xl:pb-0 [&::-webkit-scrollbar]:hidden -mx-1 px-1">
+        <div className="flex flex-row xl:flex-col gap-3 overflow-x-auto pb-1 xl:pb-0 [&::-webkit-scrollbar]:hidden -mx-1 px-1">
           {images.map((img) => (
             <div
               key={img.url}
@@ -82,7 +82,7 @@ export default function ProductSwiper({
               {/* Mobile hint or overlay could go here */}
             </div>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl w-full h-[80vh] p-0 bg-transparent border-none shadow-none flex items-center justify-center">
+          <DialogContent className="w-[calc(100%-1.5rem)] max-w-4xl h-[70vh] sm:h-[80vh] p-0 bg-transparent border-none shadow-none flex items-center justify-center z-[200] [&>button]:bg-white/90 [&>button]:text-gray-800 [&>button]:rounded-full [&>button]:p-1.5 [&>button]:shadow-md [&>button]:z-50">
              <VisuallyHidden>
               <DialogTitle>Product Image Gallery</DialogTitle>
             </VisuallyHidden>

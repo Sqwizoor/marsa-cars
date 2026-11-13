@@ -23,8 +23,12 @@ export default function MobileMenu({ role }: { role?: string }) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-white lg:hidden hover:bg-white/10">
-          <Menu className="h-6 w-6" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9 rounded-full bg-white/10 border border-white/15 text-white lg:hidden hover:bg-white/20 hover:text-white transition-colors"
+        >
+          <Menu className="h-5 w-5" />
           <span className="sr-only">Open menu</span>
         </Button>
       </SheetTrigger>

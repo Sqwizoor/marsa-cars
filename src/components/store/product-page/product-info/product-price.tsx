@@ -61,8 +61,8 @@ const ProductPrice: FC<Props> = ({ sizeId, sizes, isCard, handleChange }) => {
       <div>
         <div className="text-orange-primary inline-block font-bold leading-none mr-2.5">
           <span
-            className={cn("inline-block text-4xl text-nowrap", {
-              "text-lg": isCard,
+            className={cn("inline-block text-2xl sm:text-4xl break-words", {
+              "text-lg sm:text-lg": isCard,
             })}
           >
             {priceDisplay}
@@ -87,21 +87,23 @@ const ProductPrice: FC<Props> = ({ sizeId, sizes, isCard, handleChange }) => {
 
   return (
     <div>
-      <div className="text-orange-primary inline-block font-bold leading-none mr-2.5">
-        <span className="inline-block text-4xl">
-          R{discountedPrice.toFixed(2)}
-        </span>
+      <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+        <div className="text-orange-primary inline-block font-bold leading-none">
+          <span className="inline-block text-3xl sm:text-4xl">
+            R{discountedPrice.toFixed(2)}
+          </span>
+        </div>
+        {selectedSize.price !== discountedPrice && (
+          <span className="text-[#999] inline-block text-base sm:text-xl font-normal leading-6 line-through">
+            R{selectedSize.price.toFixed(2)}
+          </span>
+        )}
+        {selectedSize.discount > 0 && (
+          <span className="inline-block text-orange-seconadry text-base sm:text-xl leading-6 font-semibold">
+            {selectedSize.discount} % off
+          </span>
+        )}
       </div>
-      {selectedSize.price !== discountedPrice && (
-        <span className="text-[#999] inline-block text-xl font-normal leading-6 mr-2 line-through">
-          R{selectedSize.price.toFixed(2)}
-        </span>
-      )}
-      {selectedSize.discount > 0 && (
-        <span className="inline-block text-orange-seconadry text-xl leading-6">
-          {selectedSize.discount} % off
-        </span>
-      )}
       <p className="mt-2 text-xs">
         {selectedSize.quantity > 0 ? (
           `${selectedSize.quantity} items`

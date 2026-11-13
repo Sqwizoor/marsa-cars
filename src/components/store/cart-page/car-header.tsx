@@ -52,15 +52,15 @@ const CartHeader: FC<Props> = ({
   };
 
   return (
-    <div className="bg-white py-4">
+    <div className="bg-white py-4 rounded-lg">
       <div>
-        <div className="px-6 g-white">
-          <div className="flex items-center text-[#222] font-bold text-2xl">
+        <div className="px-3 sm:px-6 bg-white">
+          <div className="flex items-center text-[#222] font-bold text-xl sm:text-2xl">
             <h1>Cart ({cartLength})</h1>
           </div>
         </div>
-        <div className="flex justify-between bg-white pt-4 px-6">
-          <div className="flex items-center justify-start w-full">
+        <div className="flex justify-between bg-white pt-4 px-3 sm:px-6">
+          <div className="flex flex-wrap items-center justify-start gap-2 w-full">
             <label
               className="p-0 text-gray-900 text-sm leading-6 list-none inline-flex items-center m-0 mr-2 cursor-pointer align-middle"
               onClick={() => handleSelectAll()}
@@ -88,7 +88,7 @@ const CartHeader: FC<Props> = ({
             </label>
             {selectedLength > 0 && (
               <div
-                className="pl-4 border-l border-l-[#ebebeb] cursor-pointer"
+                className="sm:pl-4 sm:border-l sm:border-l-[#ebebeb] cursor-pointer"
                 onClick={() => removeSelectedFromCart()}
               >
                 <div className="text-[#3170ee] font-semibold text-sm leading-5">

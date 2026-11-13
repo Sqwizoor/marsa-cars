@@ -27,14 +27,14 @@ const StoreProducts: FC<Props> = ({ storeUrl, count, storeName }) => {
 
   return (
     <div className="relative mt-8 mb-12">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-main-primary flex items-center gap-2">
-          Recommended from {storeName}
-          <ChevronRight className="w-5 h-5 text-gray-400" />
+      <div className="flex items-center justify-between gap-2 mb-6">
+        <h2 className="text-lg sm:text-2xl font-bold text-main-primary flex items-center gap-1 sm:gap-2 min-w-0">
+          <span className="truncate">Recommended from {storeName}</span>
+          <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
         </h2>
         <Link 
           href={`/store/${storeUrl}`}
-          className="text-sm font-medium text-blue-primary hover:text-blue-700 transition-colors"
+          className="text-sm font-medium text-blue-primary hover:text-blue-700 transition-colors shrink-0 whitespace-nowrap"
         >
           View all
         </Link>

@@ -60,17 +60,17 @@ export default function UserMenu() {
             alt={user.fullName!}
             width={40}
             height={40}
-            className="w-10 h-10 object-cover rounded-full"
+            className="w-9 h-9 lg:w-10 lg:h-10 object-cover rounded-full ring-2 ring-white/20"
           />
         ) : (
-          <div className="flex h-11 items-center py-0 mx-2 cursor-pointer">
-            <span className="text-2xl">
-              <UserIcon />
+          <div className="flex h-9 lg:h-11 items-center px-2.5 lg:px-0 lg:mx-2 rounded-full bg-white/10 border border-white/15 hover:bg-white/20 lg:bg-transparent lg:border-0 lg:hover:bg-transparent cursor-pointer transition-colors">
+            <span className="text-lg lg:text-2xl">
+              <UserIcon className="w-4 h-4 lg:w-6 lg:h-6" />
             </span>
-            <div className="ml-1">
-              <b className="font-bold text-xs text-white leading-4">
+            <div className="ml-1.5 lg:ml-1">
+              <b className="font-semibold lg:font-bold text-xs text-white leading-4 whitespace-nowrap">
                 <span>Sign in</span>
-                <span className="text-white scale-[60%] align-middle inline-block">
+                <span className="hidden lg:inline-block text-white scale-[60%] align-middle">
                   <ChevronDown />
                 </span>
               </b>
@@ -81,20 +81,19 @@ export default function UserMenu() {
       {/* Content */}
       <div
         className={cn(
-          "absolute top-0 -left-20 cursor-pointer",
+          "absolute top-0 right-[-52px] sm:right-0 cursor-pointer",
           {
-            "-left-[200px] lg:-left-[148px]": user,
             "hidden": !isOpen,
             "block": isOpen,
           }
         )}
       >
-        <div className="relative left-2 mt-10 right-auto bottom-auto pt-2.5 text-[#222] p-0 text-sm z-40">
+        <div className="relative mt-12 pt-2.5 text-[#222] p-0 text-sm z-40">
           {/* Triangle */}
-          <div className="w-0 h-0 absolute left-[149px] top-1 right-24 !border-l-[10px] !border-l-transparent !border-r-[10px] !border-r-transparent !border-b-[10px] border-b-white"></div>
+          <div className="w-0 h-0 absolute top-1 right-[68px] sm:right-4 !border-l-[10px] !border-l-transparent !border-r-[10px] !border-r-transparent !border-b-[10px] border-b-white"></div>
           {/* Menu */}
           <div className="rounded-3xl bg-white text-sm text-[#222] shadow-lg">
-            <div className="w-[305px]">
+            <div className="w-[calc(100vw-2rem)] max-w-[305px]">
               <div className="pt-5 px-6 pb-0">
                 {user ? (
                   <div className="user-avatar flex flex-col items-center justify-center">
@@ -161,7 +160,7 @@ export default function UserMenu() {
                   ))}
                 </ul>
                 <Separator className="!max-w-[257px] mx-auto" />
-                <ul className="pt-2.5 pr-4 pb-1 pl-4 w-[288px]">
+                <ul className="pt-2.5 pr-4 pb-1 pl-4 w-full">
                   {extraLinks.map((item, i) => (
                     <li key={i}>
                       <Link 

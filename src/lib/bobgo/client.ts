@@ -64,7 +64,84 @@ export const BobGoClient = {
       }
 
       const result = await response.json();
-      return result.rates || [];
+
+      // BobGo v2 returns quotes nested under provider_rate_requests[].responses[]
+      if (Array.isArray(result.provider_rate_requests)) {
+        const parsedRates: BobGoRate[] = [];
+
+        for (const provider of result.provider_rate_requests) {
+          if (provider?.status !== "success" || !Array.isArray(provider.responses)) {
+            continue;
+          }
+
+          provider.responses.forEach((resp: any, idx: number) => {
+            if (resp?.status !== "success" || typeof resp.rate_amount !== "number") {
+              return;
+            }
+
+            const slCode: string = resp.service_level_code || resp.service_level?.code || "";
+            const slName: string =
+              resp.service_level?.name || slCode || "Standard Delivery";
+            const slDays = resp.service_level?.service_level_days;
+
+            let minDays = 2;
+            let maxDays = 5;
+            if (typeof slDays === "number" && slDays > 0) {
+              minDays = slDays;
+              maxDays = slDays;
+            } else {
+              const upper = `${slCode} ${slName}`.toUpperCase();
+              if (upper.includes("SDX") || upper.includes("SAME")) {
+                minDays = 0;
+                maxDays = 1;
+              } else if (
+                upper.includes("OVN") ||
+                upper.includes("PRI") ||
+                upper.includes("ND") ||
+                upper.includes("EXP") ||
+                upper.includes("ON1") ||
+                upper.includes("AIR") ||
+                upper.includes("EXPRESS") ||
+                upper.includes("OVERNIGHT")
+              ) {
+                minDays = 1;
+                maxDays = 2;
+              }
+            }
+
+            const totalCharge = Number(resp.rate_amount.toFixed(2));
+            const exclVat =
+              typeof resp.rate_amount_excl_vat === "number"
+                ? resp.rate_amount_excl_vat
+                : totalCharge / 1.15;
+            const taxAmount = Number(Math.max(0, totalCharge - exclVat).toFixed(2));
+            const providerId = Number(provider.provider_id) || 0;
+
+            parsedRates.push({
+              service_level_id: providerId * 10000 + idx + 1,
+              service_level_name: slName,
+              service_level_code: slCode,
+              courier_id: providerId,
+              courier_name: provider.provider_name || provider.provider_slug || "Courier",
+              courier_slug: provider.provider_slug,
+              description: resp.service_level?.description || undefined,
+              total_charge: totalCharge,
+              tax_amount: taxAmount,
+              currency: "ZAR",
+              delivery_time_min: minDays,
+              delivery_time_max: maxDays,
+            });
+          });
+        }
+
+        return parsedRates.sort((a, b) => a.total_charge - b.total_charge);
+      }
+
+      if (Array.isArray(result.rates)) {
+        return [...result.rates].sort((a, b) => a.total_charge - b.total_charge);
+      }
+
+      return [];
     } catch (error) {
       console.error("BobGo Client Error (getRates):", error);
       return [];

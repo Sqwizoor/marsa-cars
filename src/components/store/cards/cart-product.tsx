@@ -212,52 +212,60 @@ const { updateProductQuantity, removeFromCart } = useCartStore((state) => state)
           {/* Info */}
           <div className="w-0 min-w-0 flex-1">
             {/* Title - Actions */}
-            <div className="w-[calc(100%-48px)] flex items-start overflow-hidden whitespace-nowrap">
+            <div className="pr-16 flex items-start">
               <Link
                 href={`/product/${productSlug}/${variantSlug}?size=${sizeId}`}
-                className="inline-block overflow-hidden text-sm whitespace-nowrap overflow-ellipsis"
+                className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug hover:underline"
               >
                 {name} · {variantName}
               </Link>
-              <div className="absolute top-0 right-0">
-                <span
-                  className="mr-2.5 cursor-pointer inline-block"
+              <div className="absolute top-0 right-0 flex items-center gap-0.5">
+                <button
+                  type="button"
+                  aria-label="Add to wishlist"
+                  className="p-1.5 cursor-pointer inline-flex items-center justify-center rounded-full hover:bg-gray-100"
                   onClick={() => handleaddToWishlist()}
                 >
-                  <Heart className="w-4 hover:stroke-orange-seconadry" />
-                </span>
-                <span
-                  className="cursor-pointer inline-block"
+                  <Heart className="w-4 h-4 hover:stroke-orange-seconadry" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Remove from cart"
+                  className="p-1.5 cursor-pointer inline-flex items-center justify-center rounded-full hover:bg-gray-100"
                   onClick={() => removeFromCart(product)}
                 >
-                  <Trash className="w-4 hover:stroke-orange-seconadry" />
-                </span>
+                  <Trash className="w-4 h-4 hover:stroke-orange-seconadry" />
+                </button>
               </div>
             </div>
             {/* Style - size */}
-            <div className="my-1">
-              <button className="text-main-primary relative h-[24px] bg-gray-100 whitespace-normal px-2.5 py-0 max-w-full text-xs leading-4 rounded-xl font-bold cursor-pointer  outline-0">
-                <span className="flex items-center justify-between flex-wrap">
-                  <div className="text-left inline-block overflow-hidden text-ellipsis whitespace-nowrap max-w-[95%]">
+            <div className="my-1.5">
+              <button
+                type="button"
+                className="text-main-primary relative min-h-[24px] bg-gray-100 whitespace-normal px-2.5 py-0.5 max-w-full text-xs leading-4 rounded-xl font-bold cursor-pointer outline-0"
+              >
+                <span className="flex items-center justify-between gap-1">
+                  <span className="text-left inline-block truncate max-w-full">
                     {size}
-                  </div>
-                  <span className="ml-0.5">
-                    <ChevronRight className="w-3" />
                   </span>
+                  <ChevronRight className="w-3 shrink-0" />
                 </span>
               </button>
             </div>
             {/* Price - Delivery */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2 relative gap-2">
               {stock > 0 ? (
-                <div>
-                  <span className="inline-block break-all text-sm sm:text-base">
-                    R{price.toFixed(2)} x {quantity} = R{totalPrice.toFixed(2)}
+                <div className="flex flex-wrap items-baseline gap-x-1 text-sm sm:text-base">
+                  <span className="whitespace-nowrap">
+                    R{price.toFixed(2)} x {quantity}
+                  </span>
+                  <span className="font-semibold whitespace-nowrap">
+                    = R{totalPrice.toFixed(2)}
                   </span>
                 </div>
               ) : (
                 <div>
-                  <span className="inline-block break-all text-sm text-red-500">
+                  <span className="inline-block text-sm text-red-500 font-medium">
                     Out of stock
                   </span>
                 </div>

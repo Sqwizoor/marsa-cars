@@ -56,12 +56,12 @@ export default function Search() {
     <div className="relative lg:w-full flex-1">
       <form
         onSubmit={handleSubmit}
-        className="h-10 rounded-3xl bg-white relative border border-gray-200 flex items-center overflow-hidden"
+        className="h-10 rounded-full bg-white/95 relative border border-white/20 shadow-sm focus-within:ring-2 focus-within:ring-pink-500/50 flex items-center overflow-hidden transition-all"
       >
         <input
           type="text"
-          placeholder="Search..."
-          className="bg-white text-black flex-1 border-none pl-4 outline-none h-full"
+          placeholder="Search cars, parts, oils..."
+          className="bg-transparent text-sm text-black placeholder:text-slate-400 flex-1 border-none pl-4 pr-2 outline-none h-full min-w-0"
           value={searchQuery}
           onChange={handleInputChange}
         />
@@ -70,9 +70,10 @@ export default function Search() {
         )}
         <button
           type="submit"
-          className="h-full w-14 bg-pink-500 text-white grid place-items-center cursor-pointer hover:bg-pink-600 transition-colors"
+          aria-label="Search"
+          className="h-full w-12 sm:w-14 bg-pink-600 text-white grid place-items-center cursor-pointer hover:bg-pink-700 transition-colors shrink-0"
         >
-          <SearchIcon className="w-5 h-5" />
+          <SearchIcon className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </form>
     </div>

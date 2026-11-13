@@ -44,34 +44,41 @@ const PlaceOrderCard = ({
   }
 
   return (
-    <div className="sticky top-4 mt-3 mx-3 lg:ml-5 w-full lg:w-[380px] max-h-max">
-      <div className="relative py-4 px-6 bg-white mb-2">
-         <h1 className="text-gray-900 text-xl font-bold mb-2">Shipping Method</h1>
-         {loadingRates && <p className="text-sm text-gray-500">Loading rates...</p>}
+    <div className="lg:sticky lg:top-4 w-full max-h-max space-y-2">
+      <div className="relative py-4 px-4 sm:px-6 bg-white rounded-xl shadow-sm border border-slate-100">
+         <h1 className="text-gray-900 text-lg sm:text-xl font-bold mb-2">Shipping Method</h1>
+         {loadingRates && <p className="text-sm text-gray-500">Calculating BobGo courier rates...</p>}
          {!loadingRates && shippingRates.length === 0 && shippingAddress && (
              <p className="text-sm text-red-500">No shipping rates available for this address.</p>
          )}
-         {!shippingAddress && <p className="text-sm text-gray-500">Select an address to see shipping rates.</p>}
+         {!shippingAddress && <p className="text-sm text-gray-500">Select an address to calculate location-based shipping rates.</p>}
          
          <div className="space-y-2 mt-2">
-             {shippingRates.map(rate => (
+             {shippingRates.map(rate => {
+                 const isSelected = selectedRate?.service_level_id === rate.service_level_id;
+                 const etaLabel =
+                   rate.delivery_time_min === rate.delivery_time_max
+                     ? `${rate.delivery_time_min} business day${rate.delivery_time_min === 1 ? "" : "s"}`
+                     : `${rate.delivery_time_min}-${rate.delivery_time_max} business days`;
+                 return (
                  <div 
                     key={rate.service_level_id} 
-                    className={`p-2 border rounded cursor-pointer flex justify-between items-center ${selectedRate?.service_level_id === rate.service_level_id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                    className={`p-3 border rounded-lg cursor-pointer flex justify-between items-center gap-3 transition-colors ${isSelected ? 'border-blue-600 bg-blue-50/70' : 'border-gray-200 hover:border-gray-300'}`}
                     onClick={() => onSelectRate(rate)}
                  >
-                     <div>
-                         <p className="font-medium text-sm">{rate.courier_name}</p>
-                         <p className="text-xs text-gray-500">{rate.service_level_name} ({rate.delivery_time_min}-{rate.delivery_time_max} days)</p>
+                     <div className="min-w-0">
+                         <p className="font-medium text-sm truncate text-gray-900">{rate.courier_name}</p>
+                         <p className="text-xs text-gray-500">{rate.service_level_name} ({etaLabel})</p>
                      </div>
-                     <p className="font-bold text-sm">R{rate.total_charge}</p>
+                     <p className="font-bold text-sm shrink-0 whitespace-nowrap text-gray-900">R{rate.total_charge.toFixed(2)}</p>
                  </div>
-             ))}
+                 );
+             })}
          </div>
       </div>
 
-      <div className="relative py-4 px-6 bg-white">
-        <h1 className="text-gray-900 text-2xl font-bold mb-4">Summary</h1>
+      <div className="relative py-4 px-4 sm:px-6 bg-white rounded-xl shadow-sm border border-slate-100">
+        <h1 className="text-gray-900 text-xl sm:text-2xl font-bold mb-4">Summary</h1>
         <Info title="Subtotal" text={`R${subTotal.toFixed(2)}`} />
         <Info title="Shipping Fees" text={`+R${shippingFees.toFixed(2)}`} />
         <Info title="Taxes" text="+R0.00" />
@@ -81,67 +88,49 @@ const PlaceOrderCard = ({
             text={`-R${discountedAmount.toFixed(2)}`}
           />
         )}
-        <Info title="Total" text={`+R${total.toFixed(2)}`} isBold noBorder />
+        <Info title="Total" text={`R${total.toFixed(2)}`} isBold noBorder />
       </div>
-      <div className="mt-2">
+      <div>
         {coupon ? (
-          <div className="flex bg-white">
-            <svg width={16} height={96} xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M 8 0 
-         Q 4 4.8, 8 9.6 
-         T 8 19.2 
-         Q 4 24, 8 28.8 
-         T 8 38.4 
-         Q 4 43.2, 8 48 
-         T 8 57.6 
-         Q 4 62.4, 8 67.2 
-         T 8 76.8 
-         Q 4 81.6, 8 86.4 
-         T 8 96 
-         L 0 96 
-         L 0 0 
-         Z"
-                fill="#66cdaa"
-                stroke="#66cdaa"
-                strokeWidth={2}
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="mx-2 5 overflow-hidden w-full">
-              <p className="mt-1.5 text-xl font-bold text-[#66cdaa] leading-8 mr-3 overflow-hidden text-ellipsis whitespace-nowrap">
+          <div className="flex bg-white rounded-xl overflow-hidden shadow-sm border border-slate-100 min-h-[88px]">
+            <div className="w-3 bg-[#66cdaa] shrink-0" />
+            <div className="px-3 py-2.5 overflow-hidden w-full">
+              <p className="text-lg sm:text-xl font-bold text-[#66cdaa] leading-7 truncate">
                 Coupon applied !
               </p>
-              <p className="overflow-hidden leading-5 break-all text-zinc-400 max-h-10">
+              <p className="text-sm leading-5 break-words text-zinc-500">
                 ({coupon.code}) ({coupon.discount}%) discount
               </p>
-              <p className="overflow-hidden text-sm leading-5 break-words text-zinc-400">
+              <p className="text-xs sm:text-sm leading-5 break-words text-zinc-400">
                 Coupon applied only to items from {coupon.store.name}
               </p>
             </div>
           </div>
         ) : (
-          <div className="p-4 bg-white">
+          <div className="p-4 bg-white rounded-xl shadow-sm border border-slate-100">
             <ApplyCouponForm cartId={id} setCartData={setCartData} />
           </div>
         )}
       </div>
-      <div className="mt-2 p-4 bg-white">
+      <div className="p-4 bg-white rounded-xl shadow-sm border border-slate-100">
         {!shippingAddress && (
           <p className="text-sm text-orange-500 text-center py-2 mb-2">Please select a shipping address first</p>
+        )}
+        {shippingAddress && loadingRates && (
+          <p className="text-sm text-gray-500 text-center py-2 mb-2">Calculating delivery cost...</p>
         )}
         <PayFastButton 
           cartId={cartData.id} 
           shippingAddressId={shippingAddress?.id || ""}
           shippingFee={selectedRate?.total_charge}
           shippingService={selectedRate ? `${selectedRate.courier_name} - ${selectedRate.service_level_name}` : undefined}
-          disabled={!shippingAddress}
+          disabled={!shippingAddress || loadingRates || (shippingRates.length > 0 && !selectedRate)}
         />
       </div>
-      <div className="mt-2 p-4 bg-white px-6">
+      <div className="p-4 bg-white px-4 sm:px-6 rounded-xl shadow-sm border border-slate-100">
         <FastDelivery />
       </div>
-      <div className="mt-2 p-4 bg-white px-6">
+      <div className="p-4 bg-white px-4 sm:px-6 rounded-xl shadow-sm border border-slate-100">
         <SecurityPrivacyCard />
       </div>
     </div>
@@ -164,19 +153,19 @@ const Info = ({
   return (
     <div
       className={cn(
-        "mt-2 font-medium flex items-center text-[#222] text-sm pb-1 border-b",
+        "mt-2 font-medium flex items-center justify-between gap-2 text-[#222] text-sm pb-1 border-b",
         {
           "font-bold": isBold,
           "border-b-0": noBorder,
         }
       )}
     >
-      <h2 className="overflow-hidden whitespace-nowrap text-ellipsis break-normal">
+      <h2 className="truncate">
         {title}
       </h2>
-      <h3 className="flex-1 w-0 min-w-0 text-right">
+      <h3 className="shrink-0 text-right">
         <div className="px-0.5 text-black">
-          <span className="text-black text-lg inline-block break-all">
+          <span className="text-black text-base sm:text-lg inline-block whitespace-nowrap">
             {text}
           </span>
         </div>

@@ -634,11 +634,12 @@ export const placeOrder = async (
 
     // Check coupon store
     const check = storeId === cartCoupon?.storeId;
+    const itemsSubTotal = groupedTotalPrice - groupShippingFees;
 
     // Calculate discount based on coupon
     let discountedAmount = 0;
     if (check && cartCoupon) {
-      discountedAmount = (groupedTotalPrice * cartCoupon.discount) / 100;
+      discountedAmount = (itemsSubTotal * cartCoupon.discount) / 100;
     }
 
     const finalGroupShippingFee =
@@ -652,15 +653,15 @@ export const placeOrder = async (
     const finalShippingService =
       shippingServiceOverride || shippingService || "International Delivery";
 
-    // Calculate the total after applying the discount
-    const totalAfterDiscount = groupedTotalPrice - discountedAmount;
+    // Calculate the total after applying the discount (excluding prior item shippingFees to avoid double counting)
+    const totalAfterDiscount = Math.max(0, itemsSubTotal - discountedAmount);
     // Create an OrderGroup for this store
     const orderGroup = await db.orderGroup.create({
       data: {
         orderId: order.id,
         storeId: storeId,
         status: "Pending",
-        subTotal: groupedTotalPrice - groupShippingFees, // Subtotal usually excludes shipping
+        subTotal: itemsSubTotal,
         shippingFees: finalGroupShippingFee,
         total: totalAfterDiscount + finalGroupShippingFee, // Total includes shipping
         shippingService: finalShippingService,

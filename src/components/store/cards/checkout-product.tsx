@@ -33,34 +33,35 @@ export default function CheckoutProductCard({
           </div>
           {/* Info */}
           <div className="w-0 min-w-0 flex-1">
-            {/* Title - Actions */}
-            <div className="w-[calc(100%-48px)] flex items-start overflow-hidden whitespace-nowrap">
+            {/* Title */}
+            <div className="flex items-start">
               <Link
                 href={`/product/${productSlug}/${variantSlug}?size=${sizeId}`}
-                className="inline-block overflow-hidden text-sm whitespace-nowrap overflow-ellipsis"
+                className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug hover:underline"
               >
                 {product.name}
               </Link>
             </div>
             {/* Style - Size */}
-            <div className="my-1">
-              <button className="text-main-primary relative h-[24px] bg-gray-100 whitespace-normal px-2.5 py-0 max-w-full text-xs leading-4 rounded-xl font-bold cursor-pointer  outline-0">
-                <span className="flex items-center justify-between flex-wrap">
-                  <div className="text-left inline-block overflow-hidden text-ellipsis whitespace-nowrap max-w-[95%]">
+            <div className="my-1.5">
+              <button
+                type="button"
+                className="text-main-primary relative min-h-[24px] bg-gray-100 whitespace-normal px-2.5 py-0.5 max-w-full text-xs leading-4 rounded-xl font-bold cursor-pointer outline-0"
+              >
+                <span className="flex items-center justify-between gap-1">
+                  <span className="text-left inline-block truncate max-w-full">
                     {product.size}
-                  </div>
-                  <span className="ml-0.5">
-                    <ChevronRight className="w-3" />
                   </span>
+                  <ChevronRight className="w-3 shrink-0" />
                 </span>
               </button>
             </div>
-            {/* Price - Delievery */}
+            {/* Price - Delivery */}
             <div className="flex flex-col justify-between mt-2 relative">
               {/* Price - Qty */}
               <div className="font-bold w-full flex items-start justify-between">
-                <div className="flex items-center gap-x-2">
-                  <span className="inline-block break-all text-sm sm:text-base">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="inline-block whitespace-nowrap text-sm sm:text-base">
                     R{product.price.toFixed(2)} x {product.quantity}
                   </span>
                   {isDiscounted && (

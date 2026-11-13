@@ -7,9 +7,11 @@ import { ChevronLeft, ChevronRight, Download, Printer } from "lucide-react";
 import React from "react";
 import { generateOrderPDFBlob } from "./pdf-invoice";
 import { downloadBlobAsFile, printPDF } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export default function OrderHeader({ order }: { order: OrderFulltType }) {
-  if (!order) return;
+  const router = useRouter();
+  if (!order) return null;
 
   const handleDownload = async () => {
     try {
@@ -30,25 +32,32 @@ export default function OrderHeader({ order }: { order: OrderFulltType }) {
   };
   return (
     <div>
-      <div className="w-full border-b flex items-center justify-between p-2">
-        <div className="flex items-center gap-x-3">
-          <div className="border-r pr-4">
-            <button className="w-10 h-10 border rounded-full grid place-items-center">
-              <ChevronLeft className="stroke-main-secondary" />
+      <div className="w-full border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2 sm:p-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
+          <div className="sm:border-r sm:pr-4">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              aria-label="Go back"
+              className="w-9 h-9 sm:w-10 sm:h-10 border rounded-full grid place-items-center hover:bg-gray-50 transition-colors"
+            >
+              <ChevronLeft className="stroke-main-secondary w-5 h-5" />
             </button>
           </div>
-          <h1 className="text-main-secondary">Order Details</h1>
-          <ChevronRight className="stroke-main-secondary w-4" />
-          <h2>Order #{order.id}</h2>
-          <PaymentStatusTag status={order.paymentStatus as PaymentStatus} />
-          <OrderStatusTag status={order.orderStatus as OrderStatus} />
+          <h1 className="text-main-secondary text-sm sm:text-base font-medium">Order Details</h1>
+          <ChevronRight className="stroke-main-secondary w-4 shrink-0" />
+          <h2 className="text-xs sm:text-sm font-mono break-all">Order #{order.id}</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <PaymentStatusTag status={order.paymentStatus as PaymentStatus} />
+            <OrderStatusTag status={order.orderStatus as OrderStatus} />
+          </div>
         </div>
-        <div className="flex items-center gap-x-2">
-          <Button variant="outline" onClick={() => handleDownload()}>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="outline" size="sm" className="flex-1 sm:flex-initial" onClick={() => handleDownload()}>
             <Download className="w-4 me-2" />
             Export
           </Button>
-          <Button variant="outline" onClick={() => handlePrint()}>
+          <Button variant="outline" size="sm" className="flex-1 sm:flex-initial" onClick={() => handlePrint()}>
             <Printer className="w-4 me-2" />
             Print
           </Button>

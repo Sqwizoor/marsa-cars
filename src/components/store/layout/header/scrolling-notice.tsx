@@ -1,10 +1,15 @@
-import Link from 'next/link';
-import { Plus } from "lucide-react";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const ScrollingNotice = () => {
+    const pathname = usePathname();
+    const isHomePage = pathname === "/";
+
     // Content to be repeated
     const Content = () => (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
             <Link 
                 href="/cars" 
                 className="px-4 py-1.5 rounded-full bg-pink-600 text-[10px] md:text-xs font-bold uppercase text-white hover:bg-pink-700 transition-all shadow-sm whitespace-nowrap"
@@ -33,28 +38,34 @@ const ScrollingNotice = () => {
     );
 
     return (
-        <div className="w-full bg-white text-black border-t border-slate-200 relative z-[101] shadow-sm py-2">
+        <div
+            className={`w-full bg-white text-black border-t border-slate-200 relative z-[101] shadow-sm py-2 ${
+                isHomePage ? "block" : "hidden lg:block"
+            }`}
+        >
             {/* Desktop View: Static, centered, and aligned with Navbar width */}
             <div className="hidden lg:flex justify-center items-center w-full px-4 sm:px-6 lg:px-8">
                 <Content />
             </div>
 
-            {/* Mobile View: Scrolling Marquee */}
-            <div className="lg:hidden w-full overflow-hidden">
-                <div className="flex w-max animate-marquee-right-slow hover:pause-on-hover px-4">
-                    <Content />
-                    <div className="mx-4" />
-                    <Content />
-                    <div className="mx-4" />
-                    <Content />
-                    <div className="mx-4" />
-                    <Content />
-                    <div className="mx-4" />
-                    <Content />
-                    <div className="mx-4" />
-                    <Content />
+            {/* Mobile View: Scrolling Marquee (Homepage only) */}
+            {isHomePage && (
+                <div className="lg:hidden w-full overflow-hidden">
+                    <div className="flex w-max animate-marquee-right-slow hover:pause-on-hover px-4">
+                        <Content />
+                        <div className="mx-4" />
+                        <Content />
+                        <div className="mx-4" />
+                        <Content />
+                        <div className="mx-4" />
+                        <Content />
+                        <div className="mx-4" />
+                        <Content />
+                        <div className="mx-4" />
+                        <Content />
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

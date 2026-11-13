@@ -38,9 +38,14 @@ const CartSummary: FC<Props> = ({ cartItems, shippingFees }) => {
         toast.error("Failed to save cart. Please try again.");
       }
     } catch (error: unknown) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to proceed to checkout"
-      );
+      const message =
+        error instanceof Error ? error.message : "Failed to proceed to checkout";
+      if (message.toLowerCase().includes("unauthenticated")) {
+        toast.error("Please sign in to proceed to checkout");
+        router.push("/sign-in?redirect_url=/cart");
+      } else {
+        toast.error(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -55,7 +60,7 @@ const CartSummary: FC<Props> = ({ cartItems, shippingFees }) => {
         </h2>
         <h3 className="flex-1 w-0 min-w-0 text-right">
           <span className="px-0.5 text-black">
-            <div className="text-black text-base sm:text-lg inline-block break-all">
+            <div className="text-black text-base sm:text-lg inline-block whitespace-nowrap">
               R{subtotal.toFixed(2)}
             </div>
           </span>
@@ -67,7 +72,7 @@ const CartSummary: FC<Props> = ({ cartItems, shippingFees }) => {
         </h2>
         <h3 className="flex-1 w-0 min-w-0 text-right">
           <span className="px-0.5 text-black">
-            <div className="text-black text-base sm:text-lg inline-block break-all">
+            <div className="text-black text-base sm:text-lg inline-block whitespace-nowrap">
               R{shippingFees.toFixed(2)}
             </div>
           </span>
@@ -79,7 +84,7 @@ const CartSummary: FC<Props> = ({ cartItems, shippingFees }) => {
         </h2>
         <h3 className="flex-1 w-0 min-w-0 text-right">
           <span className="px-0.5 text-black">
-            <div className="text-black text-base sm:text-lg inline-block break-all">
+            <div className="text-black text-base sm:text-lg inline-block whitespace-nowrap">
               R0.00
             </div>
           </span>
@@ -91,7 +96,7 @@ const CartSummary: FC<Props> = ({ cartItems, shippingFees }) => {
         </h2>
         <h3 className="flex-1 w-0 min-w-0 text-right">
           <span className="px-0.5 text-black">
-            <div className="text-black text-base sm:text-lg inline-block break-all">
+            <div className="text-black text-base sm:text-lg inline-block whitespace-nowrap">
               R{total.toFixed(2)}
             </div>
           </span>
