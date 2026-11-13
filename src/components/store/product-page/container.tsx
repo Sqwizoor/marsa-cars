@@ -52,6 +52,15 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
       return null;
     }
 
+    const initialSize =
+      (sizeId ? productData.sizes?.find((s) => s.id === sizeId) : undefined) ??
+      productData.sizes?.[0];
+    const initialPrice = initialSize
+      ? initialSize.discount
+        ? initialSize.price - (initialSize.price * initialSize.discount) / 100
+        : initialSize.price
+      : 0;
+
     return {
       productId: productData.productId,
       variantId: productData.variantId,
@@ -62,10 +71,10 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
       image: normalizedImages[0]?.url ?? "",
       variantImage: productData.variantImage,
       quantity: 1,
-      price: 0,
-      sizeId: sizeId || "",
-      size: "",
-      stock: 1,
+      price: initialPrice,
+      sizeId: initialSize?.id || "",
+      size: initialSize?.size || "",
+      stock: initialSize?.quantity ?? 0,
       weight: productData.weight,
       shippingMethod: shippingDetails?.shippingFeeMethod || "FIXED",
       shippingService: shippingDetails?.shippingService || "Standard Shipping",
@@ -80,8 +89,11 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
 
   const [productToBeAddedToCart, setProductToBeAddedToCart] =
     useState<CartProductType | null>(baseCartProduct);
+  const activeSizeId = productToBeAddedToCart?.sizeId || sizeId;
 
-  const [isProductValid, setIsProductValid] = useState<boolean>(false);
+  const [isProductValid, setIsProductValid] = useState<boolean>(
+    Boolean(baseCartProduct?.sizeId)
+  );
   const [isBuyingNow, setIsBuyingNow] = useState<boolean>(false);
 
   // Get the store action to add items to cart
@@ -107,8 +119,10 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
         ...prev,
         ...baseCartProduct,
         quantity: prev.quantity,
-        size: prev.size,
-        stock: prev.stock,
+        sizeId: prev.sizeId || baseCartProduct.sizeId,
+        size: prev.size || baseCartProduct.size,
+        stock: prev.sizeId ? prev.stock : baseCartProduct.stock,
+        price: prev.sizeId ? prev.price : baseCartProduct.price,
       };
     });
   }, [baseCartProduct]);
@@ -135,16 +149,16 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
   // Keeping cart state updated
 
   useEffect(() => {
-    if (productToBeAddedToCart && sizeId) {
+    if (productToBeAddedToCart && activeSizeId) {
       // Temporarily bypass strict validation to debug/allow adding
       // Ideally check logic in isProductValidToAdd
       // const check = isProductValidToAdd(productToBeAddedToCart);
       // setIsProductValid(check);
-      setIsProductValid(true); 
+      setIsProductValid(true);
     } else {
       setIsProductValid(false);
     }
-  }, [productToBeAddedToCart, sizeId]);
+  }, [productToBeAddedToCart, activeSizeId]);
 
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
@@ -206,7 +220,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
       (p) =>
         p.productId === productId &&
         p.variantId === variantId &&
-        p.sizeId === sizeId
+        p.sizeId === activeSizeId
     );
 
     // If we can add more to cart, do so
@@ -244,7 +258,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
   };
 
   const maxQty = useMemo(() => {
-    if (!productId || !variantId || !sizeId) {
+    if (!productId || !variantId || !activeSizeId) {
       return stock;
     }
 
@@ -252,7 +266,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
       (p) =>
         p.productId === productId &&
         p.variantId === variantId &&
-        p.sizeId === sizeId
+        p.sizeId === activeSizeId
     );
 
     if (!searchProduct) {
@@ -262,14 +276,14 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     // Return stock minus quantity already in cart
     const remaining = stock - searchProduct.quantity;
     return remaining < 0 ? 0 : remaining;
-  }, [cartItems, productId, variantId, sizeId, stock]);
+  }, [cartItems, productId, variantId, activeSizeId, stock]);
 
   const isAlreadyInCart = Boolean(
     cartItems?.find(
       (p) =>
         p.productId === productId &&
         p.variantId === variantId &&
-        p.sizeId === sizeId
+        p.sizeId === activeSizeId
     )
   );
   const canBuyNow = isProductValid && (maxQty > 0 || isAlreadyInCart) && !isBuyingNow;
@@ -278,7 +292,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
   const actionButtonsContent = productData ? (
     <div className="mt-5 bg-white pb-4 space-y-3">
       {/* Qty selector */}
-      {sizeId && productToBeAddedToCart && (
+      {activeSizeId && productToBeAddedToCart && (
         <div className="w-full flex justify-end mt-4">
           <QuantitySelector
             productId={productToBeAddedToCart.productId}
@@ -338,14 +352,14 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
       <div className="w-full xl:flex xl:gap-4">
         <ProductSwiper
           images={variantImages.length > 0 ? variantImages : normalizedImages}
-          activeImage={activeImage || normalizedImages[0]}
+          activeImage={activeImage ?? normalizedImages[0] ?? null}
           setActiveImage={setActiveImage}
         />
         <div className="w-full mt-4 xl:mt-0 flex flex-col gap-4 md:flex-row">
           {/* Product main info */}
           <ProductInfo
             productData={productData}
-            sizeId={sizeId}
+            sizeId={activeSizeId}
             handleChange={handleChange}
             setVariantImages={setVariantImages}
             setActiveImage={setActiveImage}

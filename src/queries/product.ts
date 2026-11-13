@@ -834,38 +834,36 @@ export const getProductPageData = async (
   variantSlug: string
 ) => {
   try {
-    // Get current user
-    const user = await currentUser();
-
-    // Retrieve product variant details from the database
-    const product = await retrieveProductDetails(productSlug, variantSlug);
+    // Fetch auth, product details, and user country in parallel
+    const [user, product, userCountry] = await Promise.all([
+      currentUser(),
+      retrieveProductDetails(productSlug, variantSlug),
+      getUserCountry(),
+    ]);
     if (!product) return null;
 
-    // Retrieve user country
-    const userCountry = await getUserCountry();
+    // Fetch shipping, store metrics, and rating stats in parallel
+    const [
+      productShippingDetails,
+      storeFollwersCount,
+      isUserFollowingStore,
+      ratingStatistics,
+    ] = await Promise.all([
+      getShippingDetails(
+        product.shippingFeeMethod,
+        userCountry,
+        product.store,
+        product.freeShipping
+      ),
+      getStoreFollowersCount(product.storeId),
+      checkIfUserFollowingStore(product.storeId, user?.id),
+      getRatingStatistics(product.id),
+    ]);
 
-    // Calculate and retrieve the shipping details
-    const productShippingDetails = await getShippingDetails(
-      product.shippingFeeMethod,
-      userCountry,
-      product.store,
-      product.freeShipping
+    // Update views without blocking product page rendering
+    void incrementProductViews(product.id).catch((err) =>
+      console.error("Error incrementing product views:", err)
     );
-
-    // Fetch store followers count
-    const storeFollwersCount = await getStoreFollowersCount(product.storeId);
-
-    // Check if user is following store
-    const isUserFollowingStore = await checkIfUserFollowingStore(
-      product.storeId,
-      user?.id
-    );
-
-    // Handle product views
-    await incrementProductViews(product.id);
-
-    // Reviews stats
-    const ratingStatistics = await getRatingStatistics(product.id);
 
     return formatProductResponse(
       product,
@@ -929,7 +927,7 @@ export const retrieveProductDetails = async (
     },
   });
 
-  if (!product) return null;
+  if (!product || product.variants.length === 0) return null;
   // Get variants info
   const variantsInfo = await db.productVariant.findMany({
     where: {
@@ -1576,7 +1574,7 @@ export const getProductsByIds = async (
 const incrementProductViews = async (productId: string) => {
   if (isConvexEnabled()) return;
 
-  const isProductAlreadyViewed = getCookie(`viewedProduct_${productId}`, {
+  const isProductAlreadyViewed = await getCookie(`viewedProduct_${productId}`, {
     cookies,
   });
 

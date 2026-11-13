@@ -7,8 +7,8 @@ import ProductSpecs from "@/components/store/product-page/product-specs";
 import ProductReviews from "@/components/store/product-page/reviews/product-reviews";
 import StoreProducts from "@/components/store/product-page/store-products";
 import { Separator } from "@/components/ui/separator";
-import { getProductPageData, getProducts } from "@/queries/product";
-import { notFound, redirect } from "next/navigation";
+import { getProductPageData } from "@/queries/product";
+import { notFound } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -39,22 +39,12 @@ export default async function ProductVariantPage({
   // Extract the available sizes for the product variant
   const { sizes } = productData;
 
-  // If the size is provided in the URL
-  if (sizeId) {
-    // Check if the provided sizeId is valid by comparing with available sizes
-    const isValidSize = sizes.some((size) => size.id === sizeId);
-
-    // If the sizeId is not valid, redirect to the same product page without the size parameter
-    if (!isValidSize) {
-      redirect(`/product/${productSlug}/${variantSlug}`);
-    }
-  }
-  // If no sizeId is provided and there's only one size available, automatically select it
-  else if (sizes.length === 1) {
-    redirect(
-      `/product/${productSlug}/${variantSlug}?size=${sizes[0].id}` // Redirect to the URL with the size parameter prefilled
-    );
-  }
+  // Resolve the initial selected size directly on the server to avoid
+  // redirect round-trips and post-load client navigation flashes.
+  const matchedSize = sizeId
+    ? sizes.find((size) => size.id === sizeId)
+    : undefined;
+  const effectiveSizeId = matchedSize?.id ?? sizes[0]?.id;
 
   const {
     variantInfo,
@@ -69,7 +59,7 @@ export default async function ProductVariantPage({
   return (
     <div className="min-h-screen">
       <div className="md:max-w-[1650px] mx-auto p-4 md:p-8 overflow-x-hidden min-h-screen">
-        <ProductPageContainer productData={productData} sizeId={sizeId}>
+        <ProductPageContainer productData={productData} sizeId={effectiveSizeId}>
           <>
             <Separator className="mt-6" />
             {/* Product description */}

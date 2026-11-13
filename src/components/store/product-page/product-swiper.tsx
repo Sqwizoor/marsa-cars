@@ -32,9 +32,13 @@ export default function ProductSwiper({
   const [isOpen, setIsOpen] = useState(false);
 
   // If no images are provided, exit early and don't render anything
-  if (!images) return null;
+  if (!images || images.length === 0) return null;
 
-  const activeIndex = activeImage ? images.findIndex(img => img.id === activeImage.id) : 0;
+  const displayImage = activeImage ?? images[0] ?? null;
+  const foundIndex = displayImage
+    ? images.findIndex((img) => img.id === displayImage.id)
+    : 0;
+  const activeIndex = foundIndex >= 0 ? foundIndex : 0;
 
   return (
     <div className="relative w-full">
@@ -71,13 +75,15 @@ export default function ProductSwiper({
           <DialogTrigger asChild>
             <div className="relative w-full aspect-square md:aspect-auto md:h-[500px] rounded-xl overflow-hidden border border-gray-100 bg-white cursor-zoom-in group">
               <div className="w-full h-full flex items-center justify-center relative">
-                 <Image
-                  src={activeImage ? activeImage.url : ""}
-                  alt="Product image"
-                  fill
-                  className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
-                  priority
-                />
+                 {displayImage?.url && (
+                   <Image
+                    src={displayImage.url}
+                    alt={displayImage.alt || "Product image"}
+                    fill
+                    className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+                    priority
+                  />
+                 )}
               </div>
               {/* Mobile hint or overlay could go here */}
             </div>

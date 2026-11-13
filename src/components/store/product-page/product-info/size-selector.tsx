@@ -1,6 +1,5 @@
 import { CartProductType } from "@/lib/types";
 import { Size } from "@prisma/client";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FC, useCallback, useEffect } from "react";
 
 interface Props {
@@ -13,11 +12,6 @@ interface Props {
 }
 
 const SizeSelector: FC<Props> = ({ sizeId, sizes, handleChange }) => {
-  const pathname = usePathname();
-  const { replace } = useRouter();
-  const searchParams = useSearchParams();
-  const params = new URLSearchParams(searchParams);
-
   const handleCartProductToBeAddedChange = useCallback(
     (size: Size) => {
       handleChange("sizeId", size.id);
@@ -33,35 +27,33 @@ const SizeSelector: FC<Props> = ({ sizeId, sizes, handleChange }) => {
   );
 
   useEffect(() => {
-    if (sizes.length > 0 && !sizeId) {
-      const defaultSize = sizes[0];
-      params.set("size", defaultSize.id);
-      replace(`${pathname}?${params.toString()}`, { scroll: false });
-    }
-  }, [sizes, sizeId, pathname, replace, params]);
-
-  useEffect(() => {
-    if (!sizeId) {
+    if (sizes.length === 0) {
       return;
     }
 
-    const selectedSize = sizes.find((s) => s.id === sizeId);
+    const selectedSize = sizeId
+      ? sizes.find((s) => s.id === sizeId) ?? sizes[0]
+      : sizes[0];
+
     if (selectedSize) {
       handleCartProductToBeAddedChange(selectedSize);
     }
   }, [handleCartProductToBeAddedChange, sizeId, sizes]);
 
   const handleSelectSize = (size: Size) => {
-    params.set("size", size.id);
     handleCartProductToBeAddedChange(size);
-    replace(`${pathname}?${params.toString()}`);
+    if (typeof window !== "undefined") {
+      const nextUrl = new URL(window.location.href);
+      nextUrl.searchParams.set("size", size.id);
+      window.history.replaceState(null, "", `${nextUrl.pathname}${nextUrl.search}`);
+    }
   };
 
   return (
     <div className="flex flex-wrap gap-4">
       {sizes.map((size) => (
         <span
-          key={size.size}
+          key={size.id}
           className="border rounded-full px-5 py-1 cursor-pointer hover:border-black"
           style={{ borderColor: size.id === sizeId ? "#000" : "" }}
           onClick={() => handleSelectSize(size)}

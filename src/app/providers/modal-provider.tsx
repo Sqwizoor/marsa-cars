@@ -61,12 +61,10 @@ const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
     setShowingModal(null);
   };
 
-  if (!isMounted) return null;
-
   return (
     <ModalContext.Provider value={{ data, setOpen, setClose, isOpen }}>
       {children}
-      {showingModal}
+      {isMounted ? showingModal : null}
     </ModalContext.Provider>
   );
 };

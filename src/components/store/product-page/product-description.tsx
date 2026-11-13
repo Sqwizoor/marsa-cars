@@ -1,12 +1,30 @@
 "use client";
 import DOMPurify from "dompurify";
+import { useEffect, useState } from "react";
+
+const basicSanitize = (html: string) =>
+  html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/\son\w+\s*=\s*(['"]).*?\1/gi, "")
+    .replace(/javascript:/gi, "");
 
 export default function ProductDescription({
   text,
 }: {
   text: string;
 }) {
-  const sanitizedDescription = DOMPurify.sanitize(text);
+  const [sanitizedDescription, setSanitizedDescription] = useState<string>(() =>
+    basicSanitize(text)
+  );
+
+  useEffect(() => {
+    if (typeof DOMPurify?.sanitize === "function") {
+      setSanitizedDescription(DOMPurify.sanitize(text));
+    } else {
+      setSanitizedDescription(basicSanitize(text));
+    }
+  }, [text]);
+
   return (
     <div className="pt-6">
       {/* Title */}

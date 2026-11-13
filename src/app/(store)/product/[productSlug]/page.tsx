@@ -16,7 +16,13 @@ export default async function ProductPage({
     where: {
       slug: productSlug,
     },
-    include: { variants: true }, // Include product variants in the query
+    select: {
+      slug: true,
+      variants: {
+        select: { slug: true },
+        take: 1,
+      },
+    },
   });
 
   // If the product is not found, redirect to the homepage

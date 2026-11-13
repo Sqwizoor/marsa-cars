@@ -3,9 +3,8 @@
 import { db } from "@/lib/db";
 import { api, convexMutation, convexQuery, isConvexEnabled } from "@/lib/convex";
 import { CartItem, Country as CountryDB } from "@prisma/client";
-import { CartProductType, CartWithCartItemsType } from "@/lib/types";
+import { CartProductType, CartWithCartItemsType, Country } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
-import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";
 import {
   getDeliveryDetailsForStoreByCountry,
@@ -13,6 +12,54 @@ import {
   getShippingDetails,
 } from "./product";
 import { ShippingAddress } from "@prisma/client";
+
+const DEFAULT_USER_COUNTRY: Country = {
+  name: "South Africa",
+  code: "ZA",
+  city: "Johannesburg",
+  region: "Gauteng",
+};
+
+const getCartUserCountry = async (): Promise<Country> => {
+  try {
+    const cookieStore = await cookies();
+    const raw = cookieStore.get("userCountry")?.value;
+    if (!raw) return DEFAULT_USER_COUNTRY;
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      parsed = JSON.parse(decodeURIComponent(raw));
+    }
+
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      "name" in parsed &&
+      "code" in parsed &&
+      typeof (parsed as Country).name === "string" &&
+      typeof (parsed as Country).code === "string"
+    ) {
+      const candidate = parsed as Partial<Country>;
+      return {
+        name: candidate.name || DEFAULT_USER_COUNTRY.name,
+        code: candidate.code || DEFAULT_USER_COUNTRY.code,
+        city:
+          typeof candidate.city === "string"
+            ? candidate.city
+            : DEFAULT_USER_COUNTRY.city,
+        region:
+          typeof candidate.region === "string"
+            ? candidate.region
+            : DEFAULT_USER_COUNTRY.region,
+      };
+    }
+  } catch (error) {
+    console.error("Failed to parse userCountry cookie:", error);
+  }
+  return DEFAULT_USER_COUNTRY;
+};
 
 /**
  * @name followStore
@@ -133,6 +180,10 @@ export const saveUserCart = async (
     });
   }
 
+  if (!cartProducts || cartProducts.length === 0) {
+    return false;
+  }
+
   // Ensure the user exists in our database before proceeding.
   // This prevents foreign key errors if the user record was not created yet.
   await db.user.upsert({
@@ -146,24 +197,15 @@ export const saveUserCart = async (
     },
   });
 
-  // Search for existing user cart
-  const userCart = await db.cart.findFirst({
-    where: { userId },
-  });
-
-  // Delete any existing user cart
-  if (userCart) {
-    await db.cart.delete({
-      where: {
-        userId,
-      },
-    });
-  }
+  const country = await getCartUserCountry();
 
   // Fetch product, variant, and size data from the database for validation
-  const validatedCartItems = await Promise.all(
+  const rawValidatedItems = await Promise.all(
     cartProducts.map(async (cartProduct) => {
       const { productId, variantId, sizeId, quantity } = cartProduct;
+      if (!productId || !variantId || !sizeId) {
+        return null;
+      }
 
       // Fetch the product, variant, and size from the database
       const product = await db.product.findUnique({
@@ -198,53 +240,49 @@ export const saveUserCart = async (
         product.variants.length === 0 ||
         product.variants[0].sizes.length === 0
       ) {
-        throw new Error(
-          `Invalid product, variant, or size combination for productId ${productId}, variantId ${variantId}, sizeId ${sizeId}`
-        );
+        return null;
       }
 
       const variant = product.variants[0];
       const size = variant.sizes[0];
 
       // Validate stock and price
-      const validQuantity = Math.min(quantity, size.quantity);
+      const validQuantity = Math.max(0, Math.min(quantity, size.quantity));
 
       const price = size.discount
         ? size.price - size.price * (size.discount / 100)
         : size.price;
 
       // Calculate Shipping details
-      const countryCookie = getCookie("userCountry", { cookies });
-
       let details = {
         shippingFee: 0,
         extraShippingFee: 0,
         isFreeShipping: false,
       };
 
-      if (countryCookie) {
-        const country = countryCookie ? JSON.parse((await countryCookie) as string) : null;
-        const temp_details = await getShippingDetails(
-          product.shippingFeeMethod,
-          country,
-          product.store,
-          product.freeShipping
-        );
-        if (typeof temp_details !== "boolean") {
-          details = temp_details;
-        }
+      const temp_details = await getShippingDetails(
+        product.shippingFeeMethod,
+        country,
+        product.store,
+        product.freeShipping
+      );
+      if (typeof temp_details !== "boolean") {
+        details = temp_details;
       }
+
       let shippingFee = 0;
       const { shippingFeeMethod } = product;
-      if (shippingFeeMethod === "ITEM") {
-        shippingFee =
-          quantity === 1
-            ? details.shippingFee
-            : details.shippingFee + details.extraShippingFee * (quantity - 1);
-      } else if (shippingFeeMethod === "WEIGHT") {
-        shippingFee = details.shippingFee * variant.weight * quantity;
-      } else if (shippingFeeMethod === "FIXED") {
-        shippingFee = details.shippingFee;
+      if (validQuantity > 0) {
+        if (shippingFeeMethod === "ITEM") {
+          shippingFee =
+            validQuantity === 1
+              ? details.shippingFee
+              : details.shippingFee + details.extraShippingFee * (validQuantity - 1);
+        } else if (shippingFeeMethod === "WEIGHT") {
+          shippingFee = details.shippingFee * variant.weight * validQuantity;
+        } else if (shippingFeeMethod === "FIXED") {
+          shippingFee = details.shippingFee;
+        }
       }
 
       const totalPrice = price * validQuantity + shippingFee;
@@ -267,6 +305,21 @@ export const saveUserCart = async (
       };
     })
   );
+
+  const validatedCartItems = rawValidatedItems.filter(
+    (item): item is NonNullable<typeof item> => item !== null
+  );
+
+  if (validatedCartItems.length === 0) {
+    return false;
+  }
+
+  // Delete any existing user cart safely before creating the validated cart
+  await db.cart.deleteMany({
+    where: {
+      userId,
+    },
+  });
 
   // Recalculate the cart's total price and shipping fees
   const subTotal = validatedCartItems.reduce(
@@ -750,14 +803,23 @@ export const emptyUserCart = async () => {
 export const updateCartWithLatest = async (
   cartProducts: CartProductType[]
 ): Promise<CartProductType[]> => {
+  if (!cartProducts || cartProducts.length === 0) {
+    return [];
+  }
+
   if (isConvexEnabled()) {
     return cartProducts;
   }
 
+  const country = await getCartUserCountry();
+
   // Fetch product, variant, and size data from the database for validation
-  const validatedCartItems = await Promise.all(
-    cartProducts.map(async (cartProduct) => {
+  const rawValidatedItems = await Promise.all(
+    cartProducts.map(async (cartProduct): Promise<CartProductType | null> => {
       const { productId, variantId, sizeId, quantity } = cartProduct;
+      if (!productId || !variantId || !sizeId) {
+        return null;
+      }
 
       // Fetch the product, variant, and size from the database
       const product = await db.product.findUnique({
@@ -792,17 +854,13 @@ export const updateCartWithLatest = async (
         product.variants.length === 0 ||
         product.variants[0].sizes.length === 0
       ) {
-        throw new Error(
-          `Invalid product, variant, or size combination for productId ${productId}, variantId ${variantId}, sizeId ${sizeId}`
-        );
+        return null;
       }
 
       const variant = product.variants[0];
       const size = variant.sizes[0];
 
       // Calculate Shipping details
-      const countryCookie = getCookie("userCountry", { cookies });
-
       let details = {
         shippingService: product.store.defaultShippingService,
         shippingFee: 0,
@@ -812,18 +870,15 @@ export const updateCartWithLatest = async (
         deliveryTimeMax: 0,
       };
 
-      if (countryCookie) {
-        const country = JSON.parse((await countryCookie) as string);
-        const temp_details = await getShippingDetails(
-          product.shippingFeeMethod,
-          country,
-          product.store,
-          product.freeShipping
-        );
+      const temp_details = await getShippingDetails(
+        product.shippingFeeMethod,
+        country,
+        product.store,
+        product.freeShipping
+      );
 
-        if (typeof temp_details !== "boolean") {
-          details = temp_details;
-        }
+      if (typeof temp_details !== "boolean") {
+        details = temp_details;
       }
 
       const price = size.discount
@@ -839,7 +894,6 @@ export const updateCartWithLatest = async (
         productSlug: product.slug,
         variantSlug: variant.slug,
         sizeId,
-        sku: variant.sku,
         name: `${product.name} ${variant.variantName && variant.variantName !== product.name ? `· ${variant.variantName}` : ""}`,
         variantName: variant.variantName,
         image: variant.images && variant.images.length > 0 ? variant.images[0].url : "",
@@ -859,7 +913,9 @@ export const updateCartWithLatest = async (
       };
     })
   );
-  return validatedCartItems;
+  return rawValidatedItems.filter(
+    (item): item is CartProductType => item !== null
+  );
 };
 
 /**
@@ -944,6 +1000,15 @@ export const updateCheckoutProductstWithLatest = async (
   cartProducts: CartItem[],
   address: CountryDB | undefined
 ): Promise<CartWithCartItemsType> => {
+  const country: Country = address
+    ? {
+        name: address.name,
+        code: address.code,
+        city: "",
+        region: "",
+      }
+    : await getCartUserCountry();
+
   // Fetch product, variant, and size data from the database for validation
   const validatedCartItems = await Promise.all(
     cartProducts.map(async (cartProduct) => {
@@ -991,18 +1056,6 @@ export const updateCheckoutProductstWithLatest = async (
       const size = variant.sizes[0];
 
       // Calculate Shipping details
-      const countryCookie = getCookie("userCountry", { cookies });
-
-      const country = address
-        ? address
-        : countryCookie
-        ? JSON.parse((await countryCookie) as string)
-        : null;
-
-      if (!country) {
-        throw new Error("Couldn't retrieve country data");
-      }
-
       let shippingFee = 0;
 
       const { shippingFeeMethod, freeShipping, store } = product;
