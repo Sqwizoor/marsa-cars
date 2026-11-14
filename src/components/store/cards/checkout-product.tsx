@@ -6,9 +6,11 @@ import Link from "next/link";
 export default function CheckoutProductCard({
   product,
   isDiscounted,
+  deliveryLabel,
 }: {
   product: CartItem;
   isDiscounted: boolean;
+  deliveryLabel?: string;
 }) {
   const { productSlug, variantSlug, sizeId, shippingFee } = product;
   return (
@@ -78,9 +80,11 @@ export default function CheckoutProductCard({
                   <span>
                     <Truck className="w-4 inline-block text-[#01a971]" />
                     <span className="text-[#01a971] ml-1">
-                      {shippingFee
+                      {deliveryLabel
+                        ? deliveryLabel
+                        : shippingFee > 0
                         ? `R${shippingFee.toFixed(2)}`
-                        : "Free Delivery"}
+                        : "Delivery via BobGo courier"}
                     </span>
                   </span>
                 </div>

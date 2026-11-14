@@ -72,9 +72,15 @@ const CartSummary: FC<Props> = ({ cartItems, shippingFees }) => {
         </h2>
         <h3 className="flex-1 w-0 min-w-0 text-right">
           <span className="px-0.5 text-black">
-            <div className="text-black text-base sm:text-lg inline-block whitespace-nowrap">
-              R{shippingFees.toFixed(2)}
-            </div>
+            {shippingFees > 0 ? (
+              <div className="text-black text-base sm:text-lg inline-block whitespace-nowrap">
+                R{shippingFees.toFixed(2)}
+              </div>
+            ) : (
+              <span className="text-xs sm:text-sm font-semibold text-emerald-700 whitespace-nowrap">
+                Calculated via BobGo
+              </span>
+            )}
           </span>
         </h3>
       </div>

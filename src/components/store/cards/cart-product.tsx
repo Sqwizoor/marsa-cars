@@ -325,7 +325,9 @@ const { updateProductQuantity, removeFromCart } = useCartStore((state) => state)
                         )}
                       </span>
                     ) : (
-                      <span className="text-[#01A971] ml-1">Free Delivery</span>
+                      <span className="text-[#01A971] ml-1">
+                        BobGo courier calculated at checkout
+                      </span>
                     )}
                   </span>
                 </div>

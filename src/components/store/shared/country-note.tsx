@@ -8,9 +8,9 @@ export default function CountryNote({ country }: { country: string }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs sm:text-sm text-emerald-900 leading-relaxed">
-          Shipping fees are calculated based on your delivery destination (
+          Shipping fees are calculated via BobGo courier based on your delivery destination (
           <span className="font-semibold text-emerald-950">{country}</span>).
-          Fees automatically update when you select or add your delivery address.
+          Rates automatically update when you select or add your delivery address.
         </p>
       </div>
     </div>

@@ -47,7 +47,7 @@ const ProductReviews: FC<Props> = ({
 
   // Pagination
   const [page, setPage] = useState<number>(1);
-  const pageSize = 2;
+  const pageSize = 6;
 
   const handleGetReviews = useCallback(async () => {
     const res = await getProductFilteredReviews(
@@ -72,8 +72,8 @@ const ProductReviews: FC<Props> = ({
     <div id="reviews" className="pt-6">
       {/* Title */}
       <div className="h-12">
-        <h2 className="text-main-primary text-2xl font-bold">
-          Custom Reviews ({totalReviews})
+        <h2 className="text-main-primary text-xl sm:text-2xl font-bold">
+          Customer Reviews ({totalReviews})
         </h2>
       </div>
       {/* Statistics */}
@@ -113,13 +113,16 @@ const ProductReviews: FC<Props> = ({
               <>No Reviews.</>
             )}
           </div>
-          {data.length >= pageSize && (
+          {totalReviews > pageSize && (
             <Paginaion
               page={page}
               totalPages={
                 Math.ceil(
-                  (filters.rating || filters.hasImages
-                    ? data.length
+                  (filters.rating
+                    ? ratingStatistics.find((r) => r.rating === filters.rating)
+                        ?.numReviews ?? data.length
+                    : filters.hasImages
+                    ? statistics.reviewsWithImagesCount
                     : totalReviews) / pageSize
                 )
               }

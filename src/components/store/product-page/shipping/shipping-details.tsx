@@ -49,8 +49,9 @@ const ShippingDetails: FC<Props> = ({ shippingDetails, quantity, weight }) => {
     extraShippingFee,
     shippingFeeMethod,
     shippingService,
-    isFreeShipping,
   } = shippingDetails;
+
+  const hasFlatShippingFee = shippingTotal > 0;
 
   const { minDate, maxDate } = getShippingDatesRange(
     deliveryTimeMin,
@@ -62,25 +63,30 @@ const ShippingDetails: FC<Props> = ({ shippingDetails, quantity, weight }) => {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-start sm:items-center gap-x-1.5 min-w-0">
             <Truck className="w-4 shrink-0 mt-0.5 sm:mt-0" />
-            {isFreeShipping ? (
-              <span className="text-sm font-bold flex flex-wrap items-center">
-                <span>
-                  Free Shipping to <span>{countryName}</span>
-                </span>
-              </span>
-            ) : (
+            {hasFlatShippingFee ? (
               <span className="text-sm font-bold flex flex-wrap items-center">
                 <span>
                   Shipping to <span>{countryName}</span>
                 </span>
                 <span>&nbsp;for R{shippingTotal.toFixed(2)}</span>
               </span>
+            ) : (
+              <span className="text-sm font-bold flex flex-wrap items-center">
+                <span>
+                  Courier delivery to <span>{countryName}</span> via BobGo
+                </span>
+              </span>
             )}
           </div>
           <ChevronRight className="w-3 shrink-0" />
         </div>
         <span className="flex items-center text-sm ml-5">
-          Service:&nbsp;<strong className="text-sm">{shippingService}</strong>
+          Service:&nbsp;
+          <strong className="text-sm">
+            {hasFlatShippingFee && shippingService
+              ? shippingService
+              : "BobGo Courier (rates at checkout)"}
+          </strong>
         </span>
         <span className="flex items-center text-sm ml-5">
           Delivery:&nbsp;
@@ -88,8 +94,8 @@ const ShippingDetails: FC<Props> = ({ shippingDetails, quantity, weight }) => {
             {minDate.slice(4)} - {maxDate.slice(4)}
           </strong>
         </span>
-        {/* Product shipping fee */}
-        {!isFreeShipping && toggle && (
+        {/* Product shipping fee breakdown when a per-item fee is configured */}
+        {hasFlatShippingFee && toggle && (
           <ProductShippingFee
             fee={shippingFee}
             extraFee={extraShippingFee}
@@ -98,21 +104,23 @@ const ShippingDetails: FC<Props> = ({ shippingDetails, quantity, weight }) => {
             weight={weight}
           />
         )}
-        <div
-          onClick={() => setToggle((prev) => !prev)}
-          className="max-w-[calc(100%-2rem)] ml-4 flex items-center bg-gray-100 hover:bg-gray-200 h-5 cursor-pointer"
-        >
-          <div className="w-full flex items-center justify-between gap-x-1 px-2">
-            <span className="text-xs">
-              {toggle ? "Hide" : "Shipping Fee Breakdown"}
-            </span>
-            {toggle ? (
-              <ChevronUp className="w-4" />
-            ) : (
-              <ChevronDown className="w-4" />
-            )}
+        {hasFlatShippingFee && (
+          <div
+            onClick={() => setToggle((prev) => !prev)}
+            className="max-w-[calc(100%-2rem)] ml-4 flex items-center bg-gray-100 hover:bg-gray-200 h-5 cursor-pointer"
+          >
+            <div className="w-full flex items-center justify-between gap-x-1 px-2">
+              <span className="text-xs">
+                {toggle ? "Hide" : "Shipping Fee Breakdown"}
+              </span>
+              {toggle ? (
+                <ChevronUp className="w-4" />
+              ) : (
+                <ChevronDown className="w-4" />
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

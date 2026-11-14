@@ -1101,15 +1101,6 @@ export const getShippingDetails = async (
     const deliveryTimeMax =
       shippingRate?.deliveryTimeMax || store.defaultDeliveryTimeMax;
 
-    if (freeShipping) {
-      const free_shipping_countries = freeShipping.eligibaleCountries;
-      const check_free_shipping = free_shipping_countries.find(
-        (c) => c.countryId === country.id
-      );
-      if (check_free_shipping) {
-        shippingDetails.isFreeShipping = true;
-      }
-    }
     shippingDetails = {
       shippingFeeMethod,
       shippingService: shippingService,
@@ -1121,24 +1112,21 @@ export const getShippingDetails = async (
       countryCode: userCountry.code,
       countryName: userCountry.name,
       city: userCountry.city,
-      isFreeShipping: shippingDetails.isFreeShipping,
+      isFreeShipping: false,
     };
 
-    const { isFreeShipping } = shippingDetails;
     switch (shippingFeeMethod) {
       case "ITEM":
-        shippingDetails.shippingFee = isFreeShipping ? 0 : shippingFeePerItem;
-        shippingDetails.extraShippingFee = isFreeShipping
-          ? 0
-          : shippingFeeForAdditionalItem;
+        shippingDetails.shippingFee = shippingFeePerItem;
+        shippingDetails.extraShippingFee = shippingFeeForAdditionalItem;
         break;
 
       case "WEIGHT":
-        shippingDetails.shippingFee = isFreeShipping ? 0 : shippingFeePerKg;
+        shippingDetails.shippingFee = shippingFeePerKg;
         break;
 
       case "FIXED":
-        shippingDetails.shippingFee = isFreeShipping ? 0 : shippingFeeFixed;
+        shippingDetails.shippingFee = shippingFeeFixed;
         break;
 
       default:
@@ -1282,16 +1270,6 @@ export const getProductShippingFee = async (
   });
 
   if (country) {
-    if (freeShipping) {
-      const free_shipping_countries = freeShipping.eligibaleCountries;
-      const isEligableForFreeShipping = free_shipping_countries.some(
-        (c) => c.countryId === country.name
-      );
-      if (isEligableForFreeShipping) {
-        return 0;
-      }
-    }
-
     const shippingRate = await db.shippingRate.findFirst({
       where: {
         countryId: country.id,

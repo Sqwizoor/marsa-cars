@@ -50,12 +50,15 @@ const SizeSelector: FC<Props> = ({ sizeId, sizes, handleChange }) => {
   };
 
   return (
-    <div className="flex flex-wrap gap-4">
+    <div className="flex flex-wrap gap-2 sm:gap-3">
       {sizes.map((size) => (
         <span
           key={size.id}
-          className="border rounded-full px-5 py-1 cursor-pointer hover:border-black"
-          style={{ borderColor: size.id === sizeId ? "#000" : "" }}
+          className={`border rounded-full px-3.5 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm cursor-pointer transition-colors hover:border-black ${
+            size.id === sizeId
+              ? "border-black bg-gray-50 font-medium"
+              : "border-gray-200"
+          }`}
           onClick={() => handleSelectSize(size)}
         >
           {size.size}

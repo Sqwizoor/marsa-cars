@@ -160,33 +160,41 @@ const ProductInfo: FC<Props> = ({
       </div>
       {/* Product live watchers count */}
       <ProductWatch productId={variantId} />
-      <Separator className="mt-2" />
-      
-      <div className="flex flex-col gap-6 mt-4">
+      <Separator className="mt-3" />
+
+      <div className="grid grid-cols-2 gap-3 sm:gap-5 items-start mt-4 pb-3">
         {/* Color wheel - variant switcher */}
-        <div className="space-y-3">
-          <div className="relative flex items-center justify-between text-main-primary font-bold">
-            <span className="flex items-center gap-x-2 text-sm md:text-base">
+        <div className="min-w-0 space-y-2">
+          <div className="flex items-center gap-x-2 text-main-primary font-bold">
+            <span className="text-sm md:text-base">
               {colors.length > 1 ? "Colors" : "Color"}
-              <ColorWheel colors={colors} size={20} />
             </span>
+            {colors.length > 0 && <ColorWheel colors={colors} size={20} />}
           </div>
-          <div className="w-full">
-            {variantInfo.length > 1 && (
+          {variantInfo.length > 1 ? (
+            <div className="w-full pt-0.5">
               <ProductVariantSelector
                 variants={variantInfo}
                 slug={productData.variantSlug}
                 setVariantImages={setVariantImages}
                 setActiveImage={setActiveImage}
               />
-            )}
-          </div>
+            </div>
+          ) : (
+            colors.length === 0 && (
+              <span className="inline-block text-xs text-gray-500">
+                Original Finish
+              </span>
+            )
+          )}
         </div>
-        
+
         {/* Size selector */}
-        <div className="space-y-3 pb-2">
+        <div className="min-w-0 space-y-2">
           <div className="flex items-center gap-x-2">
-            <h1 className="text-main-primary font-bold text-sm md:text-base">Size</h1>
+            <h2 className="text-main-primary font-bold text-sm md:text-base">
+              Size
+            </h2>
           </div>
           <SizeSelector
             sizes={sizes}
@@ -197,7 +205,7 @@ const ProductInfo: FC<Props> = ({
       </div>
 
       {/* Product assurance */}
-      <Separator className="mt-2" />
+      <Separator className="mt-3" />
       <ProductAssurancePolicy />
     </div>
   );

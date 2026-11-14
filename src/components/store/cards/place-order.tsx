@@ -80,7 +80,14 @@ const PlaceOrderCard = ({
       <div className="relative py-4 px-4 sm:px-6 bg-white rounded-xl shadow-sm border border-slate-100">
         <h1 className="text-gray-900 text-xl sm:text-2xl font-bold mb-4">Summary</h1>
         <Info title="Subtotal" text={`R${subTotal.toFixed(2)}`} />
-        <Info title="Shipping Fees" text={`+R${shippingFees.toFixed(2)}`} />
+        <Info
+          title="Shipping Fees"
+          text={
+            selectedRate || shippingFees > 0
+              ? `+R${shippingFees.toFixed(2)}`
+              : "Calculated via BobGo"
+          }
+        />
         <Info title="Taxes" text="+R0.00" />
         {coupon && (
           <Info

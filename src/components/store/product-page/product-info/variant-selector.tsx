@@ -19,7 +19,7 @@ const ProductVariantSelector: FC<Props> = ({
   setActiveImage,
 }) => {
   return (
-    <div className="flex items-center flex-wrap gap-2">
+    <div className="flex items-center flex-wrap gap-2 sm:gap-3">
       {variants.map((variant, i) => (
         <Link
           href={variant.variantUrl}
@@ -35,7 +35,7 @@ const ProductVariantSelector: FC<Props> = ({
         >
           <div
             className={cn(
-              "w-12 h-12 rounded-full grid place-items-center p-0.5  overflow-hidden border border-transparent hover:border-main-primary cursor-pointer transition-all duration-75 ease-in",
+              "w-9 h-9 sm:w-11 sm:h-11 rounded-full grid place-items-center p-0.5 overflow-hidden border border-transparent hover:border-main-primary cursor-pointer transition-all duration-75 ease-in",
               {
                 "border-main-primary": slug === variant.variantSlug,
               }
@@ -44,9 +44,9 @@ const ProductVariantSelector: FC<Props> = ({
             <Image
               src={variant.variantImage || "/placeholder.png"}
               alt={`product variant ${variant.variantUrl}`}
-              width={48}
-              height={48}
-              className="rounded-full"
+              width={44}
+              height={44}
+              className="rounded-full w-full h-full object-cover"
             />
           </div>
         </Link>

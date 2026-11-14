@@ -1,5 +1,5 @@
 import StoreCard from "@/components/store/cards/store-card";
-import SponsoredAd from "@/components/store/shared/sponsored-ad";
+import OilOfferBanner from "@/components/store/shared/oil-offer-banner";
 import ProductPageContainer from "@/components/store/product-page/container";
 import ProductDescription from "@/components/store/product-page/product-description";
 import ProductQuestions from "@/components/store/product-page/product-questions";
@@ -85,7 +85,7 @@ export default async function ProductVariantPage({
           
           <Separator className="mt-6" />
           <div className="mt-6">
-            <SponsoredAd index={0} />
+            <OilOfferBanner />
           </div>
           
           <Separator className="mt-6" />

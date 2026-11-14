@@ -204,6 +204,13 @@ const CheckoutContainer: FC<Props> = ({
                 key={product.variantId}
                 product={product}
                 isDiscounted={cartData.coupon?.storeId === product.storeId}
+                deliveryLabel={
+                  loadingRates
+                    ? "Calculating BobGo rates..."
+                    : selectedRate
+                    ? `BobGo · ${selectedRate.courier_name}`
+                    : "Calculated via BobGo"
+                }
               />
             ))}
           </div>
