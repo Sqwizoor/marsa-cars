@@ -18,9 +18,9 @@ export const trackProductView = (product: {
   id: string
   name: string
   price: number
-  category?: string
-  storeId?: string
-  storeName?: string
+  category?: string | null
+  storeId?: string | null
+  storeName?: string | null
 }) => {
   posthog.capture('product_viewed', {
     product_id: product.id,
@@ -35,7 +35,7 @@ export const trackProductView = (product: {
     name: product.name,
     price: product.price,
     contentType: 'product',
-    category: product.category,
+    category: product.category ?? undefined,
   })
 }
 
@@ -58,7 +58,7 @@ export const trackAddToCart = (product: {
   name: string
   price: number
   quantity: number
-  variant?: string
+  variant?: string | null
 }) => {
   posthog.capture('add_to_cart', {
     product_id: product.id,

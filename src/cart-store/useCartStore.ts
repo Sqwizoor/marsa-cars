@@ -70,7 +70,7 @@ export const useCartStore = create(
             : product.name,
           price: product.price,
           quantity: product.quantity,
-          variant: product.variantName,
+          variant: product.variantName ?? undefined,
         });
       },
       updateProductQuantity: (product: CartProductType, quantity: number) => {
