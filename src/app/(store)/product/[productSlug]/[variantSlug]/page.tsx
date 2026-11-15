@@ -7,6 +7,7 @@ import ProductSpecs from "@/components/store/product-page/product-specs";
 import ProductReviews from "@/components/store/product-page/reviews/product-reviews";
 import StoreProducts from "@/components/store/product-page/store-products";
 import { Separator } from "@/components/ui/separator";
+import { getBmwLandingPageEventName } from "@/lib/meta-pixel";
 import { getProductPageData } from "@/queries/product";
 import { notFound } from "next/navigation";
 
@@ -56,8 +57,56 @@ export default async function ProductVariantPage({
     reviews,
   } = productData;
 
+  const landingEventName = getBmwLandingPageEventName(productSlug, variantSlug);
+  const effectiveSize = sizes.find((s) => s.id === effectiveSizeId) ?? sizes[0];
+  const landingPrice = effectiveSize
+    ? effectiveSize.discount
+      ? effectiveSize.price - (effectiveSize.price * effectiveSize.discount) / 100
+      : effectiveSize.price
+    : 0;
+  const landingPayload = landingEventName
+    ? {
+        page_type: "landing_page",
+        product_slug: productSlug,
+        variant_slug: variantSlug,
+        content_ids: [productData.productId],
+        content_name: productData.variantName
+          ? `${productData.name} - ${productData.variantName}`
+          : productData.name,
+        content_type: "product",
+        value: landingPrice,
+        currency: "ZAR",
+      }
+    : null;
+
   return (
     <div className="min-h-screen">
+      {landingEventName && landingPayload && (
+        <>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.__bmwLandingTracked = ${JSON.stringify(variantSlug)};
+                if (typeof window.fbq === "function") {
+                  window.fbq("track", "ViewContent", ${JSON.stringify(landingPayload)});
+                  window.fbq("trackCustom", "LandingPageView", ${JSON.stringify(landingPayload)});
+                  window.fbq("trackCustom", ${JSON.stringify(landingEventName)}, ${JSON.stringify(landingPayload)});
+                }
+              `,
+            }}
+          />
+          <noscript>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              height="1"
+              width="1"
+              style={{ display: "none" }}
+              src={`https://www.facebook.com/tr?id=1121730653781517&ev=${landingEventName}&noscript=1`}
+              alt=""
+            />
+          </noscript>
+        </>
+      )}
       <div className="md:max-w-[1650px] mx-auto p-4 md:p-8 overflow-x-hidden min-h-screen">
         <ProductPageContainer productData={productData} sizeId={effectiveSizeId}>
           <>

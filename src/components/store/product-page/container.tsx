@@ -18,7 +18,10 @@ import FastDelivery from "../cards/fast-delivery";
 import { useRouter } from "next/navigation";
 import { saveUserCart } from "@/queries/user";
 import { trackProductView, trackCheckoutStarted } from "@/lib/posthog-tracking";
-import { trackMetaCustomizeProduct } from "@/lib/meta-pixel";
+import {
+  trackMetaCustomizeProduct,
+  trackMetaLandingPage,
+} from "@/lib/meta-pixel";
 
 interface Props {
   productData: ProductPageDataType;
@@ -222,6 +225,15 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
         category: productData.category?.name,
         storeId: productData.store?.id,
         storeName: productData.store?.name,
+      });
+      trackMetaLandingPage({
+        productSlug: productData.productSlug,
+        variantSlug: productData.variantSlug,
+        productId,
+        name: productData.variantName
+          ? `${productData.name} - ${productData.variantName}`
+          : productData.name,
+        price: baseCartProduct?.price ?? 0,
       });
     }
   }, [productId, variantId]);
