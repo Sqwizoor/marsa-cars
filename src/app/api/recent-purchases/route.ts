@@ -13,106 +13,198 @@ export interface RecentPurchaseNotification {
   timeLabel: string;
 }
 
-const CITY_FIXES: Record<string, string> = {
-  johannesgurg: "Johannesburg",
-  jhb: "Johannesburg",
-  pta: "Pretoria",
-  cpt: "Cape Town",
-  dbn: "Durban",
-};
+const BUYER_PROFILES: Array<{ name: string; city: string }> = [
+  // Zulu names
+  { name: "Sipho Ndlovu", city: "Durban" },
+  { name: "Thabo Mkhize", city: "Johannesburg" },
+  { name: "Bongani Khumalo", city: "Pietermaritzburg" },
+  { name: "Sibusiso Dlamini", city: "Sandton" },
+  { name: "Zanele Ngcobo", city: "Umhlanga" },
+  { name: "Mandla Zulu", city: "Richards Bay" },
+  { name: "Nomvula Sithole", city: "Midrand" },
+  { name: "Lungile Buthelezi", city: "Durban" },
+  { name: "Ayanda Ntuli", city: "Centurion" },
+  { name: "Sandile Mthembu", city: "Johannesburg" },
+  { name: "Nonhle Zungu", city: "Ballito" },
+  { name: "Vusi Nxumalo", city: "Newcastle" },
+  { name: "Nokuthula Gumede", city: "Pinetown" },
+  { name: "Siyabonga Mbeje", city: "Roodepoort" },
+  { name: "Nkosinathi Cele", city: "Randburg" },
+  // Xhosa names
+  { name: "Lunga Mbeki", city: "Cape Town" },
+  { name: "Siyanda Ndaba", city: "Gqeberha" },
+  { name: "Thandiwe Madikizela", city: "East London" },
+  { name: "Zolani Kani", city: "Bellville" },
+  { name: "Buhle Dyantyi", city: "Somerset West" },
+  { name: "Andile Nkomo", city: "Johannesburg" },
+  { name: "Nolwazi Mfiki", city: "George" },
+  { name: "Lukhanyo Siwisa", city: "Mthatha" },
+  { name: "Unathi Xaba", city: "Cape Town" },
+  { name: "Khaya Majola", city: "Gqeberha" },
+  { name: "Zikhona Gqweta", city: "Durbanville" },
+  { name: "Anele Mtshali", city: "Midrand" },
+  { name: "BabalwaTshabalala", city: "Pretoria" },
+  { name: "Lwazi Mabaso", city: "Stellenbosch" },
+  { name: "Sinethemba Mbalo", city: "East London" },
+  // Sotho / Tswana / Pedi names
+  { name: "Tshepo Mokoena", city: "Pretoria" },
+  { name: "Lerato Molefe", city: "Bloemfontein" },
+  { name: "Karabo Nkoana", city: "Polokwane" },
+  { name: "Kagiso Modise", city: "Rustenburg" },
+  { name: "Palesa Sello", city: "Soweto" },
+  { name: "Mpho Letsoalo", city: "Centurion" },
+  { name: "Thato Kgosana", city: "Midrand" },
+  { name: "Tebogo Mabena", city: "Alberton" },
+  { name: "Refilwe Motaung", city: "Kempton Park" },
+  { name: "Lesedi Phiri", city: "Boksburg" },
+  { name: "Boitumelo Mahlangu", city: "Witbank" },
+  { name: "Katlego Ramaphosa", city: "Polokwane" },
+  { name: "Kabelo Tau", city: "Potchefstroom" },
+  { name: "Tumelo Sekhukhune", city: "Vereeniging" },
+  { name: "Thapelo Maluleke", city: "Nelspruit" },
+  // Broader African names
+  { name: "Tendai Moyo", city: "Johannesburg" },
+  { name: "Chipo Ndlovu", city: "Sandton" },
+  { name: "Tatenda Mutasa", city: "Pretoria" },
+  { name: "FaraiChiwenga", city: "Midrand" },
+  { name: "Tinashe Sibanda", city: "Randburg" },
+  { name: "Tariro Chikwanda", city: "Centurion" },
+  { name: "Jabulani Chauke", city: "Nelspruit" },
+  { name: "Naledi Khupe", city: "Fourways" },
+  { name: "Simba Ncube", city: "Edenvale" },
+  { name: "Tafadzwa Gumbo", city: "Bedfordview" },
+];
 
-function formatBuyerName(firstName?: string | null, lastName?: string | null): string {
-  const first = (firstName || "").trim();
-  const last = (lastName || "").trim();
-  if (!first) return "Verified Buyer";
-  const capFirst = first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
-  if (!last) return capFirst;
-  return `${capFirst} ${last.charAt(0).toUpperCase()}.`;
-}
+const TIME_LABELS = [
+  "14 mins ago",
+  "27 mins ago",
+  "42 mins ago",
+  "1h ago",
+  "2h ago",
+  "3h ago",
+  "4h ago",
+  "Earlier today",
+  "5h ago",
+  "Yesterday",
+];
 
-function normalizeCity(city?: string | null, state?: string | null): string {
-  const raw = (city || "").trim();
-  if (raw) {
-    const fixed = CITY_FIXES[raw.toLowerCase()];
-    if (fixed) return fixed;
-    return raw.charAt(0).toUpperCase() + raw.slice(1);
-  }
-  const prov = (state || "").trim();
-  return prov || "South Africa";
-}
-
-function formatTimeLabel(createdAt: Date): string {
-  const diffMs = Math.max(0, Date.now() - createdAt.getTime());
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 2) return "Just now";
-  if (diffMins < 60) return `${diffMins} mins ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays <= 7) return `${diffDays} days ago`;
-  return "Verified purchase";
+function formatShortName(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
 }
 
 export async function GET() {
   try {
-    const orderItems = await db.orderItem.findMany({
-      take: 30,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        productSlug: true,
-        variantSlug: true,
-        name: true,
-        image: true,
-        price: true,
-        createdAt: true,
-        orderGroup: {
-          select: {
-            order: {
-              select: {
-                shippingAddress: {
-                  select: {
-                    firstName: true,
-                    lastName: true,
-                    city: true,
-                    state: true,
-                  },
-                },
+    const [orderItems, products] = await Promise.all([
+      db.orderItem.findMany({
+        take: 25,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          productSlug: true,
+          variantSlug: true,
+          name: true,
+          image: true,
+          price: true,
+        },
+      }),
+      db.product.findMany({
+        take: 25,
+        orderBy: { updatedAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          variants: {
+            take: 1,
+            select: {
+              slug: true,
+              images: {
+                take: 1,
+                select: { url: true },
+              },
+              sizes: {
+                take: 1,
+                select: { price: true, discount: true },
               },
             },
           },
         },
-      },
-    });
+      }),
+    ]);
 
     const seenSlugs = new Set<string>();
-    const items: RecentPurchaseNotification[] = [];
+    const rawProducts: Array<{
+      id: string;
+      productName: string;
+      productSlug: string;
+      variantSlug: string;
+      image: string;
+      price: number;
+    }> = [];
 
     for (const item of orderItems) {
       const slugKey = `${item.productSlug}/${item.variantSlug}`;
-      if (seenSlugs.has(slugKey) || !item.image || !item.productSlug || !item.variantSlug) {
+      if (
+        seenSlugs.has(slugKey) ||
+        !item.image ||
+        !item.productSlug ||
+        !item.variantSlug
+      ) {
         continue;
       }
       seenSlugs.add(slugKey);
-
-      const address = item.orderGroup?.order?.shippingAddress;
-      const cleanName = item.name.split(" · ")[0].trim();
-
-      items.push({
+      rawProducts.push({
         id: item.id,
-        buyerName: formatBuyerName(address?.firstName, address?.lastName),
-        city: normalizeCity(address?.city, address?.state),
-        productName: cleanName,
+        productName: item.name.split(" · ")[0].trim(),
         productSlug: item.productSlug,
         variantSlug: item.variantSlug,
         image: item.image,
         price: item.price,
-        timeLabel: formatTimeLabel(new Date(item.createdAt)),
       });
-
-      if (items.length >= 10) break;
     }
+
+    for (const prod of products) {
+      const variant = prod.variants[0];
+      const image = variant?.images[0]?.url;
+      const size = variant?.sizes[0];
+      if (!variant || !image || !size) continue;
+
+      const slugKey = `${prod.slug}/${variant.slug}`;
+      if (seenSlugs.has(slugKey)) continue;
+      seenSlugs.add(slugKey);
+
+      const finalPrice = size.discount
+        ? size.price - (size.price * size.discount) / 100
+        : size.price;
+
+      rawProducts.push({
+        id: prod.id,
+        productName: prod.name,
+        productSlug: prod.slug,
+        variantSlug: variant.slug,
+        image,
+        price: finalPrice,
+      });
+    }
+
+    const items: RecentPurchaseNotification[] = rawProducts
+      .slice(0, 20)
+      .map((prod, idx) => {
+        const profile = BUYER_PROFILES[idx % BUYER_PROFILES.length];
+        return {
+          id: prod.id,
+          buyerName: formatShortName(profile.name),
+          city: profile.city,
+          productName: prod.productName,
+          productSlug: prod.productSlug,
+          variantSlug: prod.variantSlug,
+          image: prod.image,
+          price: prod.price,
+          timeLabel: TIME_LABELS[idx % TIME_LABELS.length],
+        };
+      });
 
     return NextResponse.json(
       { items },
