@@ -5,7 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { trackCarView, trackCarInquiry } from "@/lib/posthog-tracking";
-import { trackMetaAddToWishlist } from "@/lib/meta-pixel";
+import {
+  trackMetaAddToWishlist,
+  trackMetaContact,
+  trackMetaSchedule,
+} from "@/lib/meta-pixel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -133,6 +137,12 @@ export default function CarDetailClient({ listing }: CarDetailClientProps) {
         price: listing.price,
         sellerId: listing.userId
       });
+      if (/view|test drive|schedule|appointment|visit/i.test(inquiryForm.message)) {
+        trackMetaSchedule({
+          id: listing.id,
+          name: listing.title,
+        });
+      }
 
       toast.success("Inquiry sent successfully! The seller will contact you soon.");
       setShowInquiryForm(false);
@@ -558,7 +568,15 @@ export default function CarDetailClient({ listing }: CarDetailClientProps) {
                       className="w-full border-green-500 text-green-600 hover:bg-green-50"
                       asChild
                     >
-                      <a href={`tel:${listing.carSubscription.dealerPhone}`}>
+                      <a
+                        href={`tel:${listing.carSubscription.dealerPhone}`}
+                        onClick={() =>
+                          trackMetaContact({
+                            contentName: listing.title,
+                            contentCategory: "vehicle",
+                          })
+                        }
+                      >
                         <Phone className="w-5 h-5 mr-2" />
                         Call Dealer
                       </a>

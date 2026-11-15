@@ -17,7 +17,8 @@ import { setCookie } from "cookies-next";
 import FastDelivery from "../cards/fast-delivery";
 import { useRouter } from "next/navigation";
 import { saveUserCart } from "@/queries/user";
-import { trackProductView } from "@/lib/posthog-tracking";
+import { trackProductView, trackCheckoutStarted } from "@/lib/posthog-tracking";
+import { trackMetaCustomizeProduct } from "@/lib/meta-pixel";
 
 interface Props {
   productData: ProductPageDataType;
@@ -141,11 +142,18 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     property: keyof CartProductType,
     value: CartProductType[keyof CartProductType]
   ) => {
+    if (property === "size" || property === "sizeId") {
+      trackMetaCustomizeProduct({
+        id: productId,
+        name: productData?.name,
+        customization: String(value),
+      });
+    }
     setProductToBeAddedToCart((prevProduct) => ({
       ...prevProduct!,
       [property]: value,
     }));
-  }, []);
+  }, [productId, productData?.name]);
 
   // Keeping cart state updated
 
@@ -247,6 +255,11 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
       const latestCart = useCartStore.getState().cart;
       const saved = await saveUserCart(latestCart);
       if (saved) {
+        trackCheckoutStarted({
+          total: latestCart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+          itemCount: latestCart.reduce((sum, item) => sum + item.quantity, 0),
+          contentIds: latestCart.map((item) => item.productId),
+        });
         toast.success("Redirecting to checkout...");
         router.push("/checkout");
       } else {

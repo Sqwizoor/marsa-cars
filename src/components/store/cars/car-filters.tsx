@@ -21,6 +21,7 @@ import {
   CAR_CONDITIONS,
   SA_PROVINCES,
 } from "@/constants/car-subscription-plans";
+import { trackMetaFindLocation } from "@/lib/meta-pixel";
 
 interface CarFiltersProps {
   onClose: () => void;
@@ -54,6 +55,9 @@ export default function CarFilters({ onClose, onApply }: CarFiltersProps) {
   };
 
   const applyFilters = () => {
+    if (filters.province) {
+      trackMetaFindLocation({ location: filters.province });
+    }
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value) {

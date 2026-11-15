@@ -9,6 +9,7 @@ import PlaceOrderCard from "../cards/place-order";
 import { Country as CountryType } from "@/lib/types";
 import CountryNote from "../shared/country-note";
 import { updateCheckoutProductstWithLatest } from "@/queries/user";
+import { trackCheckoutStarted } from "@/lib/posthog-tracking";
 
 interface Props {
   cart: CartWithCartItemsType;
@@ -38,6 +39,14 @@ const CheckoutContainer: FC<Props> = ({
   )?.country;
 
   const { cartItems } = cart;
+
+  useEffect(() => {
+    trackCheckoutStarted({
+      total: cart.total,
+      itemCount: cartItems.reduce((sum, item) => sum + item.quantity, 0),
+      contentIds: cartItems.map((item) => item.productId),
+    });
+  }, [cart.id]);
 
   const applyRateToCart = (
     prev: CartWithCartItemsType,

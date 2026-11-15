@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { saveUserCart } from "@/queries/user";
+import { trackCheckoutStarted } from "@/lib/posthog-tracking";
 
 interface Props {
   cartItems: CartProductType[];
@@ -32,6 +33,11 @@ const CartSummary: FC<Props> = ({ cartItems, shippingFees }) => {
       setLoading(true);
       const res = await saveUserCart(cartItems);
       if (res) {
+        trackCheckoutStarted({
+          total,
+          itemCount: cartItems.reduce((sum, item) => sum + item.quantity, 0),
+          contentIds: cartItems.map((item) => item.productId),
+        });
         // Use replace to prevent back button issues on mobile
         router.push("/checkout");
       } else {

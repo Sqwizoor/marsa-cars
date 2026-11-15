@@ -4,13 +4,36 @@ import PaymentStatusTag from "@/components/shared/payment-status";
 import { Button } from "@/components/ui/button";
 import { OrderFulltType, OrderStatus, PaymentStatus } from "@/lib/types";
 import { ChevronLeft, ChevronRight, Download, Printer } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { generateOrderPDFBlob } from "./pdf-invoice";
 import { downloadBlobAsFile, printPDF } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { trackPurchase } from "@/lib/posthog-tracking";
 
 export default function OrderHeader({ order }: { order: OrderFulltType }) {
   const router = useRouter();
+
+  useEffect(() => {
+    if (!order || order.paymentStatus === "Failed") return;
+    const storageKey = `fbq_purchase_${order.id}`;
+    if (typeof window !== "undefined" && !localStorage.getItem(storageKey)) {
+      const items = order.groups.flatMap((group) =>
+        group.items.map((item) => ({
+          id: item.productId,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        }))
+      );
+      trackPurchase({
+        id: order.id,
+        total: order.total,
+        items,
+      });
+      localStorage.setItem(storageKey, "true");
+    }
+  }, [order]);
+
   if (!order) return null;
 
   const handleDownload = async () => {

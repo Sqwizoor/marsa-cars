@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/store/ui/button";
+import { trackMetaAddPaymentInfo } from "@/lib/meta-pixel";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -42,6 +43,10 @@ export default function PayFastButton({ cartId, shippingAddressId, shippingFee, 
       if (!initRes.ok) throw new Error("Failed to initiate payment");
       const data = await initRes.json();
       if (data.redirect) {
+        trackMetaAddPaymentInfo({
+          value: shippingFee,
+          currency: "ZAR",
+        });
         window.location.href = data.redirect;
       } else {
         toast.error("No redirect URL returned");

@@ -5,6 +5,12 @@ import {
   trackMetaViewContent,
   trackMetaAddToCart,
   trackMetaAddToWishlist,
+  trackMetaPurchase,
+  trackMetaLead,
+  trackMetaContact,
+  trackMetaSearch,
+  trackMetaSubscribe,
+  trackMetaInitiateCheckout,
 } from './meta-pixel'
 
 // Product tracking
@@ -98,6 +104,13 @@ export const trackPurchase = (order: {
     currency: 'ZAR',
     items: order.items,
   })
+  trackMetaPurchase({
+    value: order.total,
+    currency: 'ZAR',
+    orderId: order.id,
+    contentIds: order.items.map((item) => item.id),
+    numItems: order.items.reduce((sum, item) => sum + item.quantity, 0),
+  })
 }
 
 // Car tracking
@@ -141,6 +154,16 @@ export const trackCarInquiry = (car: {
     price: car.price,
     seller_id: car.sellerId,
   })
+  trackMetaLead({
+    id: car.id,
+    name: car.title,
+    value: car.price,
+    category: 'vehicle',
+  })
+  trackMetaContact({
+    contentName: car.title,
+    contentCategory: 'vehicle',
+  })
 }
 
 export const trackCarListingCreated = (car: {
@@ -165,6 +188,10 @@ export const trackSearch = (query: string, results: number, type: 'products' | '
     query,
     results_count: results,
     search_type: type,
+  })
+  trackMetaSearch({
+    searchString: query,
+    contentCategory: type,
   })
 }
 
@@ -200,6 +227,11 @@ export const trackSubscriptionPurchase = (subscription: {
     amount: subscription.amount,
     subscription_type: subscription.type,
   })
+  trackMetaSubscribe({
+    value: subscription.amount,
+    currency: 'ZAR',
+    predictedLtv: subscription.amount * 12,
+  })
 }
 
 // User actions
@@ -233,9 +265,15 @@ export const trackWishlistAdd = (product: {
 export const trackCheckoutStarted = (cart: {
   total: number
   itemCount: number
+  contentIds?: string[]
 }) => {
   posthog.capture('checkout_started', {
     value: cart.total,
     item_count: cart.itemCount,
+  })
+  trackMetaInitiateCheckout({
+    value: cart.total,
+    numItems: cart.itemCount,
+    contentIds: cart.contentIds,
   })
 }

@@ -20,6 +20,11 @@ import {
 import toast from "react-hot-toast";
 import { CarSubscription } from "@prisma/client";
 import posthog from 'posthog-js';
+import {
+  trackMetaStartTrial,
+  trackMetaSubscribe,
+  trackMetaSubmitApplication,
+} from "@/lib/meta-pixel";
 
 interface SellCarClientProps {
   initialSubscription: CarSubscription | null;
@@ -66,9 +71,20 @@ export default function SellCarClient({ initialSubscription }: SellCarClientProp
 
       // For free tier (Individual), redirect to dashboard
       if (selectedPlan === "INDIVIDUAL") {
+        trackMetaStartTrial({
+          value: "0.00",
+          currency: "ZAR",
+          predictedLtv: "0.00",
+        });
         toast.success("Welcome! You can now list your car.");
         router.push("/dashboard/cars");
       } else {
+        trackMetaSubmitApplication({ contentName: `Car Seller - ${selectedPlan}` });
+        trackMetaSubscribe({
+          value: plan?.price ?? 0,
+          currency: "ZAR",
+          predictedLtv: (plan?.price ?? 0) * 12,
+        });
         // For paid tiers, redirect to payment
         router.push(`/dashboard/cars/subscription/payment?tier=${selectedPlan}`);
       }

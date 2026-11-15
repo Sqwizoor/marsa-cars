@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle } from "lucide-react";
+import { trackMetaSubscribe } from "@/lib/meta-pixel";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +21,11 @@ export default function SubscriptionSuccessPage() {
   const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
+    trackMetaSubscribe({
+      value: "0.00",
+      currency: "ZAR",
+      predictedLtv: "0.00",
+    });
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {

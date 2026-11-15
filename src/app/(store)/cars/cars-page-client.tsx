@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { CarListingWithImages } from "@/queries/cars";
+import { trackMetaSearch } from "@/lib/meta-pixel";
 
 export default function CarsPageClient() {
   const searchParams = useSearchParams();
@@ -73,6 +74,10 @@ export default function CarsPageClient() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      trackMetaSearch({
+        searchString: searchQuery.trim(),
+        contentCategory: "cars",
+      });
       updateParams("model", searchQuery.trim());
     }
   };

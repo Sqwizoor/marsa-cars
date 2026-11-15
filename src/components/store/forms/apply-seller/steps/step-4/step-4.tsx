@@ -7,6 +7,10 @@ import {
   type SubscriptionPlanTier,
 } from "@/constants/subscription-plans";
 import type { StoreType } from "@/lib/types";
+import {
+  trackMetaStartTrial,
+  trackMetaSubmitApplication,
+} from "@/lib/meta-pixel";
 
 export default function Step4({
   selectedPlan,
@@ -36,6 +40,12 @@ export default function Step4({
       if (!data.redirect) {
         throw new Error("Missing redirect URL from server");
       }
+      trackMetaSubmitApplication({ contentName: formData.name || "Seller Store Application" });
+      trackMetaStartTrial({
+        value: plan?.price || 499,
+        currency: "ZAR",
+        predictedLtv: (plan?.price || 499) * 12,
+      });
       window.location.href = data.redirect;
     } catch (e: any) {
       setError(e.message || "Something went wrong");

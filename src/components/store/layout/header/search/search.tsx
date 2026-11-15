@@ -4,6 +4,7 @@ import { Search as SearchIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, FormEvent, useState } from "react";
 import SearchSuggestions from "./suggestions";
+import { trackMetaSearch } from "@/lib/meta-pixel";
 export default function Search() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -19,6 +20,12 @@ export default function Search() {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (searchQuery.trim()) {
+      trackMetaSearch({
+        searchString: searchQuery.trim(),
+        contentCategory: "products",
+      });
+    }
     if (pathname !== "/browse") {
       // We are not in browse page
       push(`/browse?search=${searchQuery}`);

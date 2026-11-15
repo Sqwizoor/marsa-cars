@@ -16,12 +16,19 @@ import { toast } from "react-hot-toast";
 import {
   SUBSCRIPTION_PLANS,
 } from "@/constants/subscription-plans";
+import { trackMetaSubscribe } from "@/lib/meta-pixel";
 
 export default function SubscriptionsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleSubscribe = async (tier: string) => {
+    const plan = SUBSCRIPTION_PLANS.find((p) => p.tier === tier);
+    trackMetaSubscribe({
+      value: plan?.price || 0,
+      currency: "ZAR",
+      predictedLtv: (plan?.price || 0) * 12,
+    });
     // Redirect to seller application with selected plan
     router.push(`/seller/apply?plan=${tier}`);
   };
