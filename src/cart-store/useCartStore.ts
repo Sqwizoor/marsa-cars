@@ -1,4 +1,5 @@
 import { CartProductType } from "@/lib/types";
+import { trackAddToCart } from "@/lib/posthog-tracking";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 // Define the interface of the Cart state
@@ -62,6 +63,15 @@ export const useCartStore = create(
             totalPrice: state.totalPrice + product.price * product.quantity,
           }));
         }
+        trackAddToCart({
+          id: product.productId,
+          name: product.variantName
+            ? `${product.name} - ${product.variantName}`
+            : product.name,
+          price: product.price,
+          quantity: product.quantity,
+          variant: product.variantName,
+        });
       },
       updateProductQuantity: (product: CartProductType, quantity: number) => {
         const cart = get().cart;

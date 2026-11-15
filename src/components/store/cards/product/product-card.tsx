@@ -9,6 +9,7 @@ import { Button } from "@/components/store/ui/button";
 import { Heart } from "lucide-react";
 import ProductPrice from "../../product-page/product-info/product-price";
 import { addToWishlist } from "@/queries/user";
+import { trackWishlistAdd } from "@/lib/posthog-tracking";
 import toast from "react-hot-toast";
 import StarRatings from "react-star-ratings";
 
@@ -25,6 +26,14 @@ export default function ProductCard({ product }: { product: ProductType }) {
       return;
     }
     
+    const lowestPrice = sizes?.length
+      ? Math.min(...sizes.map((s) => s.price * (1 - s.discount / 100)))
+      : undefined;
+    trackWishlistAdd({
+      id,
+      name,
+      price: lowestPrice,
+    });
     toast.success("Product successfully added to your wishlist!");
   };
 

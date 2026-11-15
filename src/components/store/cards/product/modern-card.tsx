@@ -7,6 +7,7 @@ import { formatCurrencyZAR } from "@/lib/utils";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { useCartStore } from "@/cart-store/useCartStore";
 import { addToWishlist } from "@/queries/user";
+import { trackWishlistAdd } from "@/lib/posthog-tracking";
 import toast from "react-hot-toast";
 
 export default function ProductCardModern({
@@ -69,6 +70,11 @@ export default function ProductCardModern({
     e.stopPropagation();
     const res = await addToWishlist(product.id, variant.variantId);
     if (res.ok) {
+      trackWishlistAdd({
+        id: product.id,
+        name: product.name,
+        price: size.price * (1 - size.discount / 100),
+      });
       toast.success("Added to wishlist");
     } else {
       toast.error(res.error);

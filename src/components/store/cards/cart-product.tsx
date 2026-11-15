@@ -2,6 +2,7 @@ import { useCartStore } from "@/cart-store/useCartStore";
 import { CartProductType, Country } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { addToWishlist } from "@/queries/user";
+import { trackWishlistAdd } from "@/lib/posthog-tracking";
 import {
   Check,
   ChevronRight,
@@ -153,6 +154,11 @@ const { updateProductQuantity, removeFromCart } = useCartStore((state) => state)
       return;
     }
     
+    trackWishlistAdd({
+      id: productId,
+      name,
+      price,
+    });
     toast.success("Product successfully added to your wishlist!");
   };
 

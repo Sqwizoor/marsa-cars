@@ -1,6 +1,11 @@
 'use client'
 
 import posthog from 'posthog-js'
+import {
+  trackMetaViewContent,
+  trackMetaAddToCart,
+  trackMetaAddToWishlist,
+} from './meta-pixel'
 
 // Product tracking
 export const trackProductView = (product: {
@@ -18,6 +23,13 @@ export const trackProductView = (product: {
     category: product.category,
     store_id: product.storeId,
     store_name: product.storeName,
+  })
+  trackMetaViewContent({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    contentType: 'product',
+    category: product.category,
   })
 }
 
@@ -49,6 +61,12 @@ export const trackAddToCart = (product: {
     quantity: product.quantity,
     variant: product.variant,
     value: product.price * product.quantity,
+  })
+  trackMetaAddToCart({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    quantity: product.quantity,
   })
 }
 
@@ -102,6 +120,12 @@ export const trackCarView = (car: {
     price: car.price,
     condition: car.condition,
     seller_id: car.userId,
+  })
+  trackMetaViewContent({
+    id: car.id,
+    name: car.title,
+    price: car.price,
+    contentType: 'vehicle',
   })
 }
 
@@ -192,10 +216,17 @@ export const trackReviewSubmitted = (review: {
 export const trackWishlistAdd = (product: {
   id: string
   name: string
+  price?: number
 }) => {
   posthog.capture('wishlist_added', {
     product_id: product.id,
     product_name: product.name,
+    price: product.price,
+  })
+  trackMetaAddToWishlist({
+    id: product.id,
+    name: product.name,
+    price: product.price,
   })
 }
 

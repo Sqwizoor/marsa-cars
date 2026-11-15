@@ -17,6 +17,7 @@ import { setCookie } from "cookies-next";
 import FastDelivery from "../cards/fast-delivery";
 import { useRouter } from "next/navigation";
 import { saveUserCart } from "@/queries/user";
+import { trackProductView } from "@/lib/posthog-tracking";
 
 interface Props {
   productData: ProductPageDataType;
@@ -199,13 +200,23 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
   }, [variantId]);
 
   useEffect(() => {
-    if (productId) {
+    if (productId && productData) {
       setCookie(`viewedProduct_${productId}`, "true", {
         maxAge: 3600,
         path: "/",
       });
+      trackProductView({
+        id: productId,
+        name: productData.variantName
+          ? `${productData.name} - ${productData.variantName}`
+          : productData.name,
+        price: baseCartProduct?.price ?? 0,
+        category: productData.category?.name,
+        storeId: productData.store?.id,
+        storeName: productData.store?.name,
+      });
     }
-  }, [productId]);
+  }, [productId, variantId]);
 
   const handleAddToCart = () => {
     if (maxQty <= 0 || !productToBeAddedToCart) return;
