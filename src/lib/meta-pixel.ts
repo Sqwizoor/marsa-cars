@@ -5,6 +5,8 @@ declare global {
   }
 }
 
+const PIXEL_ID = "1121730653781517";
+
 const ensureFbq = () => {
   if (typeof window === "undefined") return null;
   if (typeof window.fbq === "function") return window.fbq;
@@ -28,6 +30,20 @@ const ensureFbq = () => {
   n.version = "2.0";
   n.queue = [];
   window.fbq = n;
+
+  const t = document.createElement("script");
+  t.async = true;
+  t.src = "https://connect.facebook.net/en_US/fbevents.js";
+  const s = document.getElementsByTagName("script")[0];
+  if (s && s.parentNode) {
+    s.parentNode.insertBefore(t, s);
+  } else {
+    document.head.appendChild(t);
+  }
+
+  window.fbq("init", PIXEL_ID);
+  window.fbq("track", "PageView");
+
   return window.fbq;
 };
 

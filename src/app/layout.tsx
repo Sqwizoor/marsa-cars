@@ -1,5 +1,6 @@
 // Next.js
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono, Barlow, Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import type { ReactNode } from "react";
@@ -46,24 +47,25 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <head>
-          {/* Meta Pixel Code */}
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
+        <head />
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} ${barlow.variable} ${inter.variable} antialiased`}
+        >
+          <Script id="meta-pixel" strategy="afterInteractive">
+            {`
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
 if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
 n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
+s.parentNode.insertBefore(t,s);
 fbq('init', '1121730653781517');
 fbq('track', 'PageView');
-              `,
-            }}
-          />
+}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+            `}
+          </Script>
           <noscript>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -74,11 +76,6 @@ fbq('track', 'PageView');
               alt=""
             />
           </noscript>
-          {/* End Meta Pixel Code */}
-        </head>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} ${barlow.variable} ${inter.variable} antialiased`}
-        >
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
