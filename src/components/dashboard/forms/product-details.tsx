@@ -47,7 +47,6 @@ import ImageUpload from "../shared/image-upload";
 import { useToast } from "@/hooks/use-toast";
 
 import { MultiSelect } from "react-multi-select-component";
-import { WithContext as ReactTags } from "react-tag-input";
 
 // Queries
 import { upsertProduct } from "@/queries/products";
@@ -311,20 +310,21 @@ const ProductDetails = ({
 
   // Handle keywords input
   const [keywords, setKeywords] = useState<string[]>(data?.keywords || []);
+  const [tagInput, setTagInput] = useState("");
 
-  interface Keyword {
-    id: string;
-    text: string;
-  }
+  const handleAddKeyword = () => {
+    const trimmed = tagInput.trim().replace(/^,|,$/g, "");
+    if (trimmed && !keywords.includes(trimmed) && keywords.length < 10) {
+      setKeywords([...keywords, trimmed]);
+      setTagInput("");
+    }
+  };
 
-  //   const handleAddition = (keyword: Keyword) => {
-  //     if (keywords.length === 10) return;
-  //     setKeywords([...keywords, keyword.text]);
-  //   };
-
-  const handleAddition = (keyword: Keyword) => {
-    if (keywords.length === 10) return;
-    setKeywords([...keywords, keyword.text]);
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      handleAddKeyword();
+    }
   };
 
   const handleDeleteKeyword = (i: number) => {
@@ -782,43 +782,38 @@ const ProductDetails = ({
                 {/* Keywords */}
                 {role === "ADMIN" && (
                 <div className="w-full flex-1 space-y-3">
-                  <FormField
-                    control={form.control}
-                    name="keywords"
-                    render={() => (
-                      <FormItem className="relative flex-1">
-                        <FormLabel>Product Keywords</FormLabel>
-                        <FormControl>
-                          <ReactTags
-                            tags={keywords.map((k, i) => ({
-                              id: String(i),
-                              text: k,
-                            }))}
-                            handleAddition={handleAddition}
-                            handleDelete={handleDeleteKeyword}
-                            placeholder="Keywords (e.g., winter jacket, warm, stylish)"
-                            classNames={{
-                              tagInputField:
-                                "bg-background border rounded-md p-2 w-full focus:outline-none",
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <FormItem className="relative flex-1">
+                    <FormLabel>Product Keywords (Max 10)</FormLabel>
+                    <div className="flex gap-2">
+                      <Input
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        onKeyDown={handleTagKeyDown}
+                        placeholder="Type keyword and press Enter (e.g., winter jacket, warm)"
+                        className="bg-background border rounded-md p-2 w-full focus:outline-none"
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={handleAddKeyword}
+                        disabled={!tagInput.trim() || keywords.length >= 10}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </FormItem>
                   <div className="flex flex-wrap gap-1">
                     {keywords.map((k, i) => (
                       <div
                         key={i}
-                        className="text-xs inline-flex items-center px-3 py-1 bg-blue-200 text-blue-700 rounded-full gap-x-2"
+                        className="text-xs inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 rounded-full gap-x-2"
                       >
                         <span>{k}</span>
                         <span
-                          className="cursor-pointer"
+                          className="cursor-pointer font-bold hover:text-red-500"
                           onClick={() => handleDeleteKeyword(i)}
                         >
-                          x
+                          ×
                         </span>
                       </div>
                     ))}
