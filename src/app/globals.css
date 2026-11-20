@@ -466,3 +466,10 @@
 .pause-on-hover:hover {
   animation-play-state: paused;
 }
+
+/* Ensure Clerk auth modals and all modal backdrops are always above the navbar */
+.cl-modalBackdrop,
+.cl-modalContent,
+.cl-modalBackdropContainer {
+  z-index: 99999 !important;
+}

@@ -67,7 +67,7 @@ export default async function Header() {
   const offerTags = rawOfferTags.filter(tag => tag.url !== "super-deals");
 
   return (
-    <div className="sticky top-0 z-[100] w-full bg-slate-900/95 lg:bg-gradient-to-r lg:from-slate-700/80 lg:to-slate-900/70 backdrop-blur-md supports-[backdrop-filter]:bg-slate-900/85 lg:supports-[backdrop-filter]:bg-slate-900/60 border-b border-white/10 lg:border-b-0 shadow-sm flex flex-col">
+    <div className="sticky top-0 z-30 w-full bg-slate-900/95 lg:bg-gradient-to-r lg:from-slate-700/80 lg:to-slate-900/70 backdrop-blur-md supports-[backdrop-filter]:bg-slate-900/85 lg:supports-[backdrop-filter]:bg-slate-900/60 border-b border-white/10 lg:border-b-0 shadow-sm flex flex-col">
 
       <div className="h-full w-full text-white px-3.5 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 sm:gap-3 py-2 lg:py-1">

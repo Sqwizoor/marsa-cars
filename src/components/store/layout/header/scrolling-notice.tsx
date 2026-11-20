@@ -39,7 +39,7 @@ const ScrollingNotice = () => {
 
     return (
         <div
-            className={`w-full bg-white text-black border-t border-slate-200 relative z-[101] shadow-sm py-2 ${
+            className={`w-full bg-white text-black border-t border-slate-200 relative z-0 shadow-sm py-2 ${
                 isHomePage ? "block" : "hidden lg:block"
             }`}
         >
