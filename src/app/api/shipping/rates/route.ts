@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const { collection_address, delivery_address, parcels } = body as BobGoRateRequest;
 
     if (!collection_address || !delivery_address || !parcels) {
-      return new NextResponse("Missing required fields", { status: 400 });
+      return NextResponse.json({ rates: [], error: "Missing required fields" }, { status: 400 });
     }
 
     const rates = await BobGoClient.getRates({
@@ -20,6 +20,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ rates });
   } catch (error) {
     console.error("Shipping Rates API Error:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return NextResponse.json({ rates: [], error: "Internal Server Error" }, { status: 500 });
   }
 }

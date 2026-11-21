@@ -115,7 +115,7 @@ const CheckoutContainer: FC<Props> = ({
           }),
         });
 
-        const data = await res.json();
+        const data = await res.json().catch(() => ({ rates: [] }));
         if (cancelled) return;
 
         if (Array.isArray(data.rates) && data.rates.length > 0) {
@@ -196,17 +196,39 @@ const CheckoutContainer: FC<Props> = ({
 
   return (
     <div className="flex flex-col lg:flex-row px-1 sm:px-3 lg:px-0 gap-4">
-      <div className="flex-1 min-w-0 order-1">
-        <UserShippingAddresses
-          addresses={addresses}
-          countries={countries}
-          selectedAddress={selectedAddress}
-          setSelectedAddress={setSelectedAddress}
-        />
-        <div className="my-2">
-          <CountryNote country={effectiveCountryName} />
+      {/* Left Column on Desktop / Top & Bottom on Mobile */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Addresses */}
+        <div className="order-1">
+          <UserShippingAddresses
+            addresses={addresses}
+            countries={countries}
+            selectedAddress={selectedAddress}
+            setSelectedAddress={setSelectedAddress}
+          />
+          <div className="my-2">
+            <CountryNote country={effectiveCountryName} />
+          </div>
         </div>
-        <div className="w-full py-4 px-2 sm:px-4 bg-white my-3 rounded-xl shadow-sm border border-slate-100">
+
+        {/* Mobile PlaceOrderCard - shown directly under address on mobile screens (< lg) */}
+        <div className="order-2 lg:hidden w-full my-2">
+          <PlaceOrderCard
+            cartData={cartData}
+            setCartData={setCartData}
+            shippingAddress={selectedAddress}
+            shippingRates={shippingRates}
+            selectedRate={selectedRate}
+            onSelectRate={handleRateSelect}
+            loadingRates={loadingRates}
+          />
+        </div>
+
+        {/* Cart items list - on mobile comes after PlaceOrderCard; on desktop comes right under address */}
+        <div className="order-3 lg:order-2 w-full py-4 px-2 sm:px-4 bg-white my-3 rounded-xl shadow-sm border border-slate-100">
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 mb-3 px-2 sm:px-4">
+            Order Items ({cartData.cartItems.length})
+          </h2>
           <div className="relative">
             {cartData.cartItems.map((product) => (
               <CheckoutProductCard
@@ -225,7 +247,9 @@ const CheckoutContainer: FC<Props> = ({
           </div>
         </div>
       </div>
-      <div className="order-2 w-full lg:w-[380px] shrink-0">
+
+      {/* Desktop PlaceOrderCard - visible only on lg+ screens */}
+      <div className="hidden lg:block w-[380px] shrink-0">
         <PlaceOrderCard
           cartData={cartData}
           setCartData={setCartData}

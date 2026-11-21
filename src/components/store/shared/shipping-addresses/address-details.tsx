@@ -84,7 +84,7 @@ const AddressDetails: FC<AddressDetailsProps> = ({
       phone: data?.phone || "",
       state: data?.state || "",
       zip_code: data?.zip_code || "",
-      default: data?.default || false,
+      default: data?.default !== undefined ? data.default : true,
     } satisfies z.infer<typeof ShippingAddressSchema>;
   }, [data, countries]);
 

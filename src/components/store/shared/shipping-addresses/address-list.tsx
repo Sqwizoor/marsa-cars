@@ -17,12 +17,21 @@ const AddressList: FC<Props> = ({
   setSelectedAddress,
 }) => {
   useEffect(() => {
-    // Find the default address if it exists and set it as selected
-    const defaultAddress = addresses.find((address) => address.default);
-    if (defaultAddress) {
-      setSelectedAddress(defaultAddress);
+    if (!addresses || addresses.length === 0) {
+      setSelectedAddress(null);
+      return;
     }
-  }, [addresses, setSelectedAddress]);
+    // If an address is already selected and still exists in addresses list, keep it
+    if (selectedAddress && addresses.some((a) => a.id === selectedAddress.id)) {
+      return;
+    }
+    // Priority: default address -> first available address
+    const targetAddress =
+      addresses.find((address) => address.default) || addresses[0];
+    if (targetAddress) {
+      setSelectedAddress(targetAddress);
+    }
+  }, [addresses, selectedAddress, setSelectedAddress]);
 
   const haneldeAddressSelect = (address: ShippingAddress) => {
     setSelectedAddress(address);

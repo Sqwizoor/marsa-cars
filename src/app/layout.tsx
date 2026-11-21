@@ -11,6 +11,8 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 //toast imports
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as HotToaster } from "react-hot-toast";
+import { Toaster as SonnerToaster } from "sonner";
 import ModalProvider from "./providers/modal-provider";
 import ConvexClientProvider from "./providers/convex-client-provider";
 import { PostHogIdentifier } from "@/components/analytics/PostHogIdentifier";
@@ -86,6 +88,8 @@ fbq('track', 'PageView');
               <ModalProvider>{children}</ModalProvider>
             </ConvexClientProvider>
             <Toaster />
+            <HotToaster position="top-center" toastOptions={{ duration: 4000 }} />
+            <SonnerToaster richColors position="top-center" />
           </ThemeProvider>
 
           {/* <p> Opse not active</p> */}

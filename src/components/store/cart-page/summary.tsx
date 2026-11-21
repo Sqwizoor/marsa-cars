@@ -3,6 +3,7 @@ import { FC, useState } from "react";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { saveUserCart } from "@/queries/user";
 import { trackCheckoutStarted } from "@/lib/posthog-tracking";
 
@@ -13,6 +14,7 @@ interface Props {
 
 const CartSummary: FC<Props> = ({ cartItems, shippingFees }) => {
   const router = useRouter();
+  const { isSignedIn, isLoaded } = useUser();
   const [loading, setLoading] = useState<boolean>(false);
 
   // Calculate subtotal from cartItems
@@ -26,6 +28,12 @@ const CartSummary: FC<Props> = ({ cartItems, shippingFees }) => {
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
       toast.error("Your cart is empty");
+      return;
+    }
+
+    if (isLoaded && !isSignedIn) {
+      toast.error("Please sign in to proceed to checkout");
+      router.push("/sign-in?redirect_url=/cart");
       return;
     }
     
@@ -46,7 +54,7 @@ const CartSummary: FC<Props> = ({ cartItems, shippingFees }) => {
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Failed to proceed to checkout";
-      if (message.toLowerCase().includes("unauthenticated")) {
+      if (!isSignedIn || message.toLowerCase().includes("unauthenticated")) {
         toast.error("Please sign in to proceed to checkout");
         router.push("/sign-in?redirect_url=/cart");
       } else {

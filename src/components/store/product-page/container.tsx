@@ -16,6 +16,7 @@ import useFromStore from "@/hooks/useFromStore";
 import { setCookie } from "cookies-next";
 import FastDelivery from "../cards/fast-delivery";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { saveUserCart } from "@/queries/user";
 import { trackProductView, trackCheckoutStarted } from "@/lib/posthog-tracking";
 import {
@@ -31,6 +32,7 @@ interface Props {
 
 const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
   const router = useRouter();
+  const { isSignedIn, isLoaded } = useUser();
   // Hooks must be called before any conditional returns
   // State for temporary product images
   const normalizedImages = useMemo(
@@ -247,6 +249,12 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
   const handleBuyNow = async () => {
     if (!productToBeAddedToCart || isBuyingNow) return;
 
+    if (isLoaded && !isSignedIn) {
+      toast.success("Please sign in to proceed to checkout");
+      router.push("/sign-in?redirect_url=/cart");
+      return;
+    }
+
     const inCart = cartItems?.find(
       (p) =>
         p.productId === productId &&
@@ -281,7 +289,7 @@ const ProductPageContainer = ({ productData, sizeId, children }: Props) => {
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Failed to proceed to checkout";
-      if (message.toLowerCase().includes("unauthenticated")) {
+      if (!isSignedIn || message.toLowerCase().includes("unauthenticated")) {
         toast.success("Please sign in to proceed to checkout");
         router.push("/sign-in?redirect_url=/cart");
       } else {
