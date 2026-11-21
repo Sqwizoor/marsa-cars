@@ -19,7 +19,8 @@ import { Loader2, Search } from "lucide-react";
 
 export default function SourcePartModal() {
   const pathname = usePathname();
-  const isSingleProductPage = pathname?.startsWith("/product") ?? false;
+  // Only show on the home page. Do not show on cart, checkout, or any other non-home page.
+  const isHomePage = pathname === "/";
 
   const [open, setOpen] = useState(false);
   const [hasShown, setHasShown] = useState(false);
@@ -43,7 +44,7 @@ export default function SourcePartModal() {
   };
 
   useEffect(() => {
-    if (isSingleProductPage) {
+    if (!isHomePage) {
       setOpen(false);
       return;
     }
@@ -55,7 +56,7 @@ export default function SourcePartModal() {
     }
 
     const timer = setTimeout(() => {
-      // Show after 1 minute (never on single product pages)
+      // Show after 1 minute only on the home page
       if (!sessionStorage.getItem("partRequestSubmitted")) {
         setOpen(true);
         setHasShown(true);
@@ -66,9 +67,9 @@ export default function SourcePartModal() {
     return () => {
       clearTimeout(timer);
     };
-  }, [isSingleProductPage]);
+  }, [isHomePage]);
 
-  if (isSingleProductPage) {
+  if (!isHomePage) {
     return null;
   }
 
