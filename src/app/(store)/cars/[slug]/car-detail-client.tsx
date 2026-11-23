@@ -43,6 +43,8 @@ import {
   Shield,
   Eye,
   Clock,
+  Play,
+  X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { CarImage } from "@prisma/client";
@@ -77,6 +79,11 @@ export default function CarDetailClient({ listing }: CarDetailClientProps) {
   const { isSignedIn, user } = useUser();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const videoTourUrl =
+    listing.slug === "2014-mercedes-benz-c350-coupe-amg-sport"
+      ? "/images/cars/mercedes-c350-coupe/c350-video-tour.mp4"
+      : null;
   const [inquiryForm, setInquiryForm] = useState({
     name: user?.fullName || "",
     email: user?.emailAddresses[0]?.emailAddress || "",
@@ -249,11 +256,54 @@ export default function CarDetailClient({ listing }: CarDetailClientProps) {
                   )}
                 </div>
 
+                {/* Watch Video Tour if available */}
+                {videoTourUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setShowVideoModal(true)}
+                    className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-rose-600/90 hover:bg-rose-600 text-white px-3.5 py-1.5 text-xs font-bold shadow-lg backdrop-blur-sm transition-all active:scale-95"
+                  >
+                    <Play className="h-3.5 w-3.5 fill-white" />
+                    <span>Watch Video Tour</span>
+                  </button>
+                )}
+
                 {/* Image Counter */}
                 <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
                   {currentImageIndex + 1} / {listing.images.length}
                 </div>
               </div>
+
+              {/* Video Modal if open */}
+              {showVideoModal && videoTourUrl && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+                  <div className="relative w-full max-w-3xl overflow-hidden rounded-2xl bg-neutral-950 border border-neutral-800 shadow-2xl">
+                    <div className="flex items-center justify-between border-b border-neutral-800 px-4 py-3 bg-neutral-900/80">
+                      <div className="flex items-center gap-2 text-sm font-bold text-white">
+                        <Play className="h-4 w-4 text-rose-500 fill-rose-500" />
+                        <span>{listing.title} — Walkaround Video Tour</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowVideoModal(false)}
+                        className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                    </div>
+
+                    <div className="p-2 sm:p-4">
+                      <video
+                        src={videoTourUrl}
+                        controls
+                        autoPlay
+                        playsInline
+                        className="w-full max-h-[70vh] rounded-xl bg-black"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Thumbnail Strip */}
               {listing.images.length > 1 && (
