@@ -562,25 +562,50 @@ export default function CarDetailClient({ listing }: CarDetailClientProps) {
                   </Dialog>
 
                   {listing.carSubscription.dealerPhone && (
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="w-full border-green-500 text-green-600 hover:bg-green-50"
-                      asChild
-                    >
-                      <a
-                        href={`tel:${listing.carSubscription.dealerPhone}`}
-                        onClick={() =>
-                          trackMetaContact({
-                            contentName: listing.title,
-                            contentCategory: "vehicle",
-                          })
-                        }
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        size="lg"
+                        className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white shadow-sm font-semibold"
+                        asChild
                       >
-                        <Phone className="w-5 h-5 mr-2" />
-                        Call Dealer
-                      </a>
-                    </Button>
+                        <a
+                          href={`https://wa.me/${listing.carSubscription.dealerPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                            `Hi ${listing.user.name || "Seller"}, I'm interested in your ${listing.year} ${listing.make} ${listing.model} (${formatPrice(listing.price)}) listed on Joumasecars. Is it still available?`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() =>
+                            trackMetaContact({
+                              contentName: listing.title,
+                              contentCategory: "vehicle",
+                            })
+                          }
+                        >
+                          <MessageSquare className="w-5 h-5 mr-2 fill-white" />
+                          WhatsApp Seller
+                        </a>
+                      </Button>
+
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full border-green-500 text-green-600 hover:bg-green-50 font-semibold"
+                        asChild
+                      >
+                        <a
+                          href={`tel:${listing.carSubscription.dealerPhone}`}
+                          onClick={() =>
+                            trackMetaContact({
+                              contentName: listing.title,
+                              contentCategory: "vehicle",
+                            })
+                          }
+                        >
+                          <Phone className="w-5 h-5 mr-2" />
+                          {isDealer ? "Call Dealer" : "Call Seller"}
+                        </a>
+                      </Button>
+                    </div>
                   )}
 
                   <div className="flex gap-2">
